@@ -10,7 +10,7 @@ export const Route = createFileRoute('/')({
 });
 
 function Index() {
-	const { t } = useTranslation('template');
+	const { t } = useTranslation('luro');
 	const { address = ZeroAddress } = useAccount();
 	const { data: balance = 0n } = useBalance(address);
 	logger.success('Hello, world!');

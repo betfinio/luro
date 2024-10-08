@@ -10,7 +10,7 @@ import { useConfig } from 'wagmi';
 export const useBalance = (address: Address) => {
 	const config = useConfig();
 	return useQuery<bigint>({
-		queryKey: ['template', 'balance', address],
+		queryKey: ['luro', 'balance', address],
 		queryFn: () => fetchBalance(address, config),
 	});
 };

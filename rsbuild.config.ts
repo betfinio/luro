@@ -10,13 +10,13 @@ const getApp = () => {
 
 export default defineConfig({
 	server: {
-		port: 4000,
+		port: 4005,
 	},
 	dev: {
-		assetPrefix: 'http://localhost:4000',
+		assetPrefix: 'http://localhost:4005',
 	},
 	html: {
-		title: 'BetFin Template',
+		title: 'Betfin - Lucky Round',
 		favicon: './src/assets/favicon.svg',
 	},
 	output: {
@@ -26,12 +26,12 @@ export default defineConfig({
 	tools: {
 		rspack: {
 			output: {
-				uniqueName: 'betfinio_template',
+				uniqueName: 'betfinio_luro',
 			},
 			plugins: [
 				TanStackRouterRspack(),
 				new ModuleFederationPlugin({
-					name: 'betfinio_template',
+					name: 'betfinio_luro',
 					remotes: {
 						betfinio_app: getApp(),
 					},
