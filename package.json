@@ -5,14 +5,29 @@
 	"scripts": {
 		"build": "rsbuild build",
 		"check": "biome check --write",
-		"dev": "rsbuild dev --open",
-		"prod": "rsbuild dev --env-mode production --open",
-		"local": "rsbuild dev --env-mode localhost --open",
 		"format": "biome format --write",
-		"preview": "rsbuild preview"
+		"preview": "rsbuild preview",
+		"prebuild": "graphclient build",
+		"dev": "bun run build:schema:dev && rsbuild dev --open",
+		"prod": "bun run build:schema:prod && rsbuild dev --env-mode production --open",
+		"local": "bun run build:schema:local && rsbuild dev --env-mode localhost --open",
+		"build:schema:local": "dotenv -e .env.localhost.local -- graphclient build",
+		"build:schema:dev": "dotenv -e .env.development.local -- graphclient build",
+		"build:schema:prod": "dotenv -e .env.production.local -- graphclient build"
 	},
 	"dependencies": {
+		"@betfinio/ui": "^1.0.10",
 		"@betfinio/abi": "^1.1.1",
+		"react-window": "^1.8.10",
+		"react-circular-progressbar": "^2.1.0",
+		"react-confetti-explosion": "^2.1.2",
+		"animejs": "^3.2.2",
+		"react-number-format": "^5.4.2",
+		"react-chartjs-2": "^5.2.0",
+		"chart.js": "^4.4.4",
+		"@nivo/bar": "^0.87.0",
+		"@nivo/pie": "^0.87.0",
+		"@graphprotocol/client-cli": "^3.0.7",
 		"@module-federation/enhanced": "^0.6.9",
 		"@supabase/supabase-js": "^2.45.4",
 		"@tanstack/react-query": "^5.59.0",
@@ -20,6 +35,7 @@
 		"@tanstack/react-table": "^8.20.5",
 		"class-variance-authority": "^0.7.0",
 		"consola": "^3.2.3",
+		"dotenv-cli": "^7.4.2",
 		"framer-motion": "^11.11.4",
 		"i18next": "^23.15.2",
 		"i18next-browser-languagedetector": "^8.0.0",
@@ -36,6 +52,8 @@
 		"wagmi": "^2.12.17"
 	},
 	"devDependencies": {
+		"@types/animejs": "^3.1.12",
+
 		"@biomejs/biome": "^1.9.3",
 		"@rsbuild/core": "^1.0.11",
 		"@rsbuild/plugin-react": "^1.0.3",

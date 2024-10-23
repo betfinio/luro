@@ -1,7 +1,7 @@
 import logger from '@/src/config/logger';
-import { useBalance } from '@/src/lib/query';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { createFileRoute } from '@tanstack/react-router';
+import { useBalance } from 'betfinio_app/lib/query/token';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 

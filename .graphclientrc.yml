@@ -1,0 +1,13 @@
+sources:
+  - name: luro
+    handler:
+      graphql:
+        endpoint: ${PUBLIC_LUCKY_ROUND_GRAPH_URL}
+
+codegen:
+  scalars:
+    BigInt: bigint
+    Bytes: string
+
+documents:
+  - ./src/schema.graphql

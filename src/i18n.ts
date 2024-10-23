@@ -15,7 +15,7 @@ export const resources = {
 		luro: enJSON,
 		shared: sharedLang.en,
 	},
-	cz: {
+	cs: {
 		luro: czJSON,
 		shared: sharedLang.cz,
 	},
@@ -32,7 +32,11 @@ instance
 	.use(ICU)
 	.init({
 		resources: resources,
-		lng: 'en', // default language
+		detection: {
+			order: ['localStorage', 'navigator'],
+			convertDetectedLanguage: (lng) => lng.split('-')[0],
+		},
+		supportedLngs: ['en', 'ru', 'cs'],
 		fallbackLng: 'en',
 		defaultNS,
 		interpolation: { escapeValue: false },

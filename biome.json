@@ -4,7 +4,7 @@
 		"enabled": true
 	},
 	"files": {
-		"ignore": ["@mf-types/**", "**/*.gen.ts"]
+		"ignore": ["@mf-types/**", "**/*.gen.ts", "**/*.graphql"]
 	},
 	"vcs": {
 		"enabled": true,

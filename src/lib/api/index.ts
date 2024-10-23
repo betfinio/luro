@@ -1,4 +1,4 @@
-import { TOKEN } from '@/src/globals.ts';
+import { TOKEN } from '@/src/global.ts';
 import { TokenContract } from '@betfinio/abi';
 import { type Config, readContract } from '@wagmi/core';
 import type { Address } from 'viem';
