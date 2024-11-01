@@ -7,9 +7,9 @@ import { BetValue } from 'betfinio_app/BetValue';
 import { useCustomUsername, useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import cx from 'clsx';
-import { AnimatePresence, motion } from 'framer-motion';
-import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { motion } from 'framer-motion';
+import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
@@ -25,12 +25,11 @@ export const PlayersTab = () => {
 	const players = useMemo(() => {
 		return mapBetsToAuthors([...bets]).sort((a, b) => Number(b.amount - a.amount));
 	}, [bets]);
-	const Row = ({ index, style }: { index: number; style: CSSProperties }) => {
+	const renderRow = ({ index, style }) => {
 		const player = players[index];
 		return (
-			<div className={'px-2'} style={style}>
+			<div className={'px-2'} key={player.address} style={style}>
 				<TabItem
-					key={index}
 					betsNumber={player.betsNumber}
 					player={player.player}
 					amount={valueToNumber(player.amount)}
@@ -39,7 +38,6 @@ export const PlayersTab = () => {
 			</div>
 		);
 	};
-
 	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -52,16 +50,16 @@ export const PlayersTab = () => {
 
 	return (
 		<div className={'grow flex flex-col gap-2 h-full'} ref={ref}>
-			<AnimatePresence mode="popLayout">
-				<List
-					height={listHeight} // Adjust height to fit your layout
-					itemCount={players.length}
-					itemSize={74} // Adjust item size if necessary
-					width={'100%'}
-				>
-					{Row}
-				</List>
-			</AnimatePresence>
+			<List
+				height={listHeight}
+				width={1}
+				containerStyle={{ width: '100%', maxWidth: '100%' }}
+				style={{ width: '100%' }}
+				rowCount={players.length}
+				rowHeight={74}
+				rowRenderer={renderRow}
+				overscanRowCount={3}
+			/>
 		</div>
 	);
 };
@@ -70,11 +68,12 @@ export interface TabItemProps {
 	player: Address;
 	amount: number;
 	percent: number;
+	id?: Address;
 	className?: string;
 	betsNumber?: number;
 }
 
-export const TabItem: FC<TabItemProps> = ({ player, amount, percent, betsNumber = 0, className }) => {
+export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, betsNumber = 0, className }) => {
 	const { data: username } = useUsername(player);
 	const { address = ZeroAddress } = useAccount();
 	const { data: customUsername } = useCustomUsername(address, player);
@@ -85,15 +84,13 @@ export const TabItem: FC<TabItemProps> = ({ player, amount, percent, betsNumber 
 		}
 		return player;
 	};
-
 	return (
 		<motion.div
-			key={player}
 			layout
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
+			initial={{ scale: 0 }}
+			animate={{ scale: 1 }}
+			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			transition={{ duration: 0.5, type: 'spring' }}
 			className={cx('rounded-lg flex bg-primary justify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
@@ -121,4 +118,4 @@ export const TabItem: FC<TabItemProps> = ({ player, amount, percent, betsNumber 
 			<div className={'w-[10px] rounded-r-[10px]'} style={{ backgroundColor: addressToColor(player) }} />
 		</motion.div>
 	);
-};
+});

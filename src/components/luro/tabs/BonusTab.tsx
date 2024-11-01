@@ -6,9 +6,9 @@ import { BetValue } from 'betfinio_app/BetValue';
 import { useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import cx from 'clsx';
-import { AnimatePresence } from 'framer-motion';
-import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { motion } from 'framer-motion';
+import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
@@ -19,10 +19,10 @@ export const BonusTab = () => {
 	const { data: bonusShare = 0n } = useRoundBonusShare(round);
 	const [listHeight, setListHeight] = useState(460);
 
-	const Row = ({ index, style }: { index: number; style: CSSProperties }) => {
+	const renderRow = ({ index, style }) => {
 		const bet = bets[index];
 		return (
-			<div className={'px-2 h-[74px]'} style={style}>
+			<div className={'px-2 h-[74px]'} key={bet.address} style={style}>
 				<TabItem player={bet.player} bonus={bonuses[index].bonus} />
 			</div>
 		);
@@ -51,16 +51,16 @@ export const BonusTab = () => {
 
 	return (
 		<div className={'grow flex flex-col gap-2 h-full'} ref={ref}>
-			<AnimatePresence mode="popLayout">
-				<List
-					height={listHeight} // Adjust height to fit your layout
-					itemCount={bets.length}
-					itemSize={74} // Adjust item size if necessary
-					width={'100%'}
-				>
-					{Row}
-				</List>
-			</AnimatePresence>
+			<List
+				height={listHeight}
+				width={1}
+				containerStyle={{ width: '100%', maxWidth: '100%' }}
+				style={{ width: '100%' }}
+				rowCount={bets.length}
+				rowHeight={74}
+				rowRenderer={renderRow}
+				overscanRowCount={3}
+			/>
 		</div>
 	);
 };
@@ -82,7 +82,14 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 	};
 
 	return (
-		<div className={cx('rounded-lg flex bg-primary justify-between h-[68px]')}>
+		<motion.div
+			layout
+			initial={{ scale: 0 }}
+			animate={{ scale: 1 }}
+			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+			exit={{ opacity: 0, y: 10 }}
+			className={cx('rounded-lg flex bg-primary justify-between h-[68px]')}
+		>
 			<div className={'py-3 pl-4 pr-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
@@ -104,6 +111,6 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 				</div>
 			</div>
 			<div className={'w-[10px] rounded-r-[10px]'} style={{ backgroundColor: addressToColor(player) }} />
-		</div>
+		</motion.div>
 	);
 };
