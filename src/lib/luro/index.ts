@@ -72,7 +72,7 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 };
 
 export const handleError = (e: Error, t: TFunction<'shared'>) => {
-	toast({ variant: 'destructive', description: t(`errors.${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'errors.unknown') });
+	toast({ variant: 'destructive', description: t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown') });
 };
 
 export const getLuroInterval = (interval: LuroInterval) => {
