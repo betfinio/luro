@@ -131,7 +131,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 			duration: singleRotationDuration, // random duration
 			easing: `cubicBezier(${bezier.join(',')})`,
 			complete: () => {
-				updateWheelState({ state: 'stopped', result, bet });
+				updateWheelState({ state: 'stopped', result, bet }, round);
 			},
 		});
 	}
