@@ -247,3 +247,13 @@ export const fetchTotalVolume = async (address: Address, config: Config): Promis
 		args: [address],
 	})) as bigint;
 };
+
+export const calculateRound = async (address: Address, round: number, config: Config) => {
+	logger.start('[luro]', 'calculating', address, round);
+	return writeContract(config, {
+		abi: LuckyRoundContract.abi,
+		address: address,
+		functionName: 'requestCalculation',
+		args: [BigInt(round)],
+	});
+};
