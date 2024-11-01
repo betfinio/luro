@@ -3,6 +3,7 @@ import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } fro
 import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '@/src/lib/luro/query';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
 
+import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/luro/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
@@ -37,9 +38,10 @@ const largeProps = {
 };
 
 export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, className = '' }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'roundCircle' });
+	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
 
 	const [confettiExploding, setConfettiExploding] = useState(false);
+	const [winnerColor, setWinnerColor] = useState<string | null>(null);
 	const { address } = useAccount();
 	const { data: bets = [] } = useRoundBets(round);
 	const { data: currentRound } = useVisibleRound();
@@ -49,7 +51,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const {
 		state: { data: wheelState },
 		updateState: updateWheelState,
-	} = useLuroState();
+	} = useLuroState(round);
 
 	const singleRotationDuration = 5000;
 	// todo: Extract states to enum
@@ -72,7 +74,10 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 			if (winner?.player === address) {
 				setConfettiExploding(true);
 			} else {
-				setConfettiExploding(false);
+				setWinnerColor(addressToColor(winner?.player ?? ZeroAddress));
+				setTimeout(() => {
+					setWinnerColor(null);
+				}, 1000);
 			}
 		}
 	}, [wheelState]);
@@ -159,9 +164,10 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		<Tooltip>
 			<motion.div
 				className={cx(
-					'border border-gray-800 relative p-4 flex-grow xl:p-8 rounded-xl bg-primaryLight flex flex-col md:flex-row items-center justify-center gap-10 duration-300',
+					'border border-gray-800 relative p-4 flex-grow xl:p-8 rounded-xl bg-primaryLight flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
 					className,
 				)}
+				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'transparent' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
 				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[325px]')} ref={boxRef}>
@@ -304,7 +310,7 @@ const EffectsLayer: FC<{ round: number }> = ({ round }) => {
 						className="w-5 h-5 absolute"
 						style={{ left: particle.x, top: particle.y }}
 					>
-						<Bet className="w-5 h-5" />
+						<Bet className="text-yellow-400 w-5 h-5" />
 					</motion.div>
 				))}
 
@@ -347,7 +353,7 @@ const CustomTooltip =
 		);
 	};
 const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'roundCircle' });
+	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
 
 	const { data: roundData } = useRound(round);
 	const { data: bank = 0n, isLoading: isBankLoading } = useRoundBank(round);
@@ -357,7 +363,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	const {
 		state: { data: luroState, isLoading: isLotteryStateLoading, isPending: isLotteryStatePending },
 		updateState,
-	} = useLuroState();
+	} = useLuroState(round);
 	const styles = {
 		root: {
 			width: '100%',
@@ -378,7 +384,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	const changeLotteryState = () => {
 		if (luroState.state === 'standby' && !isLotteryStateLoading && !isLotteryStatePending) {
-			updateState({ state: 'waiting' });
+			updateState({ state: 'waiting' }, round);
 		}
 	};
 
@@ -419,7 +425,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		return value;
 	}, [isBankLoading, bank]);
 
-	const { state: wheelState } = useLuroState();
+	const { state: wheelState } = useLuroState(round);
 
 	const renderInside = () => {
 		if (currentRound !== round) {
@@ -445,6 +451,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
+				const secondsLeft = Number(remaining.toFormat('ss'));
 				return (
 					<motion.div
 						initial={{ opacity: 0 }}
@@ -453,10 +460,16 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 						transition={{ duration: 0.5 }}
 						className={'absolute flex flex-col items-center justify-center w-full h-full -top-4 gap-4'}
 					>
-						<div className={cx('text-md', Number(remaining.toFormat('ss')) < 30 && 'text-red-500 animate-pulse')}>
-							{end > Date.now() ? remaining.toFormat('hh:mm:ss') : t('ended')}
+						<div className={cx('text-md', secondsLeft < 30 && secondsLeft > 0 && 'text-red-500 animate-pulse')}>
+							{end > Date.now() ? (
+								remaining.toFormat('hh:mm:ss')
+							) : (
+								<div className={'w-6 aspect-square animate-pulse ease-in-out'}>
+									<img src={Chainlink as string} alt="" />
+								</div>
+							)}
 						</div>
-						<div className={cx('text-xl  lg:text-3xl', Number(remaining.toFormat('ss')) < 30 && 'animate-pulse')}>
+						<div className={cx('text-xl  lg:text-3xl', secondsLeft < 30 && secondsLeft > 0 && 'animate-pulse')}>
 							<Counter doMillify={true} from={from} to={to} />
 						</div>
 					</motion.div>
@@ -487,7 +500,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 	coef,
 	loading,
 }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'roundCircle' });
+	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
 
 	return (
 		<motion.div
@@ -509,7 +522,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 };
 
 const RoundResult: FC<{ round: number }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'roundCircle' });
+	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
 
 	const { data: roundData, isLoading, isFetching } = useRound(round);
 

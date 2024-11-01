@@ -14,7 +14,7 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 						<ChartBarIcon className={'text-[#FFC800] w-6'} />
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'games max-w-0 w-auto'}>
+				<DialogContent className={'luro max-w-0 w-auto'}>
 					<SwitchModal bets={bets} volume={volume} staking={staking} />
 				</DialogContent>
 			</Dialog>
@@ -25,7 +25,7 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 export default RoundMobileInfo;
 
 const SwitchModal: FC<{ bets: number; volume: bigint; staking: bigint }> = ({ bets, volume, staking }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'statsModal' });
+	const { t } = useTranslation('luro', { keyPrefix: 'statsModal' });
 
 	return (
 		<motion.div className={'rounded-lg border border-gray-800 bg-primary p-5 w-[350px] flex flex-col gap-5 text-white'}>
