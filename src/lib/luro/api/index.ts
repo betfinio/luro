@@ -1,5 +1,5 @@
 import logger from '@/src/config/logger';
-import { BETS_MEMORY, FIRST_BLOCK, LURO, PARTNER } from '@/src/global.ts';
+import { BETS_MEMORY, FIRST_BLOCK, PARTNER } from '@/src/global.ts';
 import type { ICurrentRoundInfo } from '@/src/lib/luro/query';
 import type { BonusClaimParams, LuroBet, PlaceBetParams, Round, RoundStatusEnum, WinnerInfo } from '@/src/lib/luro/types.ts';
 import {
@@ -275,4 +275,14 @@ export const fetchWinners = async (luro: Address, config: Config): Promise<Winne
 		console.log(e);
 		return [];
 	}
+};
+
+export const calculateRound = async (address: Address, round: number, config: Config) => {
+	logger.start('[luro]', 'calculating', address, round);
+	return writeContract(config, {
+		abi: LuckyRoundContract.abi,
+		address: address,
+		functionName: 'requestCalculation',
+		args: [BigInt(round)],
+	});
 };

@@ -1,6 +1,8 @@
+import logger from '@/src/config/logger';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { type LuroInterval, animateNewBet, getCurrentRound, handleError } from '@/src/lib/luro';
 import {
+	calculateRound,
 	claimBonus,
 	distributeBonus,
 	fetchAvailableBonus,
@@ -110,28 +112,9 @@ export const usePlaceBet = () => {
 export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { updateState } = useLuroState();
 	const config = useConfig();
 	const { interval } = Route.useParams();
 	const address = interval === '1d' ? LURO : LURO_5MIN;
-
-	useWatchContractEvent({
-		abi: LuckyRoundContract.abi,
-		address: address,
-		eventName: 'WinnerCalculated',
-		onLogs: async (landedLogs) => {
-			console.log('CALCULATED LOGS', landedLogs);
-			// @ts-ignore
-			if (Number(landedLogs[0].args.round) === round) {
-				console.log('LANDED, STOP SPINNING');
-				// @ts-ignore
-				updateState({ state: 'landed', winnerOffset: Number(landedLogs[0].args.winnerOffset), bet: landedLogs[0].args.bet });
-			}
-
-			// @ts-ignore
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'round', Number(landedLogs[0].args.round)] });
-		},
-	});
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', address, 'round', 'start'],
@@ -139,9 +122,37 @@ export const useStartRound = (round: number) => {
 		onError: (e) => handleError(e, t),
 		onMutate: () => console.log('Start round'),
 		onSuccess: async (data) => {
-			console.log(data);
+			const { update } = toast({
+				title: 'Starting a round',
+				description: 'Transaction is pending',
+				variant: 'loading',
+				duration: 10000,
+			});
+			const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+
+			if (receipt.status === 'reverted') {
+				update({
+					variant: 'destructive',
+					description: '',
+					title: 'Transaction failed',
+					action: getTransactionLink(data),
+					duration: 5000,
+				});
+				return;
+			}
+			update({ variant: 'default', description: 'Transaction is confirmed', title: 'Round requested', action: getTransactionLink(data), duration: 5000 });
+			queryClient.setQueryData(['luro', address, 'requested', round], true);
 		},
 		onSettled: () => console.log('Round start settled'),
+	});
+};
+
+export const useRoundRequested = (round: number) => {
+	const { interval } = Route.useParams();
+	const address = interval === '1d' ? LURO : LURO_5MIN;
+	return useQuery<boolean>({
+		queryKey: ['luro', address, 'requested', round],
+		initialData: false,
 	});
 };
 
@@ -306,17 +317,21 @@ export const useRound = (round: number) => {
 	});
 };
 
-export const useLuroState = () => {
+export const useLuroState = (round: number) => {
 	const queryClient = useQueryClient();
 	const { interval } = Route.useParams();
 	const address = interval === '1d' ? LURO : LURO_5MIN;
 	const state = useQuery<WheelState>({
-		queryKey: ['luro', address, 'state'],
+		queryKey: ['luro', address, 'state', round],
 		initialData: { state: 'standby' },
 	});
-	const updateState = (st: WheelState) => {
-		console.log('SET WHEEL STATE DATA', st);
-		queryClient.setQueryData(['luro', address, 'state'], st);
+	const updateState = async (st: WheelState, round: number) => {
+		console.log('SET WHEEL STATE DATA', st, round);
+		queryClient.setQueryData(['luro', address, 'state', round], st);
+		if (st.state === 'stopped') {
+			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'rounds'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'winners'] });
+		}
 	};
 
 	return { state, updateState };
@@ -336,21 +351,6 @@ export const useVisibleRound = () => {
 		await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bets', 'round'] });
 		return getCurrentRound(interval as LuroInterval);
 	};
-	const { updateState } = useLuroState();
-
-	useWatchContractEvent({
-		abi: LuckyRoundContract.abi,
-		address: address,
-		eventName: 'RequestedCalculation',
-		onLogs: (rolledLogs) => {
-			console.log('ROLLED LOGS', rolledLogs);
-			// @ts-ignore
-			if (Number(rolledLogs[0].args.round) === round) {
-				console.log('START SPINNING');
-				updateState({ state: 'spinning' });
-			}
-		},
-	});
 
 	return useQuery({
 		queryKey: ['luro', address, 'visibleRound'],
@@ -397,5 +397,22 @@ export const useBetsCount = () => {
 	return useQuery<number>({
 		queryKey: ['luro', address, 'betsCount'],
 		queryFn: () => fetchBetsCount(address, config),
+	});
+};
+
+export const useCalculate = (round: number) => {
+	const config = useConfig();
+	const { interval } = Route.useParams();
+	const address = interval === '1d' ? LURO : LURO_5MIN;
+
+	return useMutation({
+		mutationKey: ['luro', address, 'calculate'],
+		mutationFn: () => calculateRound(address, round, config),
+		onMutate: () => logger.log('calculate'),
+		onSuccess: async (data) => {
+			logger.log(data);
+		},
+		onSettled: () => logger.log('calculate settled'),
+		onError: (e) => logger.error(e),
 	});
 };
