@@ -1,3 +1,5 @@
+import Lambo from '@/src/assets/stickers/lambo.json';
+import Throw from '@/src/assets/stickers/throw.json';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
 import { getCurrentRoundInfo } from '@/src/lib/luro/api';
@@ -8,13 +10,13 @@ import {
 	useRoundBank,
 	useRoundBets,
 	useRoundBonusShare,
+	useRoundRequested,
 	useRoundWinner,
 	useStartRound,
 	useVisibleRound,
 } from '@/src/lib/luro/query';
 import { Route } from '@/src/routes/luro/$interval.tsx';
-import { ZeroAddress } from '@betfinio/abi';
-import { valueToNumber } from '@betfinio/abi';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { useQueryClient } from '@tanstack/react-query';
 import { BetValue } from 'betfinio_app/BetValue';
@@ -27,6 +29,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
 import { toast } from 'betfinio_app/use-toast';
 import cx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
+import Lottie from 'lottie-react';
 import { Coins, Loader } from 'lucide-react';
 import millify from 'millify';
 import { type FC, useEffect, useMemo, useState } from 'react';
@@ -37,7 +40,7 @@ import { useAccount } from 'wagmi';
 export const PlaceBet = () => {
 	const { data: round } = useVisibleRound();
 
-	const { state: luroState } = useLuroState();
+	const { state: luroState } = useLuroState(round);
 
 	const renderScreen = () => {
 		switch (luroState.data.state) {
@@ -280,6 +283,7 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 
 	const { mutate: startRound, isPending } = useStartRound(round);
+	const { data: isRoundRequested } = useRoundRequested(round);
 
 	const handleSpin = () => {
 		startRound();
@@ -290,17 +294,25 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col items-center justify-center min-h-[390px]'}
+			className={'grow  relative min-h-[390px] flex items-center justify-center'}
 		>
-			<span>{t('waiting')}</span>
-			<button
-				type={'button'}
-				onClick={handleSpin}
-				disabled={isPending}
-				className={'bg-yellow-400 disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
-			>
-				{isPending ? t('spinning') : t('spinTheWheel')}
-			</button>
+			<Lottie animationData={Throw} loop={true} style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }} />
+			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-primary bg-opacity-75'}>
+				<div className={'flex items-end pb-4 gap-2 '}>
+					<span className={'leading-[12px]'}>{t('waiting')}</span>
+					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
+				</div>
+				{!isRoundRequested && (
+					<button
+						type={'button'}
+						onClick={handleSpin}
+						disabled={isPending}
+						className={'bg-yellow-400 disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
+					>
+						{isPending ? t('spinning') : t('spinTheWheel')}
+					</button>
+				)}
+			</div>
 		</motion.div>
 	);
 };
@@ -314,15 +326,19 @@ const SpinningScreen: FC<{ round: number }> = () => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col items-center justify-center min-h-[390px]'}
+			className={'grow flex flex-col items-center  min-h-[390px] relative'}
 		>
-			<span>{t('winnerIsBeingDecided')}</span>
+			<Lottie animationData={Lambo} loop={true} style={{ position: 'absolute', width: '100%', bottom: 0, left: 0 }} />
+			<div className={'flex items-end pb-4 mt-10 gap-2'}>
+				<span className={'leading-[12px]'}>{t('winnerIsBeingDecided')}</span>
+				<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
+			</div>
 		</motion.div>
 	);
 };
 
 const RoundResult: FC<{ round: number }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyprefix: 'placeBet' });
+	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 
 	const queryClient = useQueryClient();
 
