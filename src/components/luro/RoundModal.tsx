@@ -17,7 +17,7 @@ const RoundModal: FC<{ round: number }> = ({ round }) => {
 	return (
 		<Dialog open={true} onOpenChange={handleClose}>
 			<DialogPortal>
-				<DialogContent className={'games max-w-0 w-auto rounded-xl'}>
+				<DialogContent className={'luro max-w-0 w-auto rounded-xl'}>
 					<DialogTitle className={'hidden'} />
 					<DialogDescription className={'hidden'} />
 					<ModalContent onClose={handleClose} interval={getLuroInterval(interval as LuroInterval)} roundId={round} round={data} />

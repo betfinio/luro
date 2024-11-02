@@ -68,7 +68,7 @@ export const RoundInfo = () => {
 						</div>
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'w-fit games'}>
+				<DialogContent className={'w-fit luro'}>
 					<SwitchModal selected={interval as LuroInterval} />
 				</DialogContent>
 			</Dialog>

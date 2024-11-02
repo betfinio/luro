@@ -3,6 +3,7 @@ import { ETHSCAN } from '@/src/global.ts';
 import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib/luro';
 import {
 	useBonusDistribution,
+	useCalculate,
 	useDistributeBonus,
 	useRound,
 	useRoundBank,
@@ -11,10 +12,11 @@ import {
 	useVisibleRound,
 	useWinners,
 } from '@/src/lib/luro/query';
+import { addressToColor } from 'betfinio_app/lib/utils';
+
 import type { Round, RoundModalPlayer } from '@/src/lib/luro/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
-import { ZeroAddress } from '@betfinio/abi';
-import { truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Bank from '@betfinio/ui/dist/icons/Bank';
 import GoldenTrophy from '@betfinio/ui/dist/icons/GoldenTrophy';
 import MoneyHand from '@betfinio/ui/dist/icons/MoneyHand';
@@ -23,11 +25,10 @@ import { Link } from '@tanstack/react-router';
 import { createColumnHelper } from '@tanstack/react-table';
 import { BetValue } from 'betfinio_app/BetValue';
 import { DataTable } from 'betfinio_app/DataTable';
-import { addressToColor } from 'betfinio_app/lib/utils';
 import { ScrollArea } from 'betfinio_app/scroll-area';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
 import { DateTime } from 'luxon';
-import { type FC, useMemo } from 'react';
+import { type FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
@@ -46,7 +47,12 @@ export const ModalContent: FC<{
 	const { data: volume = 0n } = useRoundBank(roundId);
 	const { data: bonusShare = 0n } = useRoundBonusShare(roundId);
 	const { data: winners = [] } = useWinners();
+	const { mutate } = useCalculate(round?.round || 0);
 	const winner = winners.find((w) => w.round === roundId)?.player || ZeroAddress;
+
+	const handleCalculate = useCallback(() => {
+		mutate();
+	}, []);
 	return (
 		<ScrollArea className={'h-[98vh] SCROLLBAR max-h-[98vh] w-[98vw] md:h-auto md:max-w-[1200px] lg:w-[1000px]'}>
 			<div
@@ -60,7 +66,7 @@ export const ModalContent: FC<{
 					onClick={() => onClose()}
 				/>
 				<div className={'flex flex-row gap-2 justify-start items-center'}>
-					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap'}>
+					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap cursor-pointer'} onClick={handleCalculate}>
 						{isFinished ? (
 							<div className={'text-lg leading-6'}>
 								{t('titleFinished')} #{roundId}

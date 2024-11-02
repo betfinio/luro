@@ -1,7 +1,7 @@
 import logger from '@/src/config/logger';
-import { BETS_MEMORY, FIRST_BLOCK, LURO, PARTNER } from '@/src/global.ts';
+import { BETS_MEMORY, PARTNER } from '@/src/global.ts';
 import type { ICurrentRoundInfo } from '@/src/lib/luro/query';
-import type { BonusClaimParams, LuroBet, PlaceBetParams, Round, RoundStatusEnum, WinnerInfo } from '@/src/lib/luro/types.ts';
+import type { BonusClaimParams, LuroBet, PlaceBetParams, Round, RoundStatusEnum } from '@/src/lib/luro/types.ts';
 import {
 	BetsMemoryContract,
 	LuckyRoundBetContract,
@@ -14,7 +14,7 @@ import {
 } from '@betfinio/abi';
 import { writeContract } from '@wagmi/core';
 import { type Address, type Client, encodeAbiParameters, parseAbiParameters } from 'viem';
-import { getContractEvents, multicall, readContract } from 'viem/actions';
+import { multicall, readContract } from 'viem/actions';
 import type { Config } from 'wagmi';
 import { requestPlayerRounds, requestRounds } from '../gql';
 
@@ -248,31 +248,12 @@ export const fetchTotalVolume = async (address: Address, config: Config): Promis
 	})) as bigint;
 };
 
-export const fetchWinners = async (luro: Address, config: Config): Promise<WinnerInfo[]> => {
-	console.log('fetching winners', FIRST_BLOCK);
-	try {
-		const logs = await getContractEvents(config.getClient(), {
-			abi: LuckyRoundContract.abi,
-			address: luro,
-			eventName: 'WinnerCalculated',
-			fromBlock: BigInt(FIRST_BLOCK),
-			toBlock: 'latest',
-		});
-		return await Promise.all(
-			logs.map(async (e) => {
-				// @ts-ignore
-				const { bet, winnerOffset, round } = e.args;
-				const player = await readContract(config.getClient(), {
-					abi: LuckyRoundBetContract.abi,
-					address: bet,
-					functionName: 'getPlayer',
-					args: [],
-				});
-				return { player, bet: bet, offset: winnerOffset, tx: e.transactionHash, round: Number(round) } as WinnerInfo;
-			}),
-		);
-	} catch (e) {
-		console.log(e);
-		return [];
-	}
+export const calculateRound = async (address: Address, round: number, config: Config) => {
+	logger.start('[luro]', 'calculating', address, round);
+	return writeContract(config, {
+		abi: LuckyRoundContract.abi,
+		address: address,
+		functionName: 'requestCalculation',
+		args: [BigInt(round)],
+	});
 };
