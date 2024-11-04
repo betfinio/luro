@@ -26,6 +26,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { BetValue } from 'betfinio_app/BetValue';
 import { DataTable } from 'betfinio_app/DataTable';
 import { ScrollArea } from 'betfinio_app/scroll-area';
+import cx from 'clsx';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { type FC, useCallback, useMemo } from 'react';
@@ -134,36 +135,48 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 	const staking = (volume / 1000n) * 36n;
 	const bonus = (volume / 100n) * 5n;
 	return (
-		<div className={'mt-10 grid lg:grid-cols-3 gap-2 md:gap-3 lg:gap-4'}>
-			<div className={'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<People className={'w-20 h-20'} />
-				<div className={'flex flex-col'}>
+		<div className={'mt-4 grid grid-cols-3 gap-2 ' + 'md:mt-10 md:gap-3 lg:gap-4'}>
+			<div
+				className={
+					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+				}
+			>
+				<People className={'w-14 h-14 ' + 'md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={'text-xl font-semibold'}>
 						<BetValue value={valueToNumber(volume)} precision={2} withIcon />
 					</div>
-					<div className={'text-sm flex font-semibold'}>
+					<div className={'text-sm hidden md:flex font-semibold'}>
 						({usersCount}
 						<span className={'ml-1'}>{t('bets')}</span>)
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('totalBets')}</div>
+					<div className={'text-xs text-[#6A6F84]'}>{t('totalBets')}</div>
 				</div>
 			</div>
-			<div className={'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<MoneyHand className={'w-16 h-16 text-yellow-400'} />
-				<div>
-					<div className={'mt-3 text-xl font-semibold'}>
+			<div
+				className={
+					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-1'
+				}
+			>
+				<MoneyHand className={'p-1 w-13 h-13 text-yellow-400 ' + 'md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
+					<div className={' text-xl font-semibold'}>
 						<BetValue value={valueToNumber(bonus)} precision={1} withIcon={true} />
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('totalBonus')}</div>
+					<div className={'text-xs text-[#6A6F84]'}>{t('totalBonus')}</div>
 				</div>
 			</div>
-			<div className={'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<Bank className={'w-20 h-20 text-yellow-400'} />
-				<div>
-					<div className={'mt-3 text-xl font-semibold'}>
+			<div
+				className={
+					'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+				}
+			>
+				<Bank className={'w-14 h-14 text-yellow-400 ' + 'md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
+					<div className={'text-xl font-semibold'}>
 						<BetValue value={valueToNumber(staking)} precision={1} withIcon={true} />
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('paidToStaking')}</div>
+					<div className={'text-xs text-[#6A6F84]'}>{t('paidToStaking')}</div>
 				</div>
 			</div>
 		</div>
@@ -269,6 +282,9 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 		}),
 		columnHelper.accessor('count', {
 			header: t('columns.bets'),
+			meta: {
+				className: 'hidden md:table-cell',
+			},
 			cell: (props) => {
 				const count = props.getValue();
 				return <div>{count}</div>;
@@ -282,19 +298,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 				return <BetValue value={valueToNumber(pool)} withIcon={true} />;
 			},
 		}),
-		columnHelper.accessor('win', {
-			header: t('columns.result'),
-			cell: (props) => {
-				const amount = props.getValue();
-				const isWinner = props.row.getValue('player') === winner;
-				if (winner === ZeroAddress) return <div className={'text-gray-500'}>Pending</div>;
-				return isWinner ? (
-					<BetValue value={valueToNumber(amount)} withIcon={true} className={'text-green-600'} />
-				) : (
-					<div className={'text-[#EE5E5F] font-semibold'}>Lost</div>
-				);
-			},
-		}),
+
 		columnHelper.accessor('bonus', {
 			header: t('columns.bonus'),
 			meta: {
@@ -310,9 +314,9 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			id: 'totalWin',
 			cell: (props) => {
 				const isWinner = props.row.getValue('player') === winner;
-				const win = props.row.getValue('win') as bigint;
+				const win = props.row.original.win;
 				const bonus = props.row.getValue('bonus') as bigint;
-				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} />;
+				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} className={cx(isWinner && 'text-green-600')} />;
 			},
 		}),
 	];

@@ -119,3 +119,48 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 		</motion.div>
 	);
 });
+
+export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amount, id, betsNumber = 0, className }) => {
+	const { data: username } = useUsername(player);
+	const { address = ZeroAddress } = useAccount();
+	const { data: customUsername } = useCustomUsername(address, player);
+
+	const formatPlayer = (player: string) => {
+		if (player.length > 12) {
+			return `${player.slice(0, 12)}...`;
+		}
+		return player;
+	};
+	return (
+		<motion.div
+			layout
+			initial={{ scale: 0 }}
+			animate={{ scale: 1 }}
+			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+			exit={{ opacity: 0, y: 10 }}
+			className={cx('rounded-lg flex bg-primary justify-between', className as string)}
+		>
+			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
+				<div className={'flex items-start gap-[10px]'}>
+					<Fox className={'w-5 h-5'} />
+					<div className={'flex flex-col text-[#6A6F84] text-xs gap-2'}>
+						<a
+							href={`${ETHSCAN}/address/${player}`}
+							target={'_blank'}
+							className={cx('font-semibold text-sm !text-gray-300 hover:underline', player === address && '!text-yellow-400')}
+							rel="noreferrer"
+						>
+							{formatPlayer(customUsername || username || truncateEthAddress(player))}
+						</a>
+					</div>
+				</div>
+				<div className={'flex flex-col items-end text-xs gap-2'}>
+					<span>
+						<BetValue precision={2} value={amount} withIcon={true} />
+					</span>
+				</div>
+			</div>
+			<div className={'w-[10px] rounded-r-[10px]'} style={{ backgroundColor: addressToColor(player) }} />
+		</motion.div>
+	);
+});

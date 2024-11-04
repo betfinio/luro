@@ -54,7 +54,8 @@ export const RoundInfo = () => {
 	return (
 		<div
 			className={
-				'px-5 py-6 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative'
+				'px-3 py-2 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative' +
+				'md:px-5 md:py-6'
 			}
 		>
 			<Dialog>

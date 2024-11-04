@@ -51,7 +51,7 @@ export const CurrentRound = () => {
 		},
 	});
 	return (
-		<div className={'flex flex-col my-4 md:my-0 sm:flex-row md:flex-col lg:flex-row justify-between gap-4  '}>
+		<div className={'flex flex-col my-2 justify-between gap-2 ' + 'sm:flex-row sm:my-4 sm:gap-4 ' + 'md:my-0 md:flex-col ' + 'lg:flex-row'}>
 			<RoundCircle round={round} />
 			<PlaceBet />
 		</div>
