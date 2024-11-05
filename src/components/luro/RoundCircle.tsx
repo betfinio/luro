@@ -1,4 +1,4 @@
-import { TabItem } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
 import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
 import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '@/src/lib/luro/query';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
@@ -170,7 +170,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'transparent' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
-				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[325px]')} ref={boxRef}>
+				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
 					<div className={'relative'}>
 						<ProgressBar round={round} authors={data} />
 
@@ -241,7 +241,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 								<div className={'shrink-0'}>
 									<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
 								</div>
-								<div className={'flex flex-col min-w-[220px] gap-4'}>
+								<div className={'flex flex-col min-w-[190px] gap-4'}>
 									<div
 										className={cx(
 											'border border-yellow-400 bg-primary flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
@@ -436,7 +436,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const percent = (authorVolume / volume) * 100;
 				const coef = (volume / authorVolume).toFixed(2);
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} loading={!winner} />;
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={volume} loading={!winner} />;
 			}
 		}
 		switch (wheelState.data.state) {
@@ -447,7 +447,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const percent = (authorVolume / volume) * 100;
 				const coef = (volume / authorVolume).toFixed(2);
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} loading={!winner} />;
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={volume} loading={!winner} />;
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
@@ -493,10 +493,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	);
 };
 
-const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; coef: string; loading?: boolean }> = ({
+const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; coef: string; win: number; loading?: boolean }> = ({
 	player,
 	amount,
-	percent,
+	win,
 	coef,
 	loading,
 }) => {
@@ -512,10 +512,13 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 		>
 			<img alt={'crown'} src={Crown as string} />
 			<div className={'z-10'}>
-				<TabItem player={player} amount={amount} percent={percent} />
+				<WinnerCard player={player} amount={amount} />
 			</div>
-			<div>
-				<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
+			<div className={'flex flex-col items-center z-10'}>
+				<BetValue className={'text-yellow-400 text-xs'} iconClassName={'w-2.5 h-2.5'} value={win} withIcon />
+				<div className={'flex items-center gap-1'}>
+					<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
+				</div>
 			</div>
 		</motion.div>
 	);

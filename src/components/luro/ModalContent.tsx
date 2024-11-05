@@ -26,6 +26,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { BetValue } from 'betfinio_app/BetValue';
 import { DataTable } from 'betfinio_app/DataTable';
 import { ScrollArea } from 'betfinio_app/scroll-area';
+import cx from 'clsx';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { type FC, useCallback, useMemo } from 'react';
@@ -60,9 +61,7 @@ export const ModalContent: FC<{
 				className={'relative mx-auto text-white h-full w-full  min-h-[300px] rounded-xl flex flex-col p-2 md:p-3 lg:p-4 pt-5'}
 			>
 				<X
-					className={
-						'absolute top-5 right-5 w-6 h-6  border-2 border-white rounded-full cursor-pointer hover:text-[#EB5757] hover:border-[#EB5757] duration-300'
-					}
+					className={'absolute top-5 right-5 w-6 h-6  border-2 border-white rounded-full cursor-pointer hover:text-red-500 hover:border-red-500 duration-300'}
 					onClick={() => onClose()}
 				/>
 				<div className={'flex flex-row gap-2 justify-start items-center'}>
@@ -134,36 +133,48 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 	const staking = (volume / 1000n) * 36n;
 	const bonus = (volume / 100n) * 5n;
 	return (
-		<div className={'mt-10 grid lg:grid-cols-3 gap-2 md:gap-3 lg:gap-4'}>
-			<div className={'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<People className={'w-20 h-20'} />
-				<div className={'flex flex-col'}>
+		<div className={'mt-4 grid grid-cols-3 gap-2 md:mt-10 md:gap-3 lg:gap-4'}>
+			<div
+				className={
+					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+				}
+			>
+				<People className={'w-14 h-14 md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={'text-xl font-semibold'}>
 						<BetValue value={valueToNumber(volume)} precision={2} withIcon />
 					</div>
-					<div className={'text-sm flex font-semibold'}>
+					<div className={'text-sm hidden md:flex font-semibold'}>
 						({usersCount}
 						<span className={'ml-1'}>{t('bets')}</span>)
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('totalBets')}</div>
+					<div className={'text-xs text-gray-400'}>{t('totalBets')}</div>
 				</div>
 			</div>
-			<div className={'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<MoneyHand className={'w-16 h-16 text-yellow-400'} />
-				<div>
-					<div className={'mt-3 text-xl font-semibold'}>
+			<div
+				className={
+					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-1'
+				}
+			>
+				<MoneyHand className={'p-1 w-13 h-13 text-yellow-400 md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
+					<div className={' text-xl font-semibold'}>
 						<BetValue value={valueToNumber(bonus)} precision={1} withIcon={true} />
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('totalBonus')}</div>
+					<div className={'text-xs text-gray-400'}>{t('totalBonus')}</div>
 				</div>
 			</div>
-			<div className={'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-row justify-center items-center gap-2'}>
-				<Bank className={'w-20 h-20 text-yellow-400'} />
-				<div>
-					<div className={'mt-3 text-xl font-semibold'}>
+			<div
+				className={
+					'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+				}
+			>
+				<Bank className={'w-14 h-14 text-yellow-400 md:w-20 md:h-20 '} />
+				<div className={'flex flex-col items-center md:items-start'}>
+					<div className={'text-xl font-semibold'}>
 						<BetValue value={valueToNumber(staking)} precision={1} withIcon={true} />
 					</div>
-					<div className={'mt-1 text-xs text-[#6A6F84]'}>{t('paidToStaking')}</div>
+					<div className={'text-xs text-gray-400'}>{t('paidToStaking')}</div>
 				</div>
 			</div>
 		</div>
@@ -184,7 +195,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 		return null;
 	}
 	return (
-		<div className={'py-5 border-t border-b border-[#1F222F] flex flex-col items-center text-sm font-semibold'}>
+		<div className={'py-5 border-b border-gray-800 flex flex-col items-center text-sm font-semibold'}>
 			<p>{t('winningBet')}</p>
 			{isLoading || isFetching ? (
 				<Loader className={'w-3 h-3 animate-spin'} />
@@ -195,7 +206,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 			)}
 
 			<div className={'mt-5 flex gap-2'}>
-				<p className={'text-[#8794A1]'}>{t('proofOfRandom')}</p>
+				<p className={'text-gray-400'}>{t('proofOfRandom')}</p>
 				{isLoading || isFetching ? (
 					<Loader className={'w-3 h-3 animate-spin'} />
 				) : (
@@ -248,7 +259,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			cell: (props) => (
 				<div className={'w-full h-full flex items-center justify-center'}>
 					{props.row.getValue('player') === address.toLowerCase() ? (
-						<div className={'text-[10px] text-[#6A6F84] font-semibold'}>{t('you')}</div>
+						<div className={'text-[10px] text-gray-400 font-semibold'}>{t('you')}</div>
 					) : (
 						props.row.getValue('player') === winner && <GoldenTrophy />
 					)}
@@ -269,6 +280,9 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 		}),
 		columnHelper.accessor('count', {
 			header: t('columns.bets'),
+			meta: {
+				className: 'hidden md:table-cell',
+			},
 			cell: (props) => {
 				const count = props.getValue();
 				return <div>{count}</div>;
@@ -282,19 +296,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 				return <BetValue value={valueToNumber(pool)} withIcon={true} />;
 			},
 		}),
-		columnHelper.accessor('win', {
-			header: t('columns.result'),
-			cell: (props) => {
-				const amount = props.getValue();
-				const isWinner = props.row.getValue('player') === winner;
-				if (winner === ZeroAddress) return <div className={'text-gray-500'}>Pending</div>;
-				return isWinner ? (
-					<BetValue value={valueToNumber(amount)} withIcon={true} className={'text-green-600'} />
-				) : (
-					<div className={'text-[#EE5E5F] font-semibold'}>Lost</div>
-				);
-			},
-		}),
+
 		columnHelper.accessor('bonus', {
 			header: t('columns.bonus'),
 			meta: {
@@ -310,9 +312,9 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			id: 'totalWin',
 			cell: (props) => {
 				const isWinner = props.row.getValue('player') === winner;
-				const win = props.row.getValue('win') as bigint;
+				const win = props.row.original.win;
 				const bonus = props.row.getValue('bonus') as bigint;
-				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} />;
+				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} className={cx(isWinner && 'text-green-600')} />;
 			},
 		}),
 	];

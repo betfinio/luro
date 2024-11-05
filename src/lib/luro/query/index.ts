@@ -257,7 +257,7 @@ export const useClaimBonus = () => {
 				title: t(e.cause?.reason),
 				variant: 'destructive',
 				// @ts-ignore
-				description: t(e.cause?.message),
+				description: t(e.cause?.reason),
 			});
 		},
 		onMutate: () => console.log('bonusClaim'),

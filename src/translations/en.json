@@ -12,6 +12,7 @@
 		"connectTitle": "Connect your wallet to place a bet",
 		"topUpTitle": "Top up your wallet to place a bet",
 		"expected": "Expected winnings from this bet",
+		"win": "Win",
 		"toast": {
 			"connect": "Please connect your wallet",
 			"notMember": "Connected wallet is not member of Betfin. Ask someone for an invitation",
