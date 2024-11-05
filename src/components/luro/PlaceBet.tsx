@@ -223,9 +223,13 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						{isPending ? (
 							<Loader size={30} color={'black'} className={'animate-spin'} />
 						) : (
-							<span className={'flex flex-row items-center gap-1 text-base uppercase'}>
+							<span className={'flex flex-row items-center text-base uppercase'}>
 								{t('bet')}
-								<Coins className={'text-black w-4'} />
+								<DotLottieReact
+									src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lightning-bolt.lottie'}
+									autoplay={true}
+									style={{ width: '16px', height: '16px', bottom: 0, left: 0 }}
+								/>
 							</span>
 						)}
 					</motion.button>
@@ -265,9 +269,13 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					{isPending ? (
 						<Loader size={30} color={'black'} className={'animate-spin'} />
 					) : (
-						<span className={'flex flex-row items-center gap-1 text-base uppercase'}>
+						<span className={'flex flex-row items-center text-base uppercase'}>
 							{t('bet')}
-							<Coins className={'text-black w-4'} />
+							<DotLottieReact
+								src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lightning-bolt.lottie'}
+								autoplay={true}
+								style={{ width: '16px', height: '16px', bottom: 0, left: 0 }}
+							/>
 						</span>
 					)}
 				</motion.button>
@@ -318,13 +326,14 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow relative min-h-[290px] md:min-h-[390px] flex items-center justify-center'}
+			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-center justify-center'}
 		>
 			<DotLottieReact
 				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
 				autoplay={true}
 				loop={true}
-				style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }}
+				renderConfig={{ autoResize: true }}
+				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
 			/>
 			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-primary bg-opacity-75'}>
 				<div className={'flex items-end pb-4 gap-2 '}>
@@ -355,12 +364,12 @@ const SpinningScreen: FC<{ round: number }> = () => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col items-center min-h-[390px] relative'}
+			className={'grow flex flex-col items-center min-h-[290px] sm:min-h-[390px] relative'}
 		>
 			<DotLottieReact
 				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lambo.lottie'}
-				style={{ position: 'absolute', minHeight: '100%' }}
 				renderConfig={{ autoResize: true }}
+				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
 				autoplay={true}
 				loop={true}
 			/>
