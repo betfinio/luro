@@ -1,5 +1,3 @@
-import Lambo from '@/src/assets/stickers/lambo.json';
-import Throw from '@/src/assets/stickers/throw.json';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
 import { getCurrentRoundInfo } from '@/src/lib/luro/api';
@@ -18,6 +16,8 @@ import {
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { BetValue } from 'betfinio_app/BetValue';
 import { useAllowanceModal } from 'betfinio_app/allowance';
@@ -29,12 +29,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
 import { toast } from 'betfinio_app/use-toast';
 import cx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
-import Lottie from 'lottie-react';
 import { Coins, Loader } from 'lucide-react';
 import millify from 'millify';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NumericFormat } from 'react-number-format';
+import { useMediaQuery } from 'react-responsive';
 import { useAccount } from 'wagmi';
 
 export const PlaceBet = () => {
@@ -128,7 +128,6 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			return;
 		}
 
-		console.log(allowance, BigInt(Number(amount)) * 10n ** 18n);
 		if (allowance < BigInt(Number(amount)) * 10n ** 18n) {
 			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
 			return;
@@ -154,6 +153,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const myCoef = myBetVolume === 0n ? 0 : potentialWin / valueToNumber(myBetVolume);
 
 	const [hovering, setHovering] = useState(false);
+	const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
 
 	const compiledShadow = useMemo(() => {
 		const color = addressToColor(address);
@@ -177,7 +177,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			transition={{ duration: 0.3 }}
 			className={'flex flex-col grow justify-between duration-300 lg:max-w-[300px]'}
 		>
-			<div className={'uppercase text-xl flex items-center justify-center w-full font-semibold gap-2 z-10 my-2'}>
+			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-10 my-2 sm:flex'}>
 				{t('title')}
 				<LuckyRound className={'w-5 h-5 text-yellow-400'} />
 			</div>
@@ -188,27 +188,48 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 				onMouseLeave={() => {
 					setHovering(false);
 				}}
-				style={{ filter: compiledShadow }}
-				className={cx('rounded-xl bg-primaryLight border border-gray-800 p-4 relative w-full duration-300 drop-shadow-[0_35px_35px_rgba(255,0,0,1)] ')}
+				style={{ filter: isMobile ? '' : compiledShadow }}
+				className={cx('rounded-xl bg-primaryLight border border-gray-800 p-4 relative w-full duration-300')}
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
-				<NumericFormat
-					className={cx(
-						'w-full mt-2 rounded-lg border border-yellow-400 text-center text-base lg:text-lg bg-primary py-3 font-semibold text-white disabled:cursor-not-allowed duration-300',
-						valueToNumber(balance) < Number(amount) && 'text-red-400',
-					)}
-					thousandSeparator={','}
-					min={1}
-					allowNegative={false}
-					maxLength={15}
-					disabled={loading}
-					placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
-					value={amount}
-					onValueChange={(values) => {
-						const { value } = values;
-						handleBetChange(value);
-					}}
-				/>
+				<div className={'flex items-center gap-2 mt-2'}>
+					<NumericFormat
+						className={cx(
+							'w-full rounded-lg border border-yellow-400 text-center text-base lg:text-lg bg-primary py-3 font-semibold text-white disabled:cursor-not-allowed duration-300',
+							valueToNumber(balance) < Number(amount) && 'text-red-400',
+						)}
+						thousandSeparator={','}
+						min={1}
+						allowNegative={false}
+						maxLength={15}
+						disabled={loading}
+						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
+						value={amount}
+						onValueChange={(values) => {
+							const { value } = values;
+							handleBetChange(value);
+						}}
+					/>
+
+					<motion.button
+						whileTap={{ scale: 0.95 }}
+						onClick={handleBet}
+						whileHover={{ scale: 1.03 }}
+						disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
+						className={
+							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-yellow-400 rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 sm:hidden'
+						}
+					>
+						{isPending ? (
+							<Loader size={30} color={'black'} className={'animate-spin'} />
+						) : (
+							<span className={'flex flex-row items-center gap-1 text-base uppercase'}>
+								{t('bet')}
+								<Coins className={'text-black w-4'} />
+							</span>
+						)}
+					</motion.button>
+				</div>
 
 				<div className={cx('relative mt-4 h-[24px]', balance === 0n && 'grayscale pointer-events-none')}>
 					<Slider
@@ -222,9 +243,12 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					/>
 				</div>
 
-				<h4 className={'font-medium text-gray-500 text-xs text-center mt-[10px]'}>{t('expected')}</h4>
-				<p className={'mt-[20px] text-center font-semibold text-[#27AE60]'}>
-					{expectedWinning.toLocaleString()} <span className={'text-blue-500'}>(+{t('bonus')})</span>
+				<h4 className={'font-medium text-gray-500 text-xs text-center mt-[10px] hidden sm:block'}>{t('expected')}</h4>
+				<p className={'mt-1 md:mt-5 text-center font-semibold text-yellow-400'}>
+					<span className={'text-white'}>
+						<span className={'sm:hidden'}>{t('win')}:</span>
+					</span>{' '}
+					{expectedWinning.toLocaleString()} <span className={'text-blue-500'}>+{t('bonus')}</span>
 				</p>
 				<div className={'text-center text-yellow-400 font-thin text-xs'}>
 					{(coef === Number.POSITIVE_INFINITY || Number.isNaN(coef) ? 0 : coef).toFixed(3)}x
@@ -235,7 +259,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					whileHover={{ scale: 1.03 }}
 					disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
 					className={
-						'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center h-[40px] text-center w-full mt-[30px] bg-[#FFC800] rounded-lg min-w-[210px] text-primary disabled:grayscale disabled:pointer-events-none duration-300'
+						'hidden text-xs font-semibold flex-col hover:scale-110 items-center justify-center text-center w-full h-[40px] bg-yellow-400 mt-[30px] min-w-[210px] rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 sm:flex'
 					}
 				>
 					{isPending ? (
@@ -294,9 +318,14 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow  relative min-h-[390px] flex items-center justify-center'}
+			className={'grow relative min-h-[290px] md:min-h-[390px] flex items-center justify-center'}
 		>
-			<Lottie animationData={Throw} loop={true} style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }} />
+			<DotLottieReact
+				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
+				autoplay={true}
+				loop={true}
+				style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }}
+			/>
 			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-primary bg-opacity-75'}>
 				<div className={'flex items-end pb-4 gap-2 '}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
@@ -326,9 +355,15 @@ const SpinningScreen: FC<{ round: number }> = () => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col items-center  min-h-[390px] relative'}
+			className={'grow flex flex-col items-center min-h-[390px] relative'}
 		>
-			<Lottie animationData={Lambo} loop={true} style={{ position: 'absolute', width: '100%', bottom: 0, left: 0 }} />
+			<DotLottieReact
+				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lambo.lottie'}
+				style={{ position: 'absolute', minHeight: '100%' }}
+				renderConfig={{ autoResize: true }}
+				autoplay={true}
+				loop={true}
+			/>
 			<div className={'flex items-end pb-4 mt-10 gap-2'}>
 				<span className={'leading-[12px]'}>{t('winnerIsBeingDecided')}</span>
 				<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
@@ -376,7 +411,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
 				transition={{ duration: 0.3 }}
-				className={'grow flex flex-col gap-5 items-center justify-center min-h-[390px]'}
+				className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
 			>
 				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-yellow-400'}>
 					<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
@@ -409,7 +444,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
 				transition={{ duration: 0.3 }}
-				className={'grow flex flex-col gap-5 items-center justify-center min-h-[390px]'}
+				className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
 			>
 				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-yellow-400'}>
 					<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
@@ -450,7 +485,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col gap-5 items-center justify-center min-h-[390px]'}
+			className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
 		>
 			<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-yellow-400'}>
 				<div className={'text-xl font-semibold mb-4'}>{t('yourBonus')}</div>

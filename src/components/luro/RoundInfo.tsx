@@ -54,7 +54,7 @@ export const RoundInfo = () => {
 	return (
 		<div
 			className={
-				'px-5 py-6 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative'
+				'px-3 py-2 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative md:px-5 md:py-6'
 			}
 		>
 			<Dialog>
@@ -83,7 +83,7 @@ export const RoundInfo = () => {
 				<a
 					target={'_blank'}
 					href={'https://betfin.gitbook.io/betfin-public/games-guide/lucky-round-luro'}
-					className={'flex flex-col items-center justify-center cursor-pointer text-[#FFC800] hover:text-[#FFC800] lg:text-white duration-300'}
+					className={'flex flex-col items-center justify-center cursor-pointer text-yellow-400 hover:text-yellow-400 lg:text-white duration-300'}
 					rel="noreferrer"
 				>
 					<CircleHelp className={'cursor-pointer w-6 h-6'} />
