@@ -30,13 +30,13 @@ function Luro() {
 				<div className={'grid grid-cols-4 md:grid-cols-3 lg:grid-cols-[repeat(21,minmax(0,_1fr))] xl:grid-cols-12 gap-4 md:pt-4 relative'}>
 					<div className={'col-span-4 md:col-span-2 lg:col-[span_15_/_span_15] xl:col-span-8 flex flex-col justify-between'}>
 						<CurrentRound />
+						<BonusInfo />
+						<BonusClaimBlock />
 						<div className={'text-center my-2 justify-self-end'}>
-							<Link to={getStakingUrl('conservative')} className={'text-sm text-[#6A6F84]'}>
+							<Link to={getStakingUrl('conservative')} className={'text-sm text-gray-400'}>
 								<Trans t={t} i18nKey={'feeStaking'} i18n={i18n} components={{ b: <b className={'text-yellow-400 font-medium'} /> }} />
 							</Link>
 						</div>
-						<BonusInfo />
-						<BonusClaimBlock />
 					</div>
 					<div className={'col-span-4 md:col-span-2 lg:col-[span_6_/_span_6] xl:col-span-4 flex flex-col gap-4'}>
 						<BetsInfo />

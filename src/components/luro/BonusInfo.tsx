@@ -65,7 +65,7 @@ export const BonusInfo = () => {
 								<BonusChart bonuses={bonuses} />
 							</div>
 							<div className={'hidden lg:block absolute bottom-0 w-full'}>
-								<div className={'flex justify-between text-[#6A6A9F] text-xs font-semibold'}>
+								<div className={'flex justify-between text-violet-500 text-xs font-semibold'}>
 									<div className={'flex flex-col'}>
 										<span>{t('bonusInfo.firstBet')}</span>
 										<span className={'text-[10px] text-gray-500'}>
@@ -77,7 +77,6 @@ export const BonusInfo = () => {
 										<span className={'text-[10px] text-gray-500'}>{t('bonusInfo.coefficient')} x1</span>
 									</div>
 								</div>
-								<div className={'flex justify-between text-[#959DAD] text-xs font-semibold'} />
 							</div>
 						</div>
 					</div>
