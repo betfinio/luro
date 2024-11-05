@@ -31,7 +31,7 @@ function Luro() {
 					<div className={'col-span-4 md:col-span-2 lg:col-[span_15_/_span_15] xl:col-span-8 flex flex-col justify-between'}>
 						<CurrentRound />
 						<div className={'text-center my-2 justify-self-end'}>
-							<Link to={getStakingUrl('conservative')} className={'text-sm text-[#6A6F84]'}>
+							<Link to={getStakingUrl('conservative')} className={'text-sm text-gray-400'}>
 								<Trans t={t} i18nKey={'feeStaking'} i18n={i18n} components={{ b: <b className={'text-yellow-400 font-medium'} /> }} />
 							</Link>
 						</div>

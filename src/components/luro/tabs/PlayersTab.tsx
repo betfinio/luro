@@ -96,7 +96,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-[#6A6F84] text-xs gap-2'}>
+					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
@@ -143,7 +143,7 @@ export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amo
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-[#6A6F84] text-xs gap-2'}>
+					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}

@@ -93,7 +93,7 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 			<div className={'py-3 pl-4 pr-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-[#6A6F84] text-xs gap-2'}>
+					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
@@ -105,7 +105,7 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 					</div>
 				</div>
 				<div className={'flex flex-col items-end text-xs gap-2'}>
-					<div className={'font-semibold text-sm text-[#FFC800]'}>
+					<div className={'font-semibold text-sm text-yellow-400'}>
 						<BetValue value={bonus} precision={2} withIcon={true} />
 					</div>
 				</div>

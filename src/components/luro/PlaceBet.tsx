@@ -1,5 +1,3 @@
-import Lambo from '@/src/assets/stickers/lambo.json';
-import Throw from '@/src/assets/stickers/throw.json';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
 import { getCurrentRoundInfo } from '@/src/lib/luro/api';
@@ -18,7 +16,8 @@ import {
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
-import { Player } from '@lottiefiles/react-lottie-player';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { BetValue } from 'betfinio_app/BetValue';
 import { useAllowanceModal } from 'betfinio_app/allowance';
@@ -129,7 +128,6 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			return;
 		}
 
-		console.log(allowance, BigInt(Number(amount)) * 10n ** 18n);
 		if (allowance < BigInt(Number(amount)) * 10n ** 18n) {
 			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
 			return;
@@ -179,7 +177,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			transition={{ duration: 0.3 }}
 			className={'flex flex-col grow justify-between duration-300 lg:max-w-[300px]'}
 		>
-			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-10 my-2 ' + 'sm:flex'}>
+			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-10 my-2 sm:flex'}>
 				{t('title')}
 				<LuckyRound className={'w-5 h-5 text-yellow-400'} />
 			</div>
@@ -219,8 +217,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						whileHover={{ scale: 1.03 }}
 						disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
 						className={
-							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-[#FFC800] rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 ' +
-							'sm:hidden'
+							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-yellow-400 rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 sm:hidden'
 						}
 					>
 						{isPending ? (
@@ -247,7 +244,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 				</div>
 
 				<h4 className={'font-medium text-gray-500 text-xs text-center mt-[10px] hidden sm:block'}>{t('expected')}</h4>
-				<p className={'mt-1 md:mt-[20px] text-center font-semibold text-yellow-400'}>
+				<p className={'mt-1 md:mt-5 text-center font-semibold text-yellow-400'}>
 					<span className={'text-white'}>
 						<span className={'sm:hidden'}>{t('win')}:</span>
 					</span>{' '}
@@ -262,8 +259,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					whileHover={{ scale: 1.03 }}
 					disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
 					className={
-						'hidden text-xs font-semibold flex-col hover:scale-110 items-center justify-center text-center w-full h-[40px] bg-[#FFC800] mt-[30px] min-w-[210px] rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 ' +
-						'sm:flex'
+						'hidden text-xs font-semibold flex-col hover:scale-110 items-center justify-center text-center w-full h-[40px] bg-yellow-400 mt-[30px] min-w-[210px] rounded-lg text-primary disabled:grayscale disabled:pointer-events-none duration-300 sm:flex'
 					}
 				>
 					{isPending ? (
@@ -324,7 +320,12 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			transition={{ duration: 0.3 }}
 			className={'grow relative min-h-[290px] md:min-h-[390px] flex items-center justify-center'}
 		>
-			<Player src={Throw} autoplay={true} loop={true} style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }} />
+			<DotLottieReact
+				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
+				autoplay={true}
+				loop={true}
+				style={{ position: 'absolute', zIndex: 2, width: '100%', bottom: 0, left: 0 }}
+			/>
 			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-primary bg-opacity-75'}>
 				<div className={'flex items-end pb-4 gap-2 '}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
@@ -356,7 +357,13 @@ const SpinningScreen: FC<{ round: number }> = () => {
 			transition={{ duration: 0.3 }}
 			className={'grow flex flex-col items-center min-h-[390px] relative'}
 		>
-			<Player src={Lambo} autoplay={true} loop={true} style={{ position: 'absolute', width: '100%', bottom: 0, left: 0 }} />
+			<DotLottieReact
+				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lambo.lottie'}
+				style={{ position: 'absolute', minHeight: '100%' }}
+				renderConfig={{ autoResize: true }}
+				autoplay={true}
+				loop={true}
+			/>
 			<div className={'flex items-end pb-4 mt-10 gap-2'}>
 				<span className={'leading-[12px]'}>{t('winnerIsBeingDecided')}</span>
 				<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
