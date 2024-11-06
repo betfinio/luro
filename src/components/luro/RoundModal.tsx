@@ -12,7 +12,7 @@ const RoundModal: FC<{ round: number }> = ({ round }) => {
 	const interval = '5m';
 	if (!data) return null;
 	const handleClose = async () => {
-		await navigate({ to: '/luro/$interval', params: { interval } });
+		await navigate({ to: '/luro/promo' });
 	};
 	return (
 		<Dialog open={true} onOpenChange={handleClose}>
