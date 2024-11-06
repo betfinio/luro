@@ -1,7 +1,7 @@
 import { ModalContent } from '@/src/components/luro/ModalContent.tsx';
 import { type LuroInterval, getLuroInterval } from '@/src/lib/luro';
 import { useRound } from '@/src/lib/luro/query';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/luro/promo.tsx';
 import { useNavigate } from '@tanstack/react-router';
 import { Dialog, DialogContent, DialogDescription, DialogPortal, DialogTitle } from 'betfinio_app/dialog';
 import type { FC } from 'react';
@@ -9,7 +9,7 @@ import type { FC } from 'react';
 const RoundModal: FC<{ round: number }> = ({ round }) => {
 	const { data } = useRound(round);
 	const navigate = useNavigate();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	if (!data) return null;
 	const handleClose = async () => {
 		await navigate({ to: '/luro/$interval', params: { interval } });

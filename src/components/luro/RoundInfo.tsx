@@ -2,7 +2,7 @@ import RoundMobileInfo from '@/src/components/luro/RoundMobileInfo.tsx';
 import SwitchModal from '@/src/components/luro/SwitchModal.tsx';
 import type { LuroInterval } from '@/src/lib/luro';
 import { useBetsCount, useTotalVolume, useVisibleRound } from '@/src/lib/luro/query';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/luro/promo.tsx';
 import { valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { BetValue } from 'betfinio_app/BetValue';
@@ -46,7 +46,7 @@ export const RoundInfo = () => {
 	const { data: currentRound } = useVisibleRound();
 	const { data: betsCount = 0, isFetched: isBetsFetched } = useBetsCount();
 	const { data: volume = 0n, isFetched: isVolumeFetched } = useTotalVolume();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	const staking = useMemo(() => {
 		return (volume * 36n) / 1000n;
 	}, [volume]);

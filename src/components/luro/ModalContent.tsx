@@ -15,7 +15,6 @@ import {
 import { addressToColor } from 'betfinio_app/lib/utils';
 
 import type { Round, RoundModalPlayer } from '@/src/lib/luro/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Bank from '@betfinio/ui/dist/icons/Bank';
 import GoldenTrophy from '@betfinio/ui/dist/icons/GoldenTrophy';
@@ -41,7 +40,7 @@ export const ModalContent: FC<{
 	round: Round | null;
 }> = ({ onClose, roundId, round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	const { start, end } = getTimesByRound(roundId, interval as LuroInterval);
 	const isFinished = DateTime.fromMillis(Date.now()).diff(DateTime.fromMillis(end)).milliseconds > 0;
 
@@ -104,7 +103,7 @@ const BonusDistribution: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { data: distributed } = useBonusDistribution(round);
 	const { mutate: distribute } = useDistributeBonus();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	const { end } = getTimesByRound(round, interval as LuroInterval);
 	const handleDistribute = () => {
 		console.log('distribute');

@@ -1,6 +1,6 @@
 import { usePlayerRounds, useRounds, useWinner, useWinners } from '@/src/lib/luro/query';
 import type { Round } from '@/src/lib/luro/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/luro/promo.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
@@ -126,7 +126,7 @@ const AllRoundsTable: FC<{ columns: unknown[] }> = ({ columns }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = useRounds(address);
 	const navigate = useNavigate();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 
 	const handleClick = (row: Round) => {
 		navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });
@@ -150,7 +150,7 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = usePlayerRounds(address);
 	const navigate = useNavigate();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 
 	const handleClick = (row: Round) => {
 		navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });

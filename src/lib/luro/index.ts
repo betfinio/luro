@@ -72,6 +72,7 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 };
 
 export const handleError = (e: Error, t: TFunction<'shared'>) => {
+	// @ts-ignore
 	toast({ variant: 'destructive', description: t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown') });
 };
 

@@ -5,7 +5,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/luro/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { Bet } from '@betfinio/ui/dist/icons';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
@@ -378,7 +377,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		},
 	};
 	const [progress, setProgress] = useState(0);
-	const { interval } = Route.useParams();
+	const interval = '5m';
 
 	const { start, end } = getTimesByRound(round, interval as LuroInterval);
 
@@ -388,7 +387,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		}
 	};
 
-	const luroAddress = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = LURO_5MIN;
 
 	const handleRoundEnd = () => {
 		if (bank === 0n) {

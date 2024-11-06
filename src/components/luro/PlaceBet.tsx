@@ -1,4 +1,4 @@
-import { LURO, LURO_5MIN } from '@/src/global.ts';
+import { LURO_5MIN } from '@/src/global.ts';
 import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
 import { getCurrentRoundInfo } from '@/src/lib/luro/api';
 import {
@@ -13,7 +13,6 @@ import {
 	useStartRound,
 	useVisibleRound,
 } from '@/src/lib/luro/query';
-import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -29,7 +28,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
 import { toast } from 'betfinio_app/use-toast';
 import cx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Coins, Loader } from 'lucide-react';
+import { Loader } from 'lucide-react';
 import millify from 'millify';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +61,7 @@ export const PlaceBet = () => {
 const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	const { address = ZeroAddress } = useAccount();
 	const { data: allowance = 0n, isFetching: loading } = useAllowance(address);
 	const { data: balance = 0n } = useBalance(address);
@@ -132,7 +131,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
 			return;
 		}
-		const luro = interval === '1d' ? LURO : LURO_5MIN;
+		const luro = LURO_5MIN;
 		placeBet({ round: round, amount: Number(amount), player: address, address: luro });
 	};
 
@@ -408,8 +407,8 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 		return bonuses.find((bonus) => bonus?.bet?.address === winner?.address);
 	}, [bets, volume, address]);
 
-	const { interval } = Route.useParams();
-	const luroAddress = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const luroAddress = LURO_5MIN;
 
 	if (!roundData) return null;
 

@@ -12,7 +12,7 @@ import { getStakingUrl } from 'betfinio_app/lib';
 import { TooltipProvider } from 'betfinio_app/tooltip';
 import { Trans, useTranslation } from 'react-i18next';
 
-export const Route = createFileRoute('/luro/$interval')({
+export const Route = createFileRoute('/luro/promo')({
 	validateSearch: (search: Record<string, unknown>) => {
 		if (!search.round) return {};
 		return { round: Number(search.round) || 0 };
@@ -34,7 +34,14 @@ function Luro() {
 						<BonusClaimBlock />
 						<div className={'text-center my-2 justify-self-end'}>
 							<Link to={getStakingUrl('conservative')} className={'text-sm text-gray-400'}>
-								<Trans t={t} i18nKey={'feeStaking'} i18n={i18n} components={{ b: <b className={'text-yellow-400 font-medium'} /> }} />
+								<Trans
+									t={t}
+									i18nKey={'feeStaking'}
+									i18n={i18n}
+									components={{
+										b: <b className={'text-yellow-400 font-medium'} />,
+									}}
+								/>
 							</Link>
 						</div>
 					</div>

@@ -18,7 +18,7 @@ import {
 	startRound,
 } from '@/src/lib/luro/api';
 import type { LuroBet, PlaceBetParams, Round, WheelState, WinnerInfo } from '@/src/lib/luro/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/luro/promo.tsx';
 import { LuckyRoundContract, ZeroAddress } from '@betfinio/abi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type WriteContractReturnType, readContract } from '@wagmi/core';
@@ -35,14 +35,14 @@ export const useObserveBet = (round: number) => {
 	const resetObservedBet = () => {
 		queryClient.setQueryData(['luro', address, 'bets', 'newBet'], ZeroAddress);
 	};
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	const query = useQuery<{ address: Address; strength: number }>({
 		queryKey: ['luro', address, 'bets', 'newBet'],
 		initialData: { address: ZeroAddress, strength: 0 },
 	});
 
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luro = LURO_5MIN;
 	console.log(luro);
 	useWatchContractEvent({
 		abi: LuckyRoundContract.abi,
@@ -67,8 +67,8 @@ export const usePlaceBet = () => {
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useMutation<WriteContractReturnType, WriteContractErrorType, PlaceBetParams>({
 		mutationKey: ['luro', address, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
@@ -113,8 +113,8 @@ export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', address, 'round', 'start'],
@@ -148,8 +148,8 @@ export const useStartRound = (round: number) => {
 };
 
 export const useRoundRequested = (round: number) => {
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<boolean>({
 		queryKey: ['luro', address, 'requested', round],
 		initialData: false,
@@ -158,8 +158,8 @@ export const useRoundRequested = (round: number) => {
 
 export const useRoundBets = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<LuroBet[]>({
 		queryKey: ['luro', address, 'bets', 'round', round],
 		queryFn: () => fetchRoundBets(address, round, config),
@@ -168,8 +168,8 @@ export const useRoundBets = (round: number) => {
 
 export const useRoundBank = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<bigint>({
 		queryKey: ['luro', address, 'round', 'bank', round],
 		queryFn: async () =>
@@ -184,8 +184,8 @@ export const useRoundBank = (round: number) => {
 
 export const useRoundBonusShare = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<bigint>({
 		queryKey: ['luro', address, 'round', 'bonus', round],
 		queryFn: async () => {
@@ -203,8 +203,8 @@ export const useDistributeBonus = () => {
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
 		mutationKey: ['luro', 'bonus', 'distribute'],
 		mutationFn: (params) => distributeBonus({ ...params, address }, config),
@@ -223,8 +223,8 @@ export const useDistributeBonus = () => {
 
 export const useBonusDistribution = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<boolean>({
 		queryKey: ['luro', address, 'bonus', 'distribution', round],
 		queryFn: () => fetchBonusDistribution(address, round, config),
@@ -233,8 +233,8 @@ export const useBonusDistribution = (round: number) => {
 
 export const useAvailableBonus = (address: Address) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const luro = LURO_5MIN;
 	return useQuery({
 		queryKey: ['luro', luro, 'bonus', 'available'],
 		queryFn: () => fetchAvailableBonus(luro, address, config),
@@ -245,9 +245,9 @@ export const useClaimBonus = () => {
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
+	const interval = '5m';
 	const { address: player = ZeroAddress } = useAccount();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luro = LURO_5MIN;
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luro, 'bonus', 'claim'],
 		mutationFn: () => claimBonus({ player, address: luro }, config),
@@ -278,8 +278,8 @@ export const useClaimBonus = () => {
 };
 
 export const useWinners = () => {
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const luro = LURO_5MIN;
 	return useQuery<WinnerInfo[]>({
 		queryKey: ['luro', luro, 'winners'],
 		queryFn: () => fetchWinners(luro),
@@ -287,8 +287,8 @@ export const useWinners = () => {
 };
 
 export const useWinner = (round: number) => {
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const luro = LURO_5MIN;
 	return useQuery<WinnerInfo | null>({
 		queryKey: ['luro', luro, 'winners', round],
 		queryFn: () => fetchWinner(luro, round),
@@ -306,8 +306,8 @@ export const useRoundWinner = (round: number) => {
 export const useRound = (round: number) => {
 	const { address = ZeroAddress } = useAccount();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const luro = LURO_5MIN;
 
 	return useQuery<Round>({
 		queryKey: ['luro', luro, 'round', round],
@@ -319,8 +319,8 @@ export const useRound = (round: number) => {
 
 export const useLuroState = (round: number) => {
 	const queryClient = useQueryClient();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	const state = useQuery<WheelState>({
 		queryKey: ['luro', address, 'state', round],
 		initialData: { state: 'standby' },
@@ -345,8 +345,8 @@ export interface ICurrentRoundInfo {
 
 export const useVisibleRound = () => {
 	const queryClient = useQueryClient();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	const fetchRound = async (): Promise<number> => {
 		await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bets', 'round'] });
 		return getCurrentRound(interval as LuroInterval);
@@ -364,8 +364,8 @@ export const useVisibleRound = () => {
 
 export const useRounds = (player: Address, onlyPlayers = false) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<Round[]>({
 		queryKey: ['luro', address, 'rounds', player, onlyPlayers],
 		queryFn: () => fetchRounds(address, player, onlyPlayers, config.getClient()),
@@ -373,8 +373,8 @@ export const useRounds = (player: Address, onlyPlayers = false) => {
 };
 export const usePlayerRounds = (player: Address) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<Round[]>({
 		queryKey: ['luro', address, 'rounds', player],
 		queryFn: () => fetchRoundsByPlayer(address, player, config.getClient()),
@@ -383,8 +383,8 @@ export const usePlayerRounds = (player: Address) => {
 
 export const useTotalVolume = () => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<bigint>({
 		queryKey: ['luro', address, 'totalVolume'],
 		queryFn: () => fetchTotalVolume(address, config),
@@ -392,8 +392,8 @@ export const useTotalVolume = () => {
 };
 export const useBetsCount = () => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 	return useQuery<number>({
 		queryKey: ['luro', address, 'betsCount'],
 		queryFn: () => fetchBetsCount(address, config),
@@ -402,8 +402,8 @@ export const useBetsCount = () => {
 
 export const useCalculate = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const interval = '5m';
+	const address = LURO_5MIN;
 
 	return useMutation({
 		mutationKey: ['luro', address, 'calculate'],
