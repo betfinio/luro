@@ -236,9 +236,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 	const { data: roundData } = useRound(round);
 
 	const players = useMemo(() => {
-		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address).sort((a, b) =>
-			a.player === winner ? -1 : a.volume > b.volume ? -1 : 1,
-		);
+		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address);
 	}, [bets, winner, address]);
 
 	const columns = [
