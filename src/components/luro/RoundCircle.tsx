@@ -433,10 +433,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
-				const percent = (authorVolume / volume) * 100;
-				const coef = (volume / authorVolume).toFixed(2);
+				const finalVolume = (volume * 935) / 1000;
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={volume} loading={!winner} />;
+				const percent = (authorVolume / finalVolume) * 100;
+				const coef = (finalVolume / authorVolume).toFixed(2);
+
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
 			}
 		}
 		switch (wheelState.data.state) {
@@ -444,10 +446,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
-				const percent = (authorVolume / volume) * 100;
-				const coef = (volume / authorVolume).toFixed(2);
+				const finalVolume = (volume * 935) / 1000;
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={volume} loading={!winner} />;
+				const percent = (authorVolume / finalVolume) * 100;
+				const coef = (finalVolume / authorVolume).toFixed(2);
+
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
@@ -519,6 +523,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 				<div className={'flex items-center gap-1'}>
 					<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
 				</div>
+				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
 			</div>
 		</motion.div>
 	);
