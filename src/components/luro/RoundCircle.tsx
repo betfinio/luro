@@ -1,10 +1,10 @@
-import { TabItem } from '@/src/components/luro/tabs/PlayersTab.tsx';
-import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
-import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '@/src/lib/luro/query';
+import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
+import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
-import type { CustomLuroBet } from '@/src/lib/luro/types.ts';
+import type { CustomLuroBet } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { Bet } from '@betfinio/ui/dist/icons';
@@ -137,16 +137,13 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	}
 
 	const data: CustomLuroBet[] = useMemo(() => {
-		const a = bets.map((bet) => ({
+		return bets.map((bet) => ({
 			id: bet.address,
 			label: bet.player,
 			value: valueToNumber(bet.amount),
 			color: hexToRgbA(addressToColor(bet.player)),
 			betsNumber: bets.filter((b) => bet.player === b.player).length,
 		}));
-
-		console.log(bets, a);
-		return a;
 	}, [bets]);
 
 	const [chartHeight, setChartHeight] = useState(250);
@@ -170,7 +167,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'transparent' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
-				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[325px]')} ref={boxRef}>
+				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
 					<div className={'relative'}>
 						<ProgressBar round={round} authors={data} />
 
@@ -241,7 +238,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 								<div className={'shrink-0'}>
 									<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
 								</div>
-								<div className={'flex flex-col min-w-[220px] gap-4'}>
+								<div className={'flex flex-col min-w-[190px] gap-4'}>
 									<div
 										className={cx(
 											'border border-yellow-400 bg-primary flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
@@ -353,8 +350,6 @@ const CustomTooltip =
 		);
 	};
 const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
-
 	const { data: roundData } = useRound(round);
 	const { data: bank = 0n, isLoading: isBankLoading } = useRoundBank(round);
 	const { data: currentRound } = useVisibleRound();
@@ -433,10 +428,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
-				const percent = (authorVolume / volume) * 100;
-				const coef = (volume / authorVolume).toFixed(2);
+				const finalVolume = (volume * 935) / 1000;
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} loading={!winner} />;
+				const percent = (authorVolume / finalVolume) * 100;
+				const coef = (finalVolume / authorVolume).toFixed(2);
+
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
 			}
 		}
 		switch (wheelState.data.state) {
@@ -444,10 +441,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
-				const percent = (authorVolume / volume) * 100;
-				const coef = (volume / authorVolume).toFixed(2);
+				const finalVolume = (volume * 935) / 1000;
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} loading={!winner} />;
+				const percent = (authorVolume / finalVolume) * 100;
+				const coef = (finalVolume / authorVolume).toFixed(2);
+
+				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
@@ -493,10 +492,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	);
 };
 
-const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; coef: string; loading?: boolean }> = ({
+const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; coef: string; win: number; loading?: boolean }> = ({
 	player,
 	amount,
-	percent,
+	win,
 	coef,
 	loading,
 }) => {
@@ -512,10 +511,14 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 		>
 			<img alt={'crown'} src={Crown as string} />
 			<div className={'z-10'}>
-				<TabItem player={player} amount={amount} percent={percent} />
+				<WinnerCard player={player} amount={amount} />
 			</div>
-			<div>
-				<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
+			<div className={'flex flex-col items-center z-10'}>
+				<BetValue className={'text-yellow-400 text-xs'} iconClassName={'w-2.5 h-2.5'} value={win} withIcon />
+				<div className={'flex items-center gap-1'}>
+					<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
+				</div>
+				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
 			</div>
 		</motion.div>
 	);

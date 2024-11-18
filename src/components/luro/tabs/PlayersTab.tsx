@@ -1,6 +1,5 @@
 import { ETHSCAN } from '@/src/global.ts';
-import { mapBetsToAuthors } from '@/src/lib/luro';
-import { useRoundBets, useVisibleRound } from '@/src/lib/luro/query';
+import { mapBetsToAuthors } from '@/src/lib';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Fox from '@betfinio/ui/dist/icons/Fox';
 import { BetValue } from 'betfinio_app/BetValue';
@@ -8,10 +7,11 @@ import { useCustomUsername, useUsername } from 'betfinio_app/lib/query/username'
 import { addressToColor } from 'betfinio_app/lib/utils';
 import cx from 'clsx';
 import { motion } from 'framer-motion';
-import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { useRoundBets, useVisibleRound } from '../../../lib/query';
 
 export const PlayersTab = () => {
 	const { data: round } = useVisibleRound();
@@ -25,7 +25,7 @@ export const PlayersTab = () => {
 	const players = useMemo(() => {
 		return mapBetsToAuthors([...bets]).sort((a, b) => Number(b.amount - a.amount));
 	}, [bets]);
-	const renderRow = ({ index, style }) => {
+	const renderRow = ({ index, style }: { index: number; style: CSSProperties }) => {
 		const player = players[index];
 		return (
 			<div className={'px-2'} key={player.address} style={style}>
@@ -96,7 +96,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-[#6A6F84] text-xs gap-2'}>
+					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
@@ -110,6 +110,51 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 				</div>
 				<div className={'flex flex-col items-end text-xs gap-2'}>
 					<span className={'font-semibold text-sm'}>{percent.toFixed(2)}%</span>
+					<span>
+						<BetValue precision={2} value={amount} withIcon={true} />
+					</span>
+				</div>
+			</div>
+			<div className={'w-[10px] rounded-r-[10px]'} style={{ backgroundColor: addressToColor(player) }} />
+		</motion.div>
+	);
+});
+
+export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amount, id, betsNumber = 0, className }) => {
+	const { data: username } = useUsername(player);
+	const { address = ZeroAddress } = useAccount();
+	const { data: customUsername } = useCustomUsername(address, player);
+
+	const formatPlayer = (player: string) => {
+		if (player.length > 12) {
+			return `${player.slice(0, 12)}...`;
+		}
+		return player;
+	};
+	return (
+		<motion.div
+			layout
+			initial={{ scale: 0 }}
+			animate={{ scale: 1 }}
+			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+			exit={{ opacity: 0, y: 10 }}
+			className={cx('rounded-lg flex bg-primary justify-between', className as string)}
+		>
+			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
+				<div className={'flex items-start gap-[10px]'}>
+					<Fox className={'w-5 h-5'} />
+					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
+						<a
+							href={`${ETHSCAN}/address/${player}`}
+							target={'_blank'}
+							className={cx('font-semibold text-sm !text-gray-300 hover:underline', player === address && '!text-yellow-400')}
+							rel="noreferrer"
+						>
+							{formatPlayer(customUsername || username || truncateEthAddress(player))}
+						</a>
+					</div>
+				</div>
+				<div className={'flex flex-col items-end text-xs gap-2'}>
 					<span>
 						<BetValue precision={2} value={amount} withIcon={true} />
 					</span>

@@ -19,9 +19,9 @@ export const BetsTabs: FC<BetsTabsProps> = ({ activeTab, handleTabClick, tabs })
 					onClick={() => handleTabClick(i)}
 				>
 					{activeTab === i && (
-						<motion.div layoutId="bubble" className="absolute inset-0 rounded-md bg-[#FFC800]" transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+						<motion.div layoutId="bubble" className="absolute inset-0 rounded-md bg-yellow-400" transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
 					)}
-					<div className={`text-xs font-semibold relative text-center transition-all transition-300 ${activeTab === i ? '!text-black' : 'text-[#6A6F84]'}`}>
+					<div className={`text-xs font-semibold relative text-center transition-all transition-300 ${activeTab === i ? '!text-black' : 'text-gray-400'}`}>
 						{tab}
 					</div>
 				</div>

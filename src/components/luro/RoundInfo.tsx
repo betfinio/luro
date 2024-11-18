@@ -1,17 +1,17 @@
 import RoundMobileInfo from '@/src/components/luro/RoundMobileInfo.tsx';
 import SwitchModal from '@/src/components/luro/SwitchModal.tsx';
-import type { LuroInterval } from '@/src/lib/luro';
-import { useBetsCount, useTotalVolume, useVisibleRound } from '@/src/lib/luro/query';
+import type { LuroInterval } from '@/src/lib';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { BetValue } from 'betfinio_app/BetValue';
-import { Dialog, DialogContent, DialogTrigger } from 'betfinio_app/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from 'betfinio_app/dialog';
 import cx from 'clsx';
 import { motion } from 'framer-motion';
 import { CircleHelp, Menu } from 'lucide-react';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBetsCount, useTotalVolume, useVisibleRound } from '../../lib/query';
 
 const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched: boolean }> = ({ betsCount, volume, staking, isFetched }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundInfo.stats' });
@@ -54,7 +54,7 @@ export const RoundInfo = () => {
 	return (
 		<div
 			className={
-				'px-5 py-6 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative'
+				'px-3 py-2 bg-primaryLight border border-gray-800 rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative md:px-5 md:py-6'
 			}
 		>
 			<Dialog>
@@ -68,7 +68,8 @@ export const RoundInfo = () => {
 						</div>
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'w-fit luro'}>
+				<DialogContent className={'w-fit luro'} aria-describedby={undefined}>
+					<DialogTitle className={'hidden'} />
 					<SwitchModal selected={interval as LuroInterval} />
 				</DialogContent>
 			</Dialog>
@@ -83,7 +84,7 @@ export const RoundInfo = () => {
 				<a
 					target={'_blank'}
 					href={'https://betfin.gitbook.io/betfin-public/games-guide/lucky-round-luro'}
-					className={'flex flex-col items-center justify-center cursor-pointer text-[#FFC800] hover:text-[#FFC800] lg:text-white duration-300'}
+					className={'flex flex-col items-center justify-center cursor-pointer text-yellow-400 hover:text-yellow-400 lg:text-white duration-300'}
 					rel="noreferrer"
 				>
 					<CircleHelp className={'cursor-pointer w-6 h-6'} />

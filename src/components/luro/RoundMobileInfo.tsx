@@ -10,8 +10,8 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 		<div className={'md:hidden'}>
 			<Dialog>
 				<DialogTrigger asChild>
-					<motion.div className={'flex flex-col items-center justify-center cursor-pointer text-[#FFC800] hover:text-[#FFC800] lg:text-white duration-300'}>
-						<ChartBarIcon className={'text-[#FFC800] w-6'} />
+					<motion.div className={'flex flex-col items-center justify-center cursor-pointer text-yellow-400 hover:text-yellow-400 lg:text-white duration-300'}>
+						<ChartBarIcon className={'text-yellow-400 w-6'} />
 					</motion.div>
 				</DialogTrigger>
 				<DialogContent className={'luro max-w-0 w-auto'}>

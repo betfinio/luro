@@ -1,8 +1,8 @@
 import { TabItem } from '@/src/components/luro/tabs/PlayersTab.tsx';
-import { useRoundBets, useVisibleRound } from '@/src/lib/luro/query';
 import { valueToNumber } from '@betfinio/abi';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
+import { useRoundBets, useVisibleRound } from '../../../lib/query';
 
 export const BetsTab = () => {
 	const { data: round } = useVisibleRound();
@@ -16,7 +16,7 @@ export const BetsTab = () => {
 		return [...bets].reverse();
 	}, [bets]);
 
-	const renderRow = ({ index, style }) => {
+	const renderRow = ({ index, style }: { index: number; style: CSSProperties }) => {
 		const bet = newestBetsFirst[index];
 		return (
 			<div key={bet.address} className={'px-2'} style={style}>
