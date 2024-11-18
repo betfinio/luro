@@ -1,5 +1,5 @@
 import type { ILanguageErrorKeys } from '@/src/i18next';
-import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/luro/types.ts';
+import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
 import type { QueryClient } from '@tanstack/react-query';
 import { toast } from 'betfinio_app/use-toast';
 import type { TFunction } from 'i18next';
@@ -20,7 +20,7 @@ export const mapBetsToAuthors = (bets: LuroBet[]): LuroAuthor[] => {
 
 export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, volume: bigint, bonusShare: bigint, address: Address): RoundModalPlayer[] => {
 	const bonusPool = (volume / 100n) * 4n;
-	return [...bets]
+	const mappedBets = [...bets]
 		.map((e) => ({
 			...e,
 			player: e.player.toLowerCase() as Address,
@@ -42,36 +42,35 @@ export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, volume: bi
 				acc[author].count += 1;
 				acc[author].bonus += bonus;
 			}
-			console.log(acc);
 			return acc;
 			//TODO: sorting algorhytm for largest volume
-		}, [])
-		.sort((a, b) => {
-			if (a.player === address) {
-				return -1;
-			}
-			if (b.player === address) {
-				return 1;
-			}
+		}, []);
 
-			if (a.player === winner) {
-				return -1;
-			}
-			if (b.player === winner) {
-				return 1;
-			}
-			if (a.volume > b.volume) {
-				return -1;
-			}
+	return mappedBets.toSorted((a, b) => {
+		if (a.player === address) {
+			return -1;
+		}
+		if (b.player === address) {
 			return 1;
-		});
+		}
+		if (a.player === winner) {
+			return -1;
+		}
+		if (b.player === winner) {
+			return 1;
+		}
+		if (a.volume > b.volume) {
+			return -1;
+		}
+		return 1;
+	});
 };
 
 export const animateNewBet = (address: Address, strength: number, queryClient: QueryClient, luroAddress: string) => {
 	queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], { address, strength });
 };
 
-export const handleError = (e: Error, t: TFunction<'shared'>) => {
+export const handleError = (e: Error, t: TFunction<'shared', 'errors'>) => {
 	toast({ variant: 'destructive', description: t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown') });
 };
 

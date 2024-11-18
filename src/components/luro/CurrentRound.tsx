@@ -1,11 +1,12 @@
 import { PlaceBet } from '@/src/components/luro/PlaceBet.tsx';
 import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
+import logger from '@/src/config/logger';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
-import { useLuroState, useVisibleRound } from '@/src/lib/luro/query';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { LuckyRoundContract } from '@betfinio/abi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWatchContractEvent } from 'wagmi';
+import { useLuroState, useVisibleRound } from '../../lib/query';
 
 export const CurrentRound = () => {
 	const { data: round } = useVisibleRound();
@@ -24,10 +25,10 @@ export const CurrentRound = () => {
 		eventName: 'RequestedCalculation',
 		poll: true,
 		onLogs: (rolledLogs) => {
-			console.log('ROLLED LOGS', rolledLogs, observedRound);
+			logger.log('ROLLED LOGS', rolledLogs, observedRound);
 			// @ts-ignore
 			if (Number(rolledLogs[0].args.round) === observedRound) {
-				console.log('START SPINNING');
+				logger.log('START SPINNING');
 				updateState({ state: 'spinning' }, observedRound);
 			}
 		},
@@ -38,10 +39,10 @@ export const CurrentRound = () => {
 		address: address,
 		eventName: 'WinnerCalculated',
 		onLogs: async (landedLogs) => {
-			console.log('CALCULATED LOGS', landedLogs, observedRound);
+			logger.log('CALCULATED LOGS', landedLogs, observedRound);
 			// @ts-ignore
 			if (Number(landedLogs[0].args.round) === observedRound) {
-				console.log('LANDED, STOP SPINNING');
+				logger.log('LANDED, STOP SPINNING');
 				// @ts-ignore
 				updateState({ state: 'landed', winnerOffset: Number(landedLogs[0].args.winnerOffset), bet: landedLogs[0].args.bet }, observedRound);
 			}

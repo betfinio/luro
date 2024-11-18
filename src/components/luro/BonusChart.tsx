@@ -1,4 +1,4 @@
-import type { LuroBet } from '@/src/lib/luro/types.ts';
+import type { LuroBet } from '@/src/lib/types.ts';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import { BarElement, CategoryScale, Chart as ChartJS, type ChartOptions, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 import { type FC, useMemo } from 'react';

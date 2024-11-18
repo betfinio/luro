@@ -1,5 +1,4 @@
 import { ETHSCAN } from '@/src/global.ts';
-import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '@/src/lib/luro/query';
 import { truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Fox from '@betfinio/ui/dist/icons/Fox';
 import { BetValue } from 'betfinio_app/BetValue';
@@ -7,10 +6,11 @@ import { useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import cx from 'clsx';
 import { motion } from 'framer-motion';
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '../../../lib/query';
 
 export const BonusTab = () => {
 	const { data: round } = useVisibleRound();
@@ -19,7 +19,7 @@ export const BonusTab = () => {
 	const { data: bonusShare = 0n } = useRoundBonusShare(round);
 	const [listHeight, setListHeight] = useState(460);
 
-	const renderRow = ({ index, style }) => {
+	const renderRow = ({ index, style }: { index: number; style: CSSProperties }) => {
 		const bet = bets[index];
 		return (
 			<div className={'px-2 h-[74px]'} key={bet.address} style={style}>
