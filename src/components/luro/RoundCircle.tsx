@@ -1,10 +1,10 @@
 import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
-import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
-import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '@/src/lib/luro/query';
+import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
+import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
-import type { CustomLuroBet } from '@/src/lib/luro/types.ts';
+import type { CustomLuroBet } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { Bet } from '@betfinio/ui/dist/icons';
@@ -137,16 +137,13 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	}
 
 	const data: CustomLuroBet[] = useMemo(() => {
-		const a = bets.map((bet) => ({
+		return bets.map((bet) => ({
 			id: bet.address,
 			label: bet.player,
 			value: valueToNumber(bet.amount),
 			color: hexToRgbA(addressToColor(bet.player)),
 			betsNumber: bets.filter((b) => bet.player === b.player).length,
 		}));
-
-		console.log(bets, a);
-		return a;
 	}, [bets]);
 
 	const [chartHeight, setChartHeight] = useState(250);
@@ -353,8 +350,6 @@ const CustomTooltip =
 		);
 	};
 const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
-
 	const { data: roundData } = useRound(round);
 	const { data: bank = 0n, isLoading: isBankLoading } = useRoundBank(round);
 	const { data: currentRound } = useVisibleRound();

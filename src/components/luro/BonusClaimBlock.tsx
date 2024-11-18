@@ -1,10 +1,10 @@
 import type { FC } from 'react';
 
-import { useAvailableBonus, useClaimBonus } from '@/src/lib/luro/query';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { BetValue } from 'betfinio_app/BetValue';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
+import { useAvailableBonus, useClaimBonus } from '../../lib/query';
 
 const BonusClaimBlock: FC = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'bonusClaimBlock' });

@@ -1,5 +1,4 @@
-import { usePlayerRounds, useRounds, useWinner, useWinners } from '@/src/lib/luro/query';
-import type { Round } from '@/src/lib/luro/types.ts';
+import type { Round } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -13,6 +12,7 @@ import { Expand, Loader } from 'lucide-react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
+import { usePlayerRounds, useRounds, useWinner, useWinners } from '../../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });

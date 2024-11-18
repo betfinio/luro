@@ -1,6 +1,10 @@
 import { LURO, LURO_5MIN } from '@/src/global.ts';
-import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
-import { getCurrentRoundInfo } from '@/src/lib/luro/api';
+import { hexToRgbA, jumpToCurrentRound } from '@/src/lib';
+import { Route } from '@/src/routes/luro/$interval.tsx';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { getCurrentRoundInfo } from '../../lib/api';
 import {
 	useLuroState,
 	usePlaceBet,
@@ -12,11 +16,7 @@ import {
 	useRoundWinner,
 	useStartRound,
 	useVisibleRound,
-} from '@/src/lib/luro/query';
-import { Route } from '@/src/routes/luro/$interval.tsx';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
-import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+} from '../../lib/query';
 
 import { Bet } from '@betfinio/ui/dist/icons';
 import { useQueryClient } from '@tanstack/react-query';

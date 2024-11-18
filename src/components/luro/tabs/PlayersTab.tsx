@@ -1,6 +1,5 @@
 import { ETHSCAN } from '@/src/global.ts';
-import { mapBetsToAuthors } from '@/src/lib/luro';
-import { useRoundBets, useVisibleRound } from '@/src/lib/luro/query';
+import { mapBetsToAuthors } from '@/src/lib';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Fox from '@betfinio/ui/dist/icons/Fox';
 import { BetValue } from 'betfinio_app/BetValue';
@@ -8,10 +7,11 @@ import { useCustomUsername, useUsername } from 'betfinio_app/lib/query/username'
 import { addressToColor } from 'betfinio_app/lib/utils';
 import cx from 'clsx';
 import { motion } from 'framer-motion';
-import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { useRoundBets, useVisibleRound } from '../../../lib/query';
 
 export const PlayersTab = () => {
 	const { data: round } = useVisibleRound();
@@ -25,7 +25,7 @@ export const PlayersTab = () => {
 	const players = useMemo(() => {
 		return mapBetsToAuthors([...bets]).sort((a, b) => Number(b.amount - a.amount));
 	}, [bets]);
-	const renderRow = ({ index, style }) => {
+	const renderRow = ({ index, style }: { index: number; style: CSSProperties }) => {
 		const player = players[index];
 		return (
 			<div className={'px-2'} key={player.address} style={style}>

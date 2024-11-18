@@ -11,7 +11,7 @@ import {
 	execute,
 } from '@/.graphclient';
 import logger from '@/src/config/logger.ts';
-import type { WinnerInfo } from '@/src/lib/luro/types.ts';
+import type { WinnerInfo } from '@/src/lib/types.ts';
 import type { ExecutionResult } from 'graphql/execution';
 import type { Address } from 'viem';
 
