@@ -1,10 +1,10 @@
 import { ModalContent } from '@/src/components/luro/ModalContent.tsx';
-import { type LuroInterval, getLuroInterval } from '@/src/lib/luro';
-import { useRound } from '@/src/lib/luro/query';
+import { type LuroInterval, getLuroInterval } from '@/src/lib';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { useNavigate } from '@tanstack/react-router';
 import { Dialog, DialogContent, DialogDescription, DialogPortal, DialogTitle } from 'betfinio_app/dialog';
 import type { FC } from 'react';
+import { useRound } from '../../lib/query';
 
 const RoundModal: FC<{ round: number }> = ({ round }) => {
 	const { data } = useRound(round);

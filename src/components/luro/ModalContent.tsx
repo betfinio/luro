@@ -1,6 +1,7 @@
 import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
-import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib/luro';
+import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
+import { addressToColor } from 'betfinio_app/lib/utils';
 import {
 	useBonusDistribution,
 	useCalculate,
@@ -11,10 +12,10 @@ import {
 	useRoundBonusShare,
 	useVisibleRound,
 	useWinners,
-} from '@/src/lib/luro/query';
-import { addressToColor } from 'betfinio_app/lib/utils';
+} from '../../lib/query';
 
-import type { Round, RoundModalPlayer } from '@/src/lib/luro/types.ts';
+import logger from '@/src/config/logger';
+import type { Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import Bank from '@betfinio/ui/dist/icons/Bank';
@@ -107,7 +108,7 @@ const BonusDistribution: FC<{ round: number }> = ({ round }) => {
 	const { interval } = Route.useParams();
 	const { end } = getTimesByRound(round, interval as LuroInterval);
 	const handleDistribute = () => {
-		console.log('distribute');
+		logger.log('distribute');
 		distribute({ round });
 	};
 
@@ -236,9 +237,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 	const { data: roundData } = useRound(round);
 
 	const players = useMemo(() => {
-		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address).sort((a, b) =>
-			a.player === winner ? -1 : a.volume > b.volume ? -1 : 1,
-		);
+		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address);
 	}, [bets, winner, address]);
 
 	const columns = [

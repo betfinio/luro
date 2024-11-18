@@ -1,6 +1,10 @@
 import { LURO, LURO_5MIN } from '@/src/global.ts';
-import { hexToRgbA, jumpToCurrentRound } from '@/src/lib/luro';
-import { getCurrentRoundInfo } from '@/src/lib/luro/api';
+import { hexToRgbA, jumpToCurrentRound } from '@/src/lib';
+import { Route } from '@/src/routes/luro/$interval.tsx';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { getCurrentRoundInfo } from '../../lib/api';
 import {
 	useLuroState,
 	usePlaceBet,
@@ -12,12 +16,9 @@ import {
 	useRoundWinner,
 	useStartRound,
 	useVisibleRound,
-} from '@/src/lib/luro/query';
-import { Route } from '@/src/routes/luro/$interval.tsx';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
-import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+} from '../../lib/query';
 
+import { Bet } from '@betfinio/ui/dist/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { BetValue } from 'betfinio_app/BetValue';
 import { useAllowanceModal } from 'betfinio_app/allowance';
@@ -249,10 +250,12 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 				<h4 className={'font-medium text-gray-500 text-xs text-center mt-[10px] hidden sm:block'}>{t('expected')}</h4>
 				<p className={'mt-1 md:mt-5 text-center font-semibold text-yellow-400'}>
-					<span className={'text-white'}>
+					<span className={'text-white flex justify-center items-center gap-1'}>
 						<span className={'sm:hidden'}>{t('win')}:</span>
-					</span>{' '}
-					{expectedWinning.toLocaleString()} <span className={'text-blue-500'}>+{t('bonus')}</span>
+						{expectedWinning.toLocaleString()}
+						<Bet className={'text-yellow-400'} />
+						<span className={'text-blue-500'}>+{t('bonus')}</span>
+					</span>
 				</p>
 				<div className={'text-center text-yellow-400 font-thin text-xs'}>
 					{(coef === Number.POSITIVE_INFINITY || Number.isNaN(coef) ? 0 : coef).toFixed(3)}x
