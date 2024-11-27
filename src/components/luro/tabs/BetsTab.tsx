@@ -1,8 +1,8 @@
 import { TabItem } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 import { valueToNumber } from '@betfinio/abi';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
-import { useRoundBets, useVisibleRound } from '../../../lib/query';
 
 export const BetsTab = () => {
 	const { data: round } = useVisibleRound();

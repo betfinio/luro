@@ -1,7 +1,7 @@
 import type { ILanguageErrorKeys } from '@/src/i18next';
 import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
+import { toast } from '@betfinio/components/hooks';
 import type { QueryClient } from '@tanstack/react-query';
-import { toast } from 'betfinio_app/use-toast';
 import type { TFunction } from 'i18next';
 import type { Address } from 'viem';
 
