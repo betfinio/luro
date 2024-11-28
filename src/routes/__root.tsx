@@ -8,7 +8,7 @@ import React from 'react';
 export const Route = createRootRoute({
 	component: () => (
 		<Root id={'luro'} instance={instance}>
-			<VersionValidation repository={'affiliate'} branch={import.meta.env.PUBLIC_BRANCH} current={import.meta.env.PUBLIC_DEPLOYED} />
+			<VersionValidation repository={'roulette'} branch={import.meta.env.PUBLIC_BRANCH} current={import.meta.env.PUBLIC_DEPLOYED} />
 			<Toaster />
 		</Root>
 	),
