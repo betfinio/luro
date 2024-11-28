@@ -1,5 +1,5 @@
 import { valueToNumber } from '@betfinio/abi';
-import { Dialog, DialogContent, DialogTrigger } from 'betfinio_app/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@betfinio/components/ui';
 import { motion } from 'framer-motion';
 import { ChartBarIcon } from 'lucide-react';
 import type { FC } from 'react';
@@ -10,8 +10,12 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 		<div className={'md:hidden'}>
 			<Dialog>
 				<DialogTrigger asChild>
-					<motion.div className={'flex flex-col items-center justify-center cursor-pointer text-yellow-400 hover:text-yellow-400 lg:text-white duration-300'}>
-						<ChartBarIcon className={'text-yellow-400 w-6'} />
+					<motion.div
+						className={
+							'flex flex-col items-center justify-center cursor-pointer text-secondary-foreground hover:text-secondary-foreground lg:text-white duration-300'
+						}
+					>
+						<ChartBarIcon className={'text-secondary-foreground w-6'} />
 					</motion.div>
 				</DialogTrigger>
 				<DialogContent className={'luro max-w-0 w-auto'}>
@@ -28,7 +32,7 @@ const SwitchModal: FC<{ bets: number; volume: bigint; staking: bigint }> = ({ be
 	const { t } = useTranslation('luro', { keyPrefix: 'statsModal' });
 
 	return (
-		<motion.div className={'rounded-lg border border-gray-800 bg-primary p-5 w-[350px] flex flex-col gap-5 text-white'}>
+		<motion.div className={'rounded-lg border-border border bg-background p-5 w-[350px] flex flex-col gap-5 text-white'}>
 			<div className={'flex justify-between'}>
 				<span className={'text-sm'}>{t('bets')}</span>
 				<span className={'font-semibold'}>{bets}</span>

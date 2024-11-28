@@ -7,9 +7,9 @@ import RoundModal from '@/src/components/luro/RoundModal.tsx';
 import { RoundMyInfo } from '@/src/components/luro/RoundMyInfo.tsx';
 import RoundsTable from '@/src/components/luro/RoundsTable.tsx';
 import i18n from '@/src/i18n.ts';
+import { TooltipProvider } from '@betfinio/components/ui';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { getStakingUrl } from 'betfinio_app/lib';
-import { TooltipProvider } from 'betfinio_app/tooltip';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/luro/$interval')({
@@ -33,8 +33,8 @@ function Luro() {
 						<BonusInfo />
 						<BonusClaimBlock />
 						<div className={'text-center my-2 justify-self-end'}>
-							<Link to={getStakingUrl('conservative')} className={'text-sm text-gray-400'}>
-								<Trans t={t} i18nKey={'feeStaking'} i18n={i18n} components={{ b: <b className={'text-yellow-400 font-medium'} /> }} />
+							<Link to={getStakingUrl('conservative')} className={'text-sm text-muted-foreground'}>
+								<Trans t={t} i18nKey={'feeStaking'} i18n={i18n} components={{ b: <b className={'text-secondary-foreground font-medium'} /> }} />
 							</Link>
 						</div>
 					</div>

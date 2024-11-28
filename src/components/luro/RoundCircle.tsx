@@ -1,19 +1,19 @@
 import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
 import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib';
-import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { cn } from '@betfinio/components/lib';
+import { BetValue } from '@betfinio/components/shared';
 import { Bet } from '@betfinio/ui/dist/icons';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
 import anime from 'animejs';
-import { BetValue } from 'betfinio_app/BetValue';
 import { addressToColor } from 'betfinio_app/lib/utils';
-import cx from 'clsx';
 import { AnimatePresence, animate, motion } from 'framer-motion';
 import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
 import { DateTime } from 'luxon';
@@ -160,14 +160,14 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	return (
 		<Tooltip>
 			<motion.div
-				className={cx(
-					'border border-gray-800 relative p-4 flex-grow xl:p-8 rounded-xl bg-primaryLight flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
+				className={cn(
+					'border-border border relative p-4 flex-grow xl:p-8 rounded-xl bg-background-light flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
 					className,
 				)}
 				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'transparent' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
-				<div className={cx('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
+				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
 					<div className={'relative'}>
 						<ProgressBar round={round} authors={data} />
 
@@ -230,7 +230,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 					</div>
 				</div>
 				{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
-					<div className={cx('w-full flex gap-4 flex-row items-center justify-evenly')}>
+					<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
 						{roundData?.status === 0 && t('waiting')}
 
 						{roundData?.status === 2 && (
@@ -240,8 +240,8 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 								</div>
 								<div className={'flex flex-col min-w-[190px] gap-4'}>
 									<div
-										className={cx(
-											'border border-yellow-400 bg-primary flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
+										className={cn(
+											'border border-secondary-foreground bg-background flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
 										)}
 									>
 										<RoundResult round={round} />
@@ -307,7 +307,7 @@ const EffectsLayer: FC<{ round: number }> = ({ round }) => {
 						className="w-5 h-5 absolute"
 						style={{ left: particle.x, top: particle.y }}
 					>
-						<Bet className="text-yellow-400 w-5 h-5" />
+						<Bet className="text-secondary-foreground w-5 h-5" />
 					</motion.div>
 				))}
 
@@ -364,7 +364,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 			width: '100%',
 		},
 		path: {
-			stroke: '#FFC800',
+			stroke: 'hsl(var(--primary))',
 			strokeWidth: '1px',
 		},
 		trail: {
@@ -459,7 +459,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 						transition={{ duration: 0.5 }}
 						className={'absolute flex flex-col items-center justify-center w-full h-full -top-4 gap-4'}
 					>
-						<div className={cx('text-md', secondsLeft < 30 && secondsLeft > 0 && 'text-red-500 animate-pulse')}>
+						<div className={cn('text-md', secondsLeft < 30 && secondsLeft > 0 && 'text-red-500 animate-pulse')}>
 							{end > Date.now() ? (
 								remaining.toFormat('hh:mm:ss')
 							) : (
@@ -468,7 +468,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 								</div>
 							)}
 						</div>
-						<div className={cx('text-xl  lg:text-3xl', secondsLeft < 30 && secondsLeft > 0 && 'animate-pulse')}>
+						<div className={cn('text-xl  lg:text-3xl', secondsLeft < 30 && secondsLeft > 0 && 'animate-pulse')}>
 							<Counter doMillify={true} from={from} to={to} />
 						</div>
 					</motion.div>
@@ -479,12 +479,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	return (
 		<>
-			<motion.div className={cx('absolute w-[115%] h-[115%] -top-[7.5%] -left-[7.5%]')}>
+			<motion.div className={cn('absolute w-[115%] h-[115%] -top-[7.5%] -left-[7.5%]')}>
 				<div className={'rotate-180 absolute z-10 top-[8px] lg:top-[11px] left-1/2 -translate-x-1/2'}>
-					<TriangleIcon fill={'#FFC800'} stroke={'#FFC800'} className={cx('text-yellow-400 w-6 h-6 duration-300 delay-300 opacity-100')} />
+					<TriangleIcon fill={'#FFC800'} stroke={'#FFC800'} className={cn('text-secondary-foreground w-6 h-6 duration-300 delay-300 opacity-100')} />
 				</div>
 
-				<CircularProgressbar className={cx('opacity-100 duration-300', wheelState.data.state !== 'standby' && '!opacity-0')} styles={styles} value={progress} />
+				<CircularProgressbar className={cn('opacity-100 duration-300', wheelState.data.state !== 'standby' && '!opacity-0')} styles={styles} value={progress} />
 			</motion.div>
 
 			{renderInside()}
@@ -507,16 +507,16 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.5 }}
-			className={cx('absolute flex flex-col items-center justify-center w-full h-full top-0 gap-2 duration-300', loading && 'blur-sm')}
+			className={cn('absolute flex flex-col items-center justify-center w-full h-full top-0 gap-2 duration-300', loading && 'blur-sm')}
 		>
 			<img alt={'crown'} src={Crown as string} />
 			<div className={'z-10'}>
 				<WinnerCard player={player} amount={amount} />
 			</div>
 			<div className={'flex flex-col items-center z-10'}>
-				<BetValue className={'text-yellow-400 text-xs'} iconClassName={'w-2.5 h-2.5'} value={win} withIcon />
+				<BetValue className={'text-secondary-foreground text-xs'} iconClassName={'w-2.5 h-2.5'} value={win} withIcon />
 				<div className={'flex items-center gap-1'}>
-					<span className={'text-yellow-400'}>{coef}x</span> {t('win')}
+					<span className={'text-secondary-foreground'}>{coef}x</span> {t('win')}
 				</div>
 				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
 			</div>
@@ -540,7 +540,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 					{t('couldWin')}
-					<BetValue className={'text-yellow-400 text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
 				</div>
 				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
 			</>
@@ -552,14 +552,14 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 			<>
 				<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-					<BetValue className={'text-yellow-400 text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
 				</div>
 				<div className={'text-blue-500 text-sm flex flex-row items-center justify-center gap-1'}>
 					{/*TODO: return bonus*/}+ {t('bonus')}
 				</div>
 
-				<div className={'text-gray-400 text-xs mt-2'}>{t('total')}</div>
-				<BetValue className={'text-yellow-400 text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n) + 20} withIcon />
+				<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
+				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n) + 20} withIcon />
 			</>
 		);
 	}
@@ -621,7 +621,7 @@ export const Counter: FC<{ from: number; to: number; doMillify?: boolean }> = ({
 		<>
 			<TooltipTrigger>
 				<div className={'flex gap-1 lg:gap-2 items-center relative z-[10]'}>
-					<Bet className={'text-yellow-400 w-5 h-5 lg:w-7 lg:h-7'} />
+					<Bet className={'text-secondary-foreground w-5 h-5 lg:w-7 lg:h-7'} />
 					<div className={''} ref={nodeRef} />
 				</div>
 			</TooltipTrigger>
