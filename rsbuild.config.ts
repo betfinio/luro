@@ -36,6 +36,7 @@ export default defineConfig({
 					remotes: {
 						betfinio_app: getApp(),
 					},
+					manifest: false,
 					shared: {
 						react: {
 							singleton: true,
@@ -53,10 +54,6 @@ export default defineConfig({
 							singleton: true,
 							requiredVersion: dependencies['@tanstack/react-query'],
 						},
-						'lucide-react': {
-							singleton: true,
-							requiredVersion: dependencies['lucide-react'],
-						},
 						i18next: {
 							singleton: true,
 							requiredVersion: dependencies.i18next,
@@ -64,14 +61,6 @@ export default defineConfig({
 						'react-i18next': {
 							singleton: true,
 							requiredVersion: dependencies['react-i18next'],
-						},
-						'tailwindcss-animate': {
-							singleton: true,
-							requiredVersion: dependencies['tailwindcss-animate'],
-						},
-						tailwindcss: {
-							singleton: true,
-							requiredVersion: dependencies.tailwindcss,
 						},
 						wagmi: {
 							singleton: true,

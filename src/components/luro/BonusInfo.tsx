@@ -1,8 +1,7 @@
 import { BonusChart } from '@/src/components/luro/BonusChart.tsx';
-import { ZeroAddress } from '@betfinio/abi';
-import { valueToNumber } from '@betfinio/abi';
-import { BetValue } from 'betfinio_app/BetValue';
-import { Tooltip, TooltipContent, TooltipTrigger } from 'betfinio_app/tooltip';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { BetValue } from '@betfinio/components/shared';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CircleHelp } from 'lucide-react';
 import React, { useMemo } from 'react';
@@ -39,27 +38,27 @@ export const BonusInfo = () => {
 					<div className={'flex items-center justify-between'}>
 						<h1 className={'flex gap-1 my-2 text-lg font-semibold'}>
 							{t('bonusInfo.title')}
-							<span className={'text-yellow-400'}>
+							<span className={'text-secondary-foreground'}>
 								<BetValue value={myBonus} precision={2} withIcon={true} />
 							</span>
 						</h1>
 						<TooltipTrigger>
-							<CircleHelp className={'text-yellow-400'} width={24} />
+							<CircleHelp className={'text-secondary-foreground'} width={24} />
 						</TooltipTrigger>
-						<TooltipContent className={'border border-yellow-400 rounded-lg bg-black bg-opacity-75 py-2 px-3'}>
+						<TooltipContent className={'border border-secondary-foreground rounded-lg bg-black bg-opacity-75 py-2 px-3'}>
 							{/*todo: extract description*/}
 							<div className={'text-sm italic'}>
 								<div className={'text-center'}>
-									The bonus represents <span className={'text-yellow-400'}>5%</span> of all bets{' '}
-									<span className={'text-yellow-400'}>({valueToNumber(volume).toLocaleString()} BET)</span> that are split among players according to{' '}
-									<span className={'text-yellow-400'}>order</span> and <span className={'text-yellow-400'}>size</span> of bets.
+									The bonus represents <span className={'text-secondary-foreground'}>5%</span> of all bets{' '}
+									<span className={'text-secondary-foreground'}>({valueToNumber(volume).toLocaleString()} BET)</span> that are split among players according to{' '}
+									<span className={'text-secondary-foreground'}>order</span> and <span className={'text-secondary-foreground'}>size</span> of bets.
 								</div>
-								<div className={'text-center font-semibold text-yellow-400'}>{t('bonusInfo.info')}</div>
+								<div className={'text-center font-semibold text-secondary-foreground'}>{t('bonusInfo.info')}</div>
 								<div className={'text-center font-semibold'}>{t('bonusInfo.everyPlayer')}</div>
 							</div>
 						</TooltipContent>
 					</div>
-					<div className={'bg-primaryLight rounded-xl p-4 border border-gray-800'}>
+					<div className={'bg-background-light rounded-xl p-4 border-border border'}>
 						<div className={'relative'}>
 							<div className={'lg:px-20 relative z-10'}>
 								<BonusChart bonuses={bonuses} />
