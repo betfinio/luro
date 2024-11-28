@@ -18,16 +18,15 @@ import logger from '@/src/config/logger';
 import type { Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { cn } from '@betfinio/components/lib';
+import { BetValue, DataTable } from '@betfinio/components/shared';
+import { ScrollArea } from '@betfinio/components/ui';
 import Bank from '@betfinio/ui/dist/icons/Bank';
 import GoldenTrophy from '@betfinio/ui/dist/icons/GoldenTrophy';
 import MoneyHand from '@betfinio/ui/dist/icons/MoneyHand';
 import People from '@betfinio/ui/dist/icons/People';
 import { Link } from '@tanstack/react-router';
-import { createColumnHelper } from '@tanstack/react-table';
-import { BetValue } from 'betfinio_app/BetValue';
-import { DataTable } from 'betfinio_app/DataTable';
-import { ScrollArea } from 'betfinio_app/scroll-area';
-import cx from 'clsx';
+import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { type FC, useCallback, useMemo } from 'react';
@@ -102,7 +101,6 @@ interface RoundDetailsProps {
 }
 
 const BonusDistribution: FC<{ round: number }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { data: distributed } = useBonusDistribution(round);
 	const { mutate: distribute } = useDistributeBonus();
 	const { interval } = Route.useParams();
@@ -137,7 +135,7 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 		<div className={'mt-4 grid grid-cols-3 gap-2 md:mt-10 md:gap-3 lg:gap-4'}>
 			<div
 				className={
-					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+					'border rounded-xl border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
 				}
 			>
 				<People className={'w-14 h-14 md:w-20 md:h-20 '} />
@@ -149,33 +147,33 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 						({usersCount}
 						<span className={'ml-1'}>{t('bets')}</span>)
 					</div>
-					<div className={'text-xs text-gray-400'}>{t('totalBets')}</div>
+					<div className={'text-xs text-muted-foreground'}>{t('totalBets')}</div>
 				</div>
 			</div>
 			<div
 				className={
-					'border rounded-xl border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-1'
+					'border rounded-xl border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-1'
 				}
 			>
-				<MoneyHand className={'p-1 w-13 h-13 text-yellow-400 md:w-20 md:h-20 '} />
+				<MoneyHand className={'p-1 w-13 h-13 text-secondary-foreground md:w-20 md:h-20 '} />
 				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={' text-xl font-semibold'}>
 						<BetValue value={valueToNumber(bonus)} precision={1} withIcon={true} />
 					</div>
-					<div className={'text-xs text-gray-400'}>{t('totalBonus')}</div>
+					<div className={'text-xs text-muted-foreground'}>{t('totalBonus')}</div>
 				</div>
 			</div>
 			<div
 				className={
-					'border rounded-xl  border-gray-800 bg-primaryLighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+					'border rounded-xl  border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
 				}
 			>
-				<Bank className={'w-14 h-14 text-yellow-400 md:w-20 md:h-20 '} />
+				<Bank className={'w-14 h-14 text-secondary-foreground md:w-20 md:h-20 '} />
 				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={'text-xl font-semibold'}>
 						<BetValue value={valueToNumber(staking)} precision={1} withIcon={true} />
 					</div>
-					<div className={'text-xs text-gray-400'}>{t('paidToStaking')}</div>
+					<div className={'text-xs text-muted-foreground'}>{t('paidToStaking')}</div>
 				</div>
 			</div>
 		</div>
@@ -196,7 +194,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 		return null;
 	}
 	return (
-		<div className={'py-5 border-b border-gray-800 flex flex-col items-center text-sm font-semibold'}>
+		<div className={'py-5 border-b border-border flex flex-col items-center text-sm font-semibold'}>
 			<p>{t('winningBet')}</p>
 			{isLoading || isFetching ? (
 				<Loader className={'w-3 h-3 animate-spin'} />
@@ -207,7 +205,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 			)}
 
 			<div className={'mt-5 flex gap-2'}>
-				<p className={'text-gray-400'}>{t('proofOfRandom')}</p>
+				<p className={'text-muted-foreground'}>{t('proofOfRandom')}</p>
 				{isLoading || isFetching ? (
 					<Loader className={'w-3 h-3 animate-spin'} />
 				) : (
@@ -223,16 +221,10 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 	);
 };
 
-const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusShare: bigint; winner: Address }> = ({
-	className,
-	round,
-	volume,
-	bonusShare,
-	winner,
-}) => {
+const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusShare: bigint; winner: Address }> = ({ round, volume, bonusShare, winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.table' });
 
-	const { data: bets = [], isFetched: isRoundsFetched } = useRoundBets(round);
+	const { data: bets = [] } = useRoundBets(round);
 	const { address = ZeroAddress } = useAccount();
 	const { data: roundData } = useRound(round);
 
@@ -240,7 +232,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address);
 	}, [bets, winner, address]);
 
-	const columns = [
+	const columns: ColumnDef<RoundModalPlayer, never>[] = [
 		columnHelper.display({
 			header: '',
 			id: 'color',
@@ -258,7 +250,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			cell: (props) => (
 				<div className={'w-full h-full flex items-center justify-center'}>
 					{props.row.getValue('player') === address.toLowerCase() ? (
-						<div className={'text-[10px] text-gray-400 font-semibold'}>{t('you')}</div>
+						<div className={'text-[10px] text-muted-foreground font-semibold'}>{t('you')}</div>
 					) : (
 						props.row.getValue('player') === winner && <GoldenTrophy />
 					)}
@@ -313,14 +305,13 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 				const isWinner = props.row.getValue('player') === winner;
 				const win = props.row.original.win;
 				const bonus = props.row.getValue('bonus') as bigint;
-				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} className={cx(isWinner && 'text-green-600')} />;
+				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} className={cn(isWinner && 'text-success')} />;
 			},
 		}),
 	];
 
 	return (
 		<div className={'mt-4'}>
-			{/*// @ts-ignore*/}
 			<DataTable columns={columns} data={players} state={{ columnVisibility: { totalWin: (roundData?.winnerOffset || 0n) > 0n } }} />
 		</div>
 	);

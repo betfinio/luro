@@ -1,17 +1,17 @@
 import { ETHSCAN } from '@/src/global.ts';
 import { mapBetsToAuthors } from '@/src/lib';
+import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { cn } from '@betfinio/components/lib';
+import { BetValue } from '@betfinio/components/shared';
 import Fox from '@betfinio/ui/dist/icons/Fox';
-import { BetValue } from 'betfinio_app/BetValue';
 import { useCustomUsername, useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
-import cx from 'clsx';
 import { motion } from 'framer-motion';
 import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import { useRoundBets, useVisibleRound } from '../../../lib/query';
 
 export const PlayersTab = () => {
 	const { data: round } = useVisibleRound();
@@ -91,21 +91,21 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cx('rounded-lg flex bg-primary justify-between', className as string)}
+			className={cn('rounded-lg flex bg-backgroundjustify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
+					<div className={'flex flex-col text-muted-foreground text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cx('font-semibold text-sm !text-gray-300 hover:underline', player === address && '!text-yellow-400')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
 							rel="noreferrer"
 						>
 							{formatPlayer(customUsername || username || truncateEthAddress(player))}
 						</a>
-						<span className={cx('opacity-0', betsNumber > 0 && 'opacity-100')}>{betsNumber} bets</span>
+						<span className={cn('opacity-0', betsNumber > 0 && 'opacity-100')}>{betsNumber} bets</span>
 					</div>
 				</div>
 				<div className={'flex flex-col items-end text-xs gap-2'}>
@@ -138,16 +138,16 @@ export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amo
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cx('rounded-lg flex bg-primary justify-between', className as string)}
+			className={cn('rounded-lg flex bg-backgroundjustify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
+					<div className={'flex flex-col text-muted-foreground text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cx('font-semibold text-sm !text-gray-300 hover:underline', player === address && '!text-yellow-400')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
 							rel="noreferrer"
 						>
 							{formatPlayer(customUsername || username || truncateEthAddress(player))}

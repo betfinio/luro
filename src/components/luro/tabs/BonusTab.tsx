@@ -1,16 +1,16 @@
 import { ETHSCAN } from '@/src/global.ts';
+import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '@/src/lib/query';
 import { truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { cn } from '@betfinio/components/lib';
+import { BetValue } from '@betfinio/components/shared';
 import Fox from '@betfinio/ui/dist/icons/Fox';
-import { BetValue } from 'betfinio_app/BetValue';
 import { useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
-import cx from 'clsx';
 import { motion } from 'framer-motion';
 import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '../../../lib/query';
 
 export const BonusTab = () => {
 	const { data: round } = useVisibleRound();
@@ -88,16 +88,16 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cx('rounded-lg flex bg-primary justify-between h-[68px]')}
+			className={cn('rounded-lg flex bg-background justify-between h-[68px]')}
 		>
 			<div className={'py-3 pl-4 pr-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
 					<Fox className={'w-5 h-5'} />
-					<div className={'flex flex-col text-gray-400 text-xs gap-2'}>
+					<div className={'flex flex-col text-muted-foreground text-xs gap-2'}>
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cx('font-semibold text-sm !text-gray-300 hover:underline', player === address && '!text-yellow-400')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
 							rel="noreferrer"
 						>
 							{formatPlayer(username || truncateEthAddress(player))}
@@ -105,7 +105,7 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 					</div>
 				</div>
 				<div className={'flex flex-col items-end text-xs gap-2'}>
-					<div className={'font-semibold text-sm text-yellow-400'}>
+					<div className={'font-semibold text-sm text-secondary-foreground'}>
 						<BetValue value={bonus} precision={2} withIcon={true} />
 					</div>
 				</div>

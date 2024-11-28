@@ -1,18 +1,17 @@
 import type { Round } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { cn } from '@betfinio/components/lib';
+import { BetValue, DataTable } from '@betfinio/components/shared';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/ui';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { BetValue } from 'betfinio_app/BetValue';
-import { DataTable } from 'betfinio_app/DataTable';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from 'betfinio_app/tabs';
-import cx from 'clsx';
 import { motion } from 'framer-motion';
 import { Expand, Loader } from 'lucide-react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
-import { usePlayerRounds, useRounds, useWinner, useWinners } from '../../lib/query';
+import { usePlayerRounds, useRounds, useWinner } from '../../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
@@ -25,7 +24,7 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 			cell: (props) => {
 				const { player, round } = props.row.original;
 
-				return <div className={cx('text-gray-400 md:w-[90px]', player.bets > 0 && 'text-yellow-400')}>#{round.toString()}</div>;
+				return <div className={cn('text-muted-foreground md:w-[90px]', player.bets > 0 && 'text-secondary-foreground')}>#{round.toString()}</div>;
 			},
 		}),
 		columnHelper.accessor('total.bets', {
@@ -49,7 +48,7 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 				className: 'hidden md:table-cell',
 			},
 			cell: (props) => (
-				<div className={'text-yellow-400'}>
+				<div className={'text-secondary-foreground'}>
 					<BetValue value={valueToNumber(props.getValue())} withIcon />
 				</div>
 			),
@@ -97,7 +96,7 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	};
 
 	return (
-		<div className={cx('w-full overflow-x-auto min-h-[100px]', className)}>
+		<div className={cn('w-full overflow-x-auto min-h-[100px]', className)}>
 			<Tabs defaultValue={'all'}>
 				<TabsList>
 					<TabsTrigger variant={'default'} value={'all'}>
@@ -157,10 +156,9 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	};
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-			{/*// @ts-ignore*/}
 			<DataTable
 				data={rounds}
-				columns={columns as ColumnDef<Round, unknown>[]}
+				columns={columns as ColumnDef<Round, never>[]}
 				onRowClick={handleClick}
 				isLoading={isLoading}
 				loaderClassName="h-[185px]"
@@ -181,5 +179,5 @@ const WinnerInfo: FC<{ round: number }> = ({ round }) => {
 	if (!winner) {
 		return <div>{t('waiting')}</div>;
 	}
-	return <div className={cx(address?.toLowerCase() === winner.player.toLowerCase() && 'text-green-500')}>{truncateEthAddress(winner.player)}</div>;
+	return <div className={cn(address?.toLowerCase() === winner.player.toLowerCase() && 'text-green-500')}>{truncateEthAddress(winner.player)}</div>;
 };
