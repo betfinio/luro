@@ -91,7 +91,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cn('rounded-lg flex bg-backgroundjustify-between', className as string)}
+			className={cn('rounded-lg flex bg-background justify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
