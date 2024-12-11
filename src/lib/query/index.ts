@@ -81,7 +81,7 @@ export const usePlaceBet = () => {
 		},
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
-			const { update } = toast({
+			const { update, id } = toast({
 				title: 'Placing a bet',
 				description: 'Transaction is pending',
 				variant: 'loading',
@@ -91,6 +91,7 @@ export const usePlaceBet = () => {
 
 			if (receipt.status === 'reverted') {
 				update({
+					id,
 					variant: 'destructive',
 					description: '',
 					title: 'Transaction failed',
@@ -99,7 +100,7 @@ export const usePlaceBet = () => {
 				});
 				return;
 			}
-			update({ variant: 'default', description: 'Transaction is confirmed', title: 'Bet placed', action: getTransactionLink(data), duration: 5000 });
+			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bet placed', action: getTransactionLink(data), duration: 5000 });
 			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bets', 'round'] });
 			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'round'] });
 		},
@@ -120,7 +121,7 @@ export const useStartRound = (round: number) => {
 		onError: (e) => handleError(e, t),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
-			const { update } = toast({
+			const { update, id } = toast({
 				title: 'Starting a round',
 				description: 'Transaction is pending',
 				variant: 'loading',
@@ -130,6 +131,7 @@ export const useStartRound = (round: number) => {
 
 			if (receipt.status === 'reverted') {
 				update({
+					id,
 					variant: 'destructive',
 					description: '',
 					title: 'Transaction failed',
@@ -138,7 +140,7 @@ export const useStartRound = (round: number) => {
 				});
 				return;
 			}
-			update({ variant: 'default', description: 'Transaction is confirmed', title: 'Round requested', action: getTransactionLink(data), duration: 5000 });
+			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Round requested', action: getTransactionLink(data), duration: 5000 });
 			queryClient.setQueryData(['luro', address, 'requested', round], true);
 		},
 		onSettled: () => logger.log('Round start settled'),
@@ -210,8 +212,8 @@ export const useDistributeBonus = () => {
 			handleError(e, t);
 		},
 		onMutate: () => logger.log('distribute bonus'),
-		onSuccess: async (data) => {
-			await queryClient.invalidateQueries({ queryKey: ['luro', 'bonus'] });
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bonus'] });
 		},
 		onSettled: () => logger.log('placeBet settled'),
 	});
@@ -259,14 +261,14 @@ export const useClaimBonus = () => {
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
-			const { update } = toast({
+			const { update, id } = toast({
 				title: 'Claiming bonus',
 				description: 'Transaction is pending',
 				variant: 'loading',
 				duration: 10000,
 			});
 			await waitForTransactionReceipt(config.getClient(), { hash: data });
-			update({ variant: 'default', description: 'Transaction is confirmed', title: 'Bonus claimed!', action: getTransactionLink(data), duration: 5000 });
+			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bonus claimed!', action: getTransactionLink(data), duration: 5000 });
 			queryClient.invalidateQueries({ queryKey: ['luro', luro, 'bonus', 'available'] });
 		},
 		onSettled: () => logger.log('bonusClaim settled'),

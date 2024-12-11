@@ -9,7 +9,6 @@ import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { Bet } from '@betfinio/ui/dist/icons';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
 import anime from 'animejs';
@@ -27,6 +26,7 @@ import { useAccount } from 'wagmi';
 import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
 import { LURO, LURO_5MIN } from '@/src/global.ts';
+import { Bet } from '@betfinio/components/icons';
 import { useTranslation } from 'react-i18next';
 
 const largeProps = {
