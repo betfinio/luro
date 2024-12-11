@@ -45,7 +45,7 @@ export const BonusInfo = () => {
 						<TooltipTrigger>
 							<CircleHelp className={'text-secondary-foreground'} width={24} />
 						</TooltipTrigger>
-						<TooltipContent className={'border border-secondary-foreground rounded-lg bg-opacity-75 py-2 px-3'}>
+						<TooltipContent className={'border border-secondary-foreground rounded-lg bg-background bg-opacity-75 py-2 px-3'}>
 							{/*todo: extract description*/}
 							<div className={'text-sm italic'}>
 								<div className={'text-center'}>
