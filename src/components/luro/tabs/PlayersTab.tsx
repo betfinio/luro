@@ -2,9 +2,9 @@ import { ETHSCAN } from '@/src/global.ts';
 import { mapBetsToAuthors } from '@/src/lib';
 import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { Fox } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import Fox from '@betfinio/ui/dist/icons/Fox';
 import { useCustomUsername, useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import { motion } from 'framer-motion';
@@ -91,7 +91,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cn('rounded-lg flex bg-backgroundjustify-between', className as string)}
+			className={cn('rounded-lg flex bg-background justify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>
@@ -138,7 +138,7 @@ export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amo
 			animate={{ scale: 1 }}
 			transition={{ type: 'spring', stiffness: 500, damping: 30 }}
 			exit={{ opacity: 0, y: 10 }}
-			className={cn('rounded-lg flex bg-backgroundjustify-between', className as string)}
+			className={cn('rounded-lg flex bg-background justify-between', className as string)}
 		>
 			<div className={'py-3 px-2 flex justify-between items-center grow gap-2'}>
 				<div className={'flex items-start gap-[10px]'}>

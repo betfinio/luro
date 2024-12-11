@@ -1,9 +1,9 @@
 import { ETHSCAN } from '@/src/global.ts';
 import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '@/src/lib/query';
 import { truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { Fox } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import Fox from '@betfinio/ui/dist/icons/Fox';
 import { useUsername } from 'betfinio_app/lib/query/username';
 import { addressToColor } from 'betfinio_app/lib/utils';
 import { motion } from 'framer-motion';
