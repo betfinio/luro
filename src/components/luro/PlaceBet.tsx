@@ -2,7 +2,6 @@ import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { hexToRgbA, jumpToCurrentRound } from '@/src/lib';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
-import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { getCurrentRoundInfo } from '../../lib/api';
 import {
@@ -18,11 +17,11 @@ import {
 	useVisibleRound,
 } from '../../lib/query';
 
-import { toast } from '@betfinio/components/hooks';
+import { toast, useMediaQuery } from '@betfinio/components/hooks';
+import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
 import { Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { Bet } from '@betfinio/ui/dist/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAllowanceModal } from 'betfinio_app/allowance';
 import { useIsMember } from 'betfinio_app/lib/query/pass';
@@ -34,7 +33,6 @@ import millify from 'millify';
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NumericFormat } from 'react-number-format';
-import { useMediaQuery } from 'react-responsive';
 import { useAccount } from 'wagmi';
 
 export const PlaceBet = () => {
@@ -151,7 +149,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const myCoef = myBetVolume === 0n ? 0 : potentialWin / valueToNumber(myBetVolume);
 
 	const [hovering, setHovering] = useState(false);
-	const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
+	const { isMobile } = useMediaQuery();
 
 	const compiledShadow = useMemo(() => {
 		const color = addressToColor(address);
