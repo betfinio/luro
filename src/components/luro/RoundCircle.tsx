@@ -169,7 +169,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 
 						{data.length > 0 ? (
 							round === currentRound ? (
-								<motion.div className={'LOTTERY'} ref={wheelRef} animate={controls}>
+								<motion.div ref={wheelRef} animate={controls}>
 									<Pie
 										data={data}
 										colors={{ datum: 'data.color' }}
