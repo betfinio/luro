@@ -1,6 +1,5 @@
 import logger from '@/src/config/logger.ts';
-import { LURO, LURO_5MIN } from '@/src/global.ts';
-import { type LuroInterval, animateNewBet, getCurrentRound, handleError } from '@/src/lib';
+import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
 import type { LuroBet, PlaceBetParams, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { LuckyRoundContract, ZeroAddress } from '@betfinio/abi';
@@ -32,20 +31,20 @@ import { fetchWinner, fetchWinners } from '../gql';
 
 export const useObserveBet = (round: number) => {
 	const queryClient = useQueryClient();
+	const luroAddress = useLuroAddress();
+
 	const resetObservedBet = () => {
-		queryClient.setQueryData(['luro', address, 'bets', 'newBet'], ZeroAddress);
+		queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], ZeroAddress);
 	};
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+
 	const query = useQuery<{ address: Address; strength: number }>({
-		queryKey: ['luro', address, 'bets', 'newBet'],
+		queryKey: ['luro', luroAddress, 'bets', 'newBet'],
 		initialData: { address: ZeroAddress, strength: 0 },
 	});
 
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
 	useWatchContractEvent({
 		abi: LuckyRoundContract.abi,
-		address: luro,
+		address: luroAddress,
 		eventName: 'BetCreated',
 		args: {
 			round: BigInt(round),
@@ -53,8 +52,8 @@ export const useObserveBet = (round: number) => {
 		onLogs: async (betLogs) => {
 			// @ts-ignore
 			animateNewBet(betLogs[0]?.args?.player ?? ZeroAddress, 10, queryClient, address);
-			await queryClient.invalidateQueries({ queryKey: ['luro', luro, 'round'] });
-			await queryClient.invalidateQueries({ queryKey: ['luro', luro, 'bets'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets'] });
 		},
 	});
 
@@ -62,28 +61,29 @@ export const useObserveBet = (round: number) => {
 };
 
 export const usePlaceBet = () => {
-	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: error } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useMutation<WriteContractReturnType, WriteContractErrorType, PlaceBetParams>({
-		mutationKey: ['luro', address, 'bets', 'place'],
+		mutationKey: ['luro', luroAddress, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
 		onError: (e) => {
 			toast({
 				// @ts-ignore
-				title: t('default'),
+				title: error('default'),
 				variant: 'destructive',
 				// @ts-ignore
-				description: t(e.cause?.reason),
+				description: error(e.cause?.reason),
 			});
 		},
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
 			const { update, id } = toast({
-				title: 'Placing a bet',
-				description: 'Transaction is pending',
+				title: t('toast.placeBetTitle') as string,
+				description: t('toast.placeBetDescription') as string,
 				variant: 'loading',
 				duration: 10000,
 			});
@@ -94,15 +94,15 @@ export const usePlaceBet = () => {
 					id,
 					variant: 'destructive',
 					description: '',
-					title: 'Transaction failed',
+					title: t('toast.transactionFailed'),
 					action: getTransactionLink(data),
 					duration: 5000,
 				});
 				return;
 			}
 			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bet placed', action: getTransactionLink(data), duration: 5000 });
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bets', 'round'] });
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'round'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 		},
 		onSettled: () => logger.log('placeBet settled'),
 	});
@@ -112,12 +112,11 @@ export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
-		mutationKey: ['luro', address, 'round', 'start'],
-		mutationFn: () => startRound(address, round, config),
+		mutationKey: ['luro', luroAddress, 'round', 'start'],
+		mutationFn: () => startRound(luroAddress, round, config),
 		onError: (e) => handleError(e, t),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
@@ -141,41 +140,41 @@ export const useStartRound = (round: number) => {
 				return;
 			}
 			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Round requested', action: getTransactionLink(data), duration: 5000 });
-			queryClient.setQueryData(['luro', address, 'requested', round], true);
+			queryClient.setQueryData(['luro', luroAddress, 'requested', round], true);
 		},
 		onSettled: () => logger.log('Round start settled'),
 	});
 };
 
 export const useRoundRequested = (round: number) => {
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<boolean>({
-		queryKey: ['luro', address, 'requested', round],
+		queryKey: ['luro', luroAddress, 'requested', round],
 		initialData: false,
 	});
 };
 
 export const useRoundBets = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<LuroBet[]>({
-		queryKey: ['luro', address, 'bets', 'round', round],
-		queryFn: () => fetchRoundBets(address, round, config),
+		queryKey: ['luro', luroAddress, 'bets', 'round', round],
+		queryFn: () => fetchRoundBets(luroAddress, round, config),
 	});
 };
 
 export const useRoundBank = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<bigint>({
-		queryKey: ['luro', address, 'round', 'bank', round],
+		queryKey: ['luro', luroAddress, 'round', 'bank', round],
 		queryFn: async () =>
 			(await readContract(config, {
 				abi: LuckyRoundContract.abi,
-				address: address,
+				address: luroAddress,
 				functionName: 'roundBank',
 				args: [BigInt(round)],
 			})) as bigint,
@@ -184,14 +183,14 @@ export const useRoundBank = (round: number) => {
 
 export const useRoundBonusShare = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<bigint>({
-		queryKey: ['luro', address, 'round', 'bonus', round],
+		queryKey: ['luro', luroAddress, 'round', 'bonus', round],
 		queryFn: async () => {
 			return (await readContract(config, {
 				abi: LuckyRoundContract.abi,
-				address: address,
+				address: luroAddress,
 				functionName: 'roundBonusShares',
 				args: [BigInt(round)],
 			})) as bigint;
@@ -203,17 +202,17 @@ export const useDistributeBonus = () => {
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
 		mutationKey: ['luro', 'bonus', 'distribute'],
-		mutationFn: (params) => distributeBonus({ ...params, address }, config),
+		mutationFn: (params) => distributeBonus({ ...params, address: luroAddress }, config),
 		onError: (e) => {
 			handleError(e, t);
 		},
 		onMutate: () => logger.log('distribute bonus'),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bonus'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus'] });
 		},
 		onSettled: () => logger.log('placeBet settled'),
 	});
@@ -221,21 +220,21 @@ export const useDistributeBonus = () => {
 
 export const useBonusDistribution = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<boolean>({
-		queryKey: ['luro', address, 'bonus', 'distribution', round],
-		queryFn: () => fetchBonusDistribution(address, round, config),
+		queryKey: ['luro', luroAddress, 'bonus', 'distribution', round],
+		queryFn: () => fetchBonusDistribution(luroAddress, round, config),
 	});
 };
 
 export const useAvailableBonus = (address: Address) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery({
-		queryKey: ['luro', luro, 'bonus', 'available'],
-		queryFn: () => fetchAvailableBonus(luro, address, config),
+		queryKey: ['luro', luroAddress, 'bonus', 'available'],
+		queryFn: () => fetchAvailableBonus(luroAddress, address, config),
 	});
 };
 
@@ -243,12 +242,13 @@ export const useClaimBonus = () => {
 	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
-	const { interval } = Route.useParams();
+	const luroAddress = useLuroAddress();
+
 	const { address: player = ZeroAddress } = useAccount();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
-		mutationKey: ['luro', luro, 'bonus', 'claim'],
-		mutationFn: () => claimBonus({ player, address: luro }, config),
+		mutationKey: ['luro', luroAddress, 'bonus', 'claim'],
+		mutationFn: () => claimBonus({ player, address: luroAddress }, config),
 		onError: (e) => {
 			toast({
 				// @ts-ignore
@@ -269,27 +269,27 @@ export const useClaimBonus = () => {
 			});
 			await waitForTransactionReceipt(config.getClient(), { hash: data });
 			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bonus claimed!', action: getTransactionLink(data), duration: 5000 });
-			queryClient.invalidateQueries({ queryKey: ['luro', luro, 'bonus', 'available'] });
+			queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
 		},
 		onSettled: () => logger.log('bonusClaim settled'),
 	});
 };
 
 export const useWinners = () => {
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<WinnerInfo[]>({
-		queryKey: ['luro', luro, 'winners'],
-		queryFn: () => fetchWinners(luro),
+		queryKey: ['luro', luroAddress, 'winners'],
+		queryFn: () => fetchWinners(luroAddress),
 	});
 };
 
 export const useWinner = (round: number) => {
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<WinnerInfo | null>({
-		queryKey: ['luro', luro, 'winners', round],
-		queryFn: () => fetchWinner(luro, round),
+		queryKey: ['luro', luroAddress, 'winners', round],
+		queryFn: () => fetchWinner(luroAddress, round),
 	});
 };
 
@@ -304,31 +304,30 @@ export const useRoundWinner = (round: number) => {
 export const useRound = (round: number) => {
 	const { address = ZeroAddress } = useAccount();
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const luro = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
 
 	return useQuery<Round>({
-		queryKey: ['luro', luro, 'round', round],
+		queryKey: ['luro', luroAddress, 'round', round],
 		queryFn: () => {
-			return fetchRound(luro, round, address, config.getClient());
+			return fetchRound(luroAddress, round, address, config.getClient());
 		},
 	});
 };
 
 export const useLuroState = (round: number) => {
 	const queryClient = useQueryClient();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	const state = useQuery<WheelState>({
-		queryKey: ['luro', address, 'state', round],
+		queryKey: ['luro', luroAddress, 'state', round],
 		initialData: { state: 'standby' },
 	});
 	const updateState = async (st: WheelState, round: number) => {
 		logger.log('SET WHEEL STATE DATA', st, round);
-		queryClient.setQueryData(['luro', address, 'state', round], st);
+		queryClient.setQueryData(['luro', luroAddress, 'state', round], st);
 		if (st.state === 'stopped') {
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'rounds'] });
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'winners'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'rounds'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'winners'] });
 		}
 	};
 
@@ -344,14 +343,16 @@ export interface ICurrentRoundInfo {
 export const useVisibleRound = () => {
 	const queryClient = useQueryClient();
 	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	const fetchRound = async (): Promise<number> => {
-		await queryClient.invalidateQueries({ queryKey: ['luro', address, 'bets', 'round'] });
+		await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
 		return getCurrentRound(interval as LuroInterval);
 	};
+	console.log(getCurrentRound(interval as LuroInterval));
 
 	return useQuery({
-		queryKey: ['luro', address, 'visibleRound'],
+		queryKey: ['luro', luroAddress, 'visibleRound'],
 		queryFn: fetchRound,
 		initialData: getCurrentRound(interval as LuroInterval),
 		refetchOnWindowFocus: false,
@@ -362,50 +363,49 @@ export const useVisibleRound = () => {
 
 export const useRounds = (player: Address, onlyPlayers = false) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<Round[]>({
-		queryKey: ['luro', address, 'rounds', player, onlyPlayers],
-		queryFn: () => fetchRounds(address, player, onlyPlayers, config.getClient()),
+		queryKey: ['luro', luroAddress, 'rounds', player, onlyPlayers],
+		queryFn: () => fetchRounds(luroAddress, player, onlyPlayers, config.getClient()),
 	});
 };
 export const usePlayerRounds = (player: Address) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<Round[]>({
-		queryKey: ['luro', address, 'rounds', player],
-		queryFn: () => fetchRoundsByPlayer(address, player, config.getClient()),
+		queryKey: ['luro', luroAddress, 'rounds', player],
+		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config.getClient()),
 	});
 };
 
 export const useTotalVolume = () => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<bigint>({
-		queryKey: ['luro', address, 'totalVolume'],
-		queryFn: () => fetchTotalVolume(address, config),
+		queryKey: ['luro', luroAddress, 'totalVolume'],
+		queryFn: () => fetchTotalVolume(luroAddress, config),
 	});
 };
 export const useBetsCount = () => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	return useQuery<number>({
-		queryKey: ['luro', address, 'betsCount'],
-		queryFn: () => fetchBetsCount(address, config),
+		queryKey: ['luro', luroAddress, 'betsCount'],
+		queryFn: () => fetchBetsCount(luroAddress, config),
 	});
 };
 
 export const useCalculate = (round: number) => {
 	const config = useConfig();
-	const { interval } = Route.useParams();
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
 
 	return useMutation({
-		mutationKey: ['luro', address, 'calculate'],
-		mutationFn: () => calculateRound(address, round, config),
+		mutationKey: ['luro', luroAddress, 'calculate'],
+		mutationFn: () => calculateRound(luroAddress, round, config),
 		onMutate: () => logger.log('calculate'),
 		onSuccess: async (data) => {
 			logger.log(data);

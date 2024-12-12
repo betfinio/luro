@@ -1,7 +1,7 @@
 import { PlaceBet } from '@/src/components/luro/PlaceBet.tsx';
 import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
 import logger from '@/src/config/logger';
-import { LURO, LURO_5MIN } from '@/src/global.ts';
+import { useLuroAddress } from '@/src/lib';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { LuckyRoundContract } from '@betfinio/abi';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,14 +14,14 @@ export const CurrentRound = () => {
 	const observedRound = search?.round ? search.round : round;
 
 	const { updateState } = useLuroState(round);
-	const { interval } = Route.useParams();
 
-	const address = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
+
 	const queryClient = useQueryClient();
 
 	useWatchContractEvent({
 		abi: LuckyRoundContract.abi,
-		address: address,
+		address: luroAddress,
 		eventName: 'RequestedCalculation',
 		poll: true,
 		onLogs: (rolledLogs) => {
@@ -36,7 +36,7 @@ export const CurrentRound = () => {
 
 	useWatchContractEvent({
 		abi: LuckyRoundContract.abi,
-		address: address,
+		address: luroAddress,
 		eventName: 'WinnerCalculated',
 		onLogs: async (landedLogs) => {
 			logger.log('CALCULATED LOGS', landedLogs, observedRound);
@@ -48,7 +48,7 @@ export const CurrentRound = () => {
 			}
 
 			// @ts-ignore
-			await queryClient.invalidateQueries({ queryKey: ['luro', address, 'round', Number(landedLogs[0].args.round)] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round', Number(landedLogs[0].args.round)] });
 		},
 	});
 	return (

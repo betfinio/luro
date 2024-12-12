@@ -1,5 +1,10 @@
 {
 	"feeStaking": "All bets are subject of <b>3,6% fee</b> which is distributed into <b>Conservative staking.</b>",
+	"tabs": {
+		"bets": "Bets",
+		"players": "Players",
+		"bonus": "Bonus"
+	},
 	"placeBet": {
 		"title": "Place a bet",
 		"amount": "Enter the amount of your bet:",
@@ -18,7 +23,10 @@
 			"notMember": "Connected wallet is not member of Betfin. Ask someone for an invitation",
 			"amount": "Please enter amount",
 			"minimalBet": "Minimal bet amount is 1000 BET",
-			"invalidAmount": "Invalid amount"
+			"invalidAmount": "Invalid amount",
+			"placeBetTitle": "Placing a bet",
+			"placeBetDescription": "Transaction is pending",
+			"transactionFailed": "Transaction failed"
 		},
 		"placeholder": {
 			"balance": "Please top-up balance",
