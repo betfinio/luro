@@ -24,8 +24,6 @@
 			"amount": "Please enter amount",
 			"minimalBet": "Minimal bet amount is 1000 BET",
 			"invalidAmount": "Invalid amount",
-			"placeBetTitle": "Placing a bet",
-			"placeBetDescription": "Transaction is pending",
 			"transactionFailed": "Transaction failed"
 		},
 		"placeholder": {
@@ -130,5 +128,38 @@
 			"stakingEarnings": "Stake Earnings"
 		},
 		"waiting": "Waiting"
+	},
+	"toast": {
+		"newVersion": {
+			"title": "New version available!",
+			"action": "Update"
+		},
+		"placeBet": {
+			"title": "Placing a bet",
+			"description": "Transaction is pending"
+		},
+		"transactionFailed": {
+			"title": "Transaction failed"
+		},
+		"betPlaced": {
+			"title": "Bet placed",
+			"description": "Transaction is confirmed"
+		},
+		"startingRound": {
+			"title": "Starting a round",
+			"description": "Transaction is pending"
+		},
+		"roundRequested": {
+			"title": "Round requested",
+			"description": "Transaction is confirmed"
+		},
+		"claimingBonus": {
+			"title": "Claiming bonus",
+			"description": "Transaction is pending"
+		},
+		"bonusClaimed": {
+			"title": "Bonus claimed!",
+			"description": "Transaction is confirmed"
+		}
 	}
 }

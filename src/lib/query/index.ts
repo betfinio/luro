@@ -61,8 +61,8 @@ export const useObserveBet = (round: number) => {
 };
 
 export const usePlaceBet = () => {
-	const { t: error } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
+	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -73,17 +73,17 @@ export const usePlaceBet = () => {
 		onError: (e) => {
 			toast({
 				// @ts-ignore
-				title: error('default'),
+				title: errors('default'),
 				variant: 'destructive',
 				// @ts-ignore
-				description: error(e.cause?.reason),
+				description: errors(e.cause?.reason),
 			});
 		},
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
 			const { update, id } = toast({
-				title: t('toast.placeBetTitle') as string,
-				description: t('toast.placeBetDescription') as string,
+				title: t('placeBet.title') as string,
+				description: t('placeBet.description') as string,
 				variant: 'loading',
 				duration: 10000,
 			});
@@ -94,13 +94,20 @@ export const usePlaceBet = () => {
 					id,
 					variant: 'destructive',
 					description: '',
-					title: t('toast.transactionFailed'),
+					title: t('transactionFailed.title'),
 					action: getTransactionLink(data),
 					duration: 5000,
 				});
 				return;
 			}
-			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bet placed', action: getTransactionLink(data), duration: 5000 });
+			update({
+				id,
+				variant: 'default',
+				description: t('betPlaced.description'),
+				title: t('betPlaced.title'),
+				action: getTransactionLink(data),
+				duration: 5000,
+			});
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 		},
@@ -110,19 +117,20 @@ export const usePlaceBet = () => {
 
 export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
-	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'round', 'start'],
 		mutationFn: () => startRound(luroAddress, round, config),
-		onError: (e) => handleError(e, t),
+		onError: (e) => handleError(e, errors),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
 			const { update, id } = toast({
-				title: 'Starting a round',
-				description: 'Transaction is pending',
+				title: t('startingRound.title'),
+				description: t('startingRound.description'),
 				variant: 'loading',
 				duration: 10000,
 			});
@@ -133,13 +141,20 @@ export const useStartRound = (round: number) => {
 					id,
 					variant: 'destructive',
 					description: '',
-					title: 'Transaction failed',
+					title: t('transactionFailed.title'),
 					action: getTransactionLink(data),
 					duration: 5000,
 				});
 				return;
 			}
-			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Round requested', action: getTransactionLink(data), duration: 5000 });
+			update({
+				id,
+				variant: 'default',
+				description: t('roundRequested.title'),
+				title: t('roundRequested.title'),
+				action: getTransactionLink(data),
+				duration: 5000,
+			});
 			queryClient.setQueryData(['luro', luroAddress, 'requested', round], true);
 		},
 		onSettled: () => logger.log('Round start settled'),
@@ -239,7 +254,8 @@ export const useAvailableBonus = (address: Address) => {
 };
 
 export const useClaimBonus = () => {
-	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -252,23 +268,30 @@ export const useClaimBonus = () => {
 		onError: (e) => {
 			toast({
 				// @ts-ignore
-				title: t(e.cause?.reason),
+				title: errors(e.cause?.reason),
 				variant: 'destructive',
 				// @ts-ignore
-				description: t(e.cause?.reason),
+				description: errors(e.cause?.reason),
 			});
 		},
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
 			const { update, id } = toast({
-				title: 'Claiming bonus',
-				description: 'Transaction is pending',
+				title: t('claimingBonus.title'),
+				description: t('claimingBonus.description'),
 				variant: 'loading',
 				duration: 10000,
 			});
 			await waitForTransactionReceipt(config.getClient(), { hash: data });
-			update({ id, variant: 'default', description: 'Transaction is confirmed', title: 'Bonus claimed!', action: getTransactionLink(data), duration: 5000 });
+			update({
+				id,
+				variant: 'default',
+				description: t('bonusClaimed.description'),
+				title: t('bonusClaimed.title'),
+				action: getTransactionLink(data),
+				duration: 5000,
+			});
 			queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
 		},
 		onSettled: () => logger.log('bonusClaim settled'),
