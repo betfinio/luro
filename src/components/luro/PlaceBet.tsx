@@ -78,6 +78,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const handleBetChange = (value: string) => {
 		setAmount(value);
 	};
+	const luroAddress = useLuroAddress();
 
 	const handleBet = () => {
 		if (address === ZeroAddress) {
@@ -125,7 +126,6 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
 			return;
 		}
-		const luroAddress = useLuroAddress();
 		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
 	};
 
