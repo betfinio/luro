@@ -15,7 +15,7 @@ interface BonusItem extends BarDatum {
 export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({ bonuses }) => {
 	const data = useMemo<BonusItem[]>(() => {
 		return bonuses.map((item, index) => ({
-			bet: item.bet.player as Address,
+			bet: item.bet.address as Address,
 			bonus: item.bonus,
 			bonusColor: addressToColor(item.bet.player),
 			index,

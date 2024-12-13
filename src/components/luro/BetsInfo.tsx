@@ -17,13 +17,13 @@ export const BetsInfo = () => {
 
 			<div className={'py-3 mt-3 min-h-[250px] overflow-y-auto rounded-xl bg-background-light grow flex flex-col gap-5 border-border border'}>
 				<div className={'grow flex flex-col h-full'}>
-					<TabsContent value={'players'} className={'overflow-hidden'}>
+					<TabsContent value={'players'} className={'overflow-hidden h-full'}>
 						<PlayersTab />
 					</TabsContent>
-					<TabsContent value={'bets'} className={'overflow-hidden'}>
+					<TabsContent value={'bets'} className={'overflow-hidden h-full'}>
 						<BetsTab />
 					</TabsContent>
-					<TabsContent value={'bonuses'} className={'overflow-hidden'}>
+					<TabsContent value={'bonuses'} className={'overflow-hidden h-full'}>
 						<BonusTab />
 					</TabsContent>
 				</div>
