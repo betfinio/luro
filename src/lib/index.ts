@@ -1,5 +1,7 @@
+import { LURO, LURO_5MIN } from '@/src/global.ts';
 import type { ILanguageErrorKeys } from '@/src/i18next';
 import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/luro/$interval.tsx';
 import { toast } from '@betfinio/components/hooks';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
@@ -116,3 +118,15 @@ export function hexToRgbA(hex: string) {
 }
 
 export type LuroInterval = '1d' | '5m';
+
+export const useLuroAddress = (): Address => {
+	const { interval } = Route.useParams();
+	switch (interval) {
+		case '1d':
+			return LURO;
+		case '5m':
+			return LURO_5MIN;
+		default:
+			return LURO;
+	}
+};

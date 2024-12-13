@@ -3,12 +3,14 @@ import { toast } from '@betfinio/components/hooks';
 import { Button } from '@betfinio/components/ui';
 import { useLatestVersion } from 'betfinio_app/github';
 import { type FC, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 interface VersionValidationProps {
 	repository: string;
 	branch: string;
 	current: string;
 }
 export const VersionValidation: FC<VersionValidationProps> = ({ branch, repository, current }) => {
+	const { t } = useTranslation('luro', { keyPrefix: 'toast.newVersion' });
 	const { data: version } = useLatestVersion(repository, branch);
 	useEffect(() => {
 		logger.warn('Latest version:', version);
@@ -18,10 +20,10 @@ export const VersionValidation: FC<VersionValidationProps> = ({ branch, reposito
 			logger.warn('New version available!');
 			toast({
 				variant: 'soon',
-				title: 'New version available!',
+				title: t('title'),
 				action: (
 					<Button size={'sm'} shape={'pill'} onClick={handleRefresh}>
-						Update
+						{t('action')}
 					</Button>
 				),
 			});

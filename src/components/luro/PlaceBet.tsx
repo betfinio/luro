@@ -1,6 +1,4 @@
-import { LURO, LURO_5MIN } from '@/src/global.ts';
-import { hexToRgbA, jumpToCurrentRound } from '@/src/lib';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { getCurrentRoundInfo } from '../../lib/api';
@@ -60,7 +58,6 @@ export const PlaceBet = () => {
 const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
-	const { interval } = Route.useParams();
 	const { address = ZeroAddress } = useAccount();
 	const { data: allowance = 0n, isFetching: loading } = useAllowance(address);
 	const { data: balance = 0n } = useBalance(address);
@@ -128,8 +125,8 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
 			return;
 		}
-		const luro = interval === '1d' ? LURO : LURO_5MIN;
-		placeBet({ round: round, amount: Number(amount), player: address, address: luro });
+		const luroAddress = useLuroAddress();
+		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
 	};
 
 	const myBetVolume = useMemo(() => {
@@ -403,8 +400,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 		return bonuses.find((bonus) => bonus?.bet?.address === winner?.address);
 	}, [bets, volume, address]);
 
-	const { interval } = Route.useParams();
-	const luroAddress = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
 
 	if (!roundData) return null;
 
