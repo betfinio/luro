@@ -2,7 +2,7 @@ import logger from '@/src/config/logger.ts';
 import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
 import type { LuroBet, PlaceBetParams, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
-import { LuckyRoundContract, ZeroAddress } from '@betfinio/abi';
+import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/hooks';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type WriteContractReturnType, readContract } from '@wagmi/core';
@@ -43,15 +43,14 @@ export const useObserveBet = (round: number) => {
 	});
 
 	useWatchContractEvent({
-		abi: LuckyRoundContract.abi,
+		abi: LuckyRoundABI,
 		address: luroAddress,
 		eventName: 'BetCreated',
 		args: {
 			round: BigInt(round),
 		},
 		onLogs: async (betLogs) => {
-			// @ts-ignore
-			animateNewBet(betLogs[0]?.args?.player ?? ZeroAddress, 10, queryClient, address);
+			animateNewBet(betLogs[0]?.args?.player ?? ZeroAddress, 10, queryClient, luroAddress);
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets'] });
 		},
@@ -188,7 +187,7 @@ export const useRoundBank = (round: number) => {
 		queryKey: ['luro', luroAddress, 'round', 'bank', round],
 		queryFn: async () =>
 			(await readContract(config, {
-				abi: LuckyRoundContract.abi,
+				abi: LuckyRoundABI,
 				address: luroAddress,
 				functionName: 'roundBank',
 				args: [BigInt(round)],
@@ -204,7 +203,7 @@ export const useRoundBonusShare = (round: number) => {
 		queryKey: ['luro', luroAddress, 'round', 'bonus', round],
 		queryFn: async () => {
 			return (await readContract(config, {
-				abi: LuckyRoundContract.abi,
+				abi: LuckyRoundABI,
 				address: luroAddress,
 				functionName: 'roundBonusShares',
 				args: [BigInt(round)],
@@ -332,7 +331,7 @@ export const useRound = (round: number) => {
 	return useQuery<Round>({
 		queryKey: ['luro', luroAddress, 'round', round],
 		queryFn: () => {
-			return fetchRound(luroAddress, round, address, config.getClient());
+			return fetchRound(luroAddress, BigInt(round), address, config.getClient());
 		},
 	});
 };
@@ -372,8 +371,6 @@ export const useVisibleRound = () => {
 		await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
 		return getCurrentRound(interval as LuroInterval);
 	};
-	console.log(getCurrentRound(interval as LuroInterval));
-
 	return useQuery({
 		queryKey: ['luro', luroAddress, 'visibleRound'],
 		queryFn: fetchRound,
