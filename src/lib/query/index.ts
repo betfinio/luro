@@ -371,8 +371,6 @@ export const useVisibleRound = () => {
 		await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
 		return getCurrentRound(interval as LuroInterval);
 	};
-	console.log(getCurrentRound(interval as LuroInterval));
-
 	return useQuery({
 		queryKey: ['luro', luroAddress, 'visibleRound'],
 		queryFn: fetchRound,
