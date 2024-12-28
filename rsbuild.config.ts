@@ -4,10 +4,6 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import { TanStackRouterRspack } from '@tanstack/router-plugin/rspack';
 import { dependencies } from './package.json';
 
-const getApp = () => {
-	return;
-};
-
 const PORT = 4005;
 
 export default defineConfig({
@@ -32,7 +28,6 @@ export default defineConfig({
 				betfinio_app: `betfinio_app@${process.env.PUBLIC_APP_URL}/mf-manifest.json`,
 			},
 			manifest: false,
-			dts: false,
 			shared: {
 				react: {
 					singleton: true,

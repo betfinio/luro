@@ -21,7 +21,7 @@ import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
-import { ScrollArea } from '@betfinio/components/ui';
+import { Button, ScrollArea } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
@@ -116,9 +116,9 @@ const BonusDistribution: FC<{ round: number }> = ({ round }) => {
 	}
 	return (
 		<div className={'flex flex-row gap-2 items-center justify-end py-2'}>
-			<button type={'submit'} onClick={handleDistribute} className={'bg-yellow-400 px-4 py-2 rounded-xl text-black '}>
+			<Button type={'button'} onClick={handleDistribute}>
 				Distribute bonuses
-			</button>
+			</Button>
 		</div>
 	);
 };

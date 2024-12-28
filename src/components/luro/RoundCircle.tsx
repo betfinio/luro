@@ -1,7 +1,7 @@
 import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
 import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
+import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';
@@ -500,7 +500,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 				<div className={'flex items-center gap-1'}>
 					<span className={'text-secondary-foreground'}>{coef}x</span> {t('win')}
 				</div>
-				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
+				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</div>
 		</motion.div>
 	);
@@ -513,18 +513,20 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 
 	const winner = useRoundWinner(round);
 
+	const { data: playerRoundInfo = { bets: 0, volume: 0n } } = usePlayerRoundInfo(BigInt(round));
+
 	const { address = ZeroAddress } = useAccount();
-	if (isLoading || isFetching) return <Loader size={40} className={'animate-spin'} color={'white'} />;
+	if (isLoading || isFetching) return <Loader size={40} className={'animate-spin text-foreground'} />;
 	if (!roundData) return null;
-	if (roundData.player.bets === 0n) {
+	if (playerRoundInfo.bets === 0) {
 		return (
 			<>
 				<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 					{t('couldWin')}
-					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
+				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</>
 		);
 	}
@@ -534,11 +536,11 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 			<>
 				<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-blue-500 text-sm flex flex-row items-center justify-center gap-1'}>+ {t('bonus')}</div>
+				<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>+ {t('bonus')}</div>
 				<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
-				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n) + 20} withIcon />
+				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 			</>
 		);
 	}
@@ -546,7 +548,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 	return (
 		<>
 			<div className={'text-xl font-semibold mb-4'}>{t('yourBonus')}</div>
-			<div className={'text-blue-500 text-sm flex flex-row items-center justify-center gap-1'}>
+			<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
 				+<BetValue value={20} withIcon />
 			</div>
 		</>

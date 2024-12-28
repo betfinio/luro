@@ -1,6 +1,6 @@
 import logger from '@/src/config/logger.ts';
 import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
-import type { LuroBet, PlaceBetParams, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
+import type { LuroBet, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/hooks';
@@ -18,6 +18,7 @@ import {
 	fetchAvailableBonus,
 	fetchBetsCount,
 	fetchBonusDistribution,
+	fetchPlayerRoundInfo,
 	fetchRound,
 	fetchRoundBets,
 	fetchRounds,
@@ -381,13 +382,13 @@ export const useVisibleRound = () => {
 	});
 };
 
-export const useRounds = (player: Address, onlyPlayers = false) => {
+export const useRounds = (player: Address) => {
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
 
 	return useQuery<Round[]>({
-		queryKey: ['luro', luroAddress, 'rounds', player, onlyPlayers],
-		queryFn: () => fetchRounds(luroAddress, player, onlyPlayers, config.getClient()),
+		queryKey: ['luro', luroAddress, 'rounds', player],
+		queryFn: () => fetchRounds(luroAddress, player, config.getClient()),
 	});
 };
 export const usePlayerRounds = (player: Address) => {
@@ -395,7 +396,7 @@ export const usePlayerRounds = (player: Address) => {
 	const luroAddress = useLuroAddress();
 
 	return useQuery<Round[]>({
-		queryKey: ['luro', luroAddress, 'rounds', player],
+		queryKey: ['luro', luroAddress, 'playerRounds', player],
 		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config.getClient()),
 	});
 };
@@ -432,5 +433,16 @@ export const useCalculate = (round: number) => {
 		},
 		onSettled: () => logger.log('calculate settled'),
 		onError: (e) => logger.error(e),
+	});
+};
+
+export const usePlayerRoundInfo = (round: bigint) => {
+	const config = useConfig();
+	const luroAddress = useLuroAddress();
+	const { address = ZeroAddress } = useAccount();
+
+	return useQuery<PlayerRoundInfo>({
+		queryKey: ['luro', luroAddress, 'playerRoundInfo', Number(round)],
+		queryFn: () => fetchPlayerRoundInfo(luroAddress, address, round, config),
 	});
 };

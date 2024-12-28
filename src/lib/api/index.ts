@@ -1,6 +1,6 @@
 import logger from '@/src/config/logger.ts';
 import { BETS_MEMORY, PARTNER } from '@/src/global.ts';
-import type { BonusClaimParams, LuroBet, PlaceBetParams, Round, RoundStatusEnum } from '@/src/lib/types.ts';
+import type { BonusClaimParams, LuroBet, PlaceBetParams, PlayerRoundInfo, Round, RoundStatusEnum } from '@/src/lib/types.ts';
 import { BetsMemoryABI, LuckyRoundABI, LuckyRoundBetABI, PartnerABI, ZeroAddress, arrayFrom, defaultMulticall, valueToNumber } from '@betfinio/abi';
 import { writeContract } from '@wagmi/core';
 import { type Address, type Client, encodeAbiParameters, parseAbiParameters } from 'viem';
@@ -11,7 +11,7 @@ import type { ICurrentRoundInfo } from '../query';
 
 export async function placeBet({ round, amount, player, address }: PlaceBetParams, config: Config) {
 	try {
-		logger.log('PLACING A BET', amount, round);
+		logger.log('placing a bet', amount, round);
 		const data = encodeAbiParameters(parseAbiParameters('address player, uint256 amount, uint256 round'), [player, BigInt(amount), BigInt(round)]);
 		return await writeContract(config, {
 			abi: PartnerABI,
@@ -20,7 +20,7 @@ export async function placeBet({ round, amount, player, address }: PlaceBetParam
 			args: [address, BigInt(amount) * 10n ** 18n, data],
 		});
 	} catch (e) {
-		logger.log(e);
+		logger.error(e);
 		throw e;
 	}
 }
@@ -34,7 +34,7 @@ export async function claimBonus({ player, address }: BonusClaimParams, config: 
 			args: [player],
 		});
 	} catch (e) {
-		logger.log(e);
+		logger.error(e);
 		throw e;
 	}
 }
@@ -125,16 +125,14 @@ export const getCurrentRoundInfo = (iBets: LuroBet[]): ICurrentRoundInfo => {
 	};
 };
 
-export const fetchRounds = async (address: Address, player: Address, onlyPlayers: boolean, config?: Client): Promise<Round[]> => {
+export const fetchRounds = async (address: Address, player: Address, config?: Client): Promise<Round[]> => {
 	if (!config) return [];
-	const activeRounds = await requestRounds(address);
-	return await Promise.all(activeRounds.map((e) => fetchRound(address, BigInt(e.round), player, config)));
+	return await requestRounds(address);
 };
 
 export const fetchRoundsByPlayer = async (address: Address, player: Address, config?: Client): Promise<Round[]> => {
 	if (!config) return [];
-	const activeRounds = await requestPlayerRounds(address, player);
-	return await Promise.all(activeRounds.map((e) => fetchRound(address, BigInt(e.round), player, config)));
+	return await requestPlayerRounds(address, player);
 };
 export const getRoundWinnerByOffset = (bets: LuroBet[], offset: bigint) => {
 	if (!offset) return null;
@@ -144,6 +142,29 @@ export const getRoundWinnerByOffset = (bets: LuroBet[], offset: bigint) => {
 		if (tmp + valueToNumber(bet.amount) > offset) return { ...bet, offset };
 		tmp += valueToNumber(bet.amount);
 	}
+};
+export const fetchPlayerRoundInfo = async (address: Address, player: Address, round: bigint, config: Config): Promise<PlayerRoundInfo> => {
+	const data = await multicall(config.getClient(), {
+		multicallAddress: defaultMulticall,
+		contracts: [
+			{
+				abi: LuckyRoundABI,
+				address: address,
+				functionName: 'roundPlayerVolume',
+				args: [round, player],
+			},
+			{
+				abi: LuckyRoundABI,
+				address: address,
+				functionName: 'roundPlayerBetsCount',
+				args: [round, player],
+			},
+		],
+	});
+	return {
+		volume: data[0].result ?? 0n,
+		bets: Number(data[1].result ?? 0n),
+	} as PlayerRoundInfo;
 };
 
 export const fetchRound = async (address: Address, round: bigint, player: Address, config: Client): Promise<Round> => {
@@ -191,8 +212,6 @@ export const fetchRound = async (address: Address, round: bigint, player: Addres
 
 	const volume = data[0].result ?? 0n;
 	const count = data[1].result ?? 0n;
-	const playerVolume = data[2].result ?? 0n;
-	const playerCount = data[3].result ?? 0n;
 	const status = data[4].result as RoundStatusEnum;
 	const bonus = (volume / 100n) * 5n;
 	const winnerOffset = BigInt(data[5].result as bigint);
@@ -204,11 +223,6 @@ export const fetchRound = async (address: Address, round: bigint, player: Addres
 			bets: count,
 			bonus: bonus,
 			staking: (volume * 360n) / 10000n,
-		},
-		player: {
-			volume: playerVolume,
-			bets: playerCount,
-			bonus: (playerVolume / 100n) * 5n,
 		},
 		status,
 		address: ZeroAddress,
@@ -239,7 +253,7 @@ export const fetchTotalVolume = async (address: Address, config: Config): Promis
 };
 
 export const calculateRound = async (address: Address, round: number, config: Config) => {
-	logger.start('[luro]', 'calculating', address, round);
+	logger.start('calculating', address, round);
 	return writeContract(config, {
 		abi: LuckyRoundABI,
 		address: address,

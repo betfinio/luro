@@ -13,7 +13,6 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as LuroIndexImport } from './routes/luro/index'
-import { Route as LuroSoonImport } from './routes/luro/soon'
 import { Route as LuroIntervalImport } from './routes/luro/$interval'
 
 // Create/Update Routes
@@ -27,12 +26,6 @@ const IndexRoute = IndexImport.update({
 const LuroIndexRoute = LuroIndexImport.update({
   id: '/luro/',
   path: '/luro/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LuroSoonRoute = LuroSoonImport.update({
-  id: '/luro/soon',
-  path: '/luro/soon',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,13 +53,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LuroIntervalImport
       parentRoute: typeof rootRoute
     }
-    '/luro/soon': {
-      id: '/luro/soon'
-      path: '/luro/soon'
-      fullPath: '/luro/soon'
-      preLoaderRoute: typeof LuroSoonImport
-      parentRoute: typeof rootRoute
-    }
     '/luro/': {
       id: '/luro/'
       path: '/luro'
@@ -82,14 +68,12 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/luro/$interval': typeof LuroIntervalRoute
-  '/luro/soon': typeof LuroSoonRoute
   '/luro': typeof LuroIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/luro/$interval': typeof LuroIntervalRoute
-  '/luro/soon': typeof LuroSoonRoute
   '/luro': typeof LuroIndexRoute
 }
 
@@ -97,30 +81,27 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/luro/$interval': typeof LuroIntervalRoute
-  '/luro/soon': typeof LuroSoonRoute
   '/luro/': typeof LuroIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/luro/$interval' | '/luro/soon' | '/luro'
+  fullPaths: '/' | '/luro/$interval' | '/luro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/luro/$interval' | '/luro/soon' | '/luro'
-  id: '__root__' | '/' | '/luro/$interval' | '/luro/soon' | '/luro/'
+  to: '/' | '/luro/$interval' | '/luro'
+  id: '__root__' | '/' | '/luro/$interval' | '/luro/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LuroIntervalRoute: typeof LuroIntervalRoute
-  LuroSoonRoute: typeof LuroSoonRoute
   LuroIndexRoute: typeof LuroIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LuroIntervalRoute: LuroIntervalRoute,
-  LuroSoonRoute: LuroSoonRoute,
   LuroIndexRoute: LuroIndexRoute,
 }
 
@@ -136,7 +117,6 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/luro/$interval",
-        "/luro/soon",
         "/luro/"
       ]
     },
@@ -145,9 +125,6 @@ export const routeTree = rootRoute
     },
     "/luro/$interval": {
       "filePath": "luro/$interval.tsx"
-    },
-    "/luro/soon": {
-      "filePath": "luro/soon.tsx"
     },
     "/luro/": {
       "filePath": "luro/index.tsx"

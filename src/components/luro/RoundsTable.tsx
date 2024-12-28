@@ -4,27 +4,29 @@ import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/ui';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Expand, Loader } from 'lucide-react';
+import { Expand } from 'lucide-react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import { usePlayerRounds, useRounds, useWinner } from '../../lib/query';
+import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 
-	const columns = [
+	const columns: ColumnDef<Round, never>[] = [
 		columnHelper.accessor('round', {
 			header: t('columns.round'),
 			meta: { className: 'md:w-[120px]' },
 
 			cell: (props) => {
-				const { player, round } = props.row.original;
+				const { round } = props.row.original;
+				const { data } = usePlayerRoundInfo(BigInt(props.row.original.round));
 
-				return <div className={cn('text-muted-foreground md:w-[90px]', player.bets > 0 && 'text-secondary-foreground')}>#{round.toString()}</div>;
+				return <div className={cn('text-muted-foreground md:w-[90px]', (data?.bets ?? 0) > 0 && 'text-secondary-foreground')}>#{round.toString()}</div>;
 			},
 		}),
 		columnHelper.accessor('total.bets', {
@@ -53,9 +55,9 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 				</div>
 			),
 		}),
-		columnHelper.accessor('winner', {
+		columnHelper.accessor('winnerAddress', {
 			header: t('columns.winner'),
-			cell: (props) => <WinnerInfo round={Number(props.row.original.round)} />,
+			cell: (props) => <WinnerInfo winner={props.getValue()} />,
 		}),
 		columnHelper.accessor('total.staking', {
 			meta: {
@@ -80,13 +82,17 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 		}),
 	];
 
-	const myBetsColumn = columnHelper.accessor('player.volume', {
+	const myBetsColumn = columnHelper.display({
+		id: 'playerVolume',
 		header: t('columns.myBets'),
-		cell: (props) => (
-			<div className={''}>
-				<BetValue value={valueToNumber(props.getValue())} withIcon />
-			</div>
-		),
+		cell: (props) => {
+			const { data } = usePlayerRoundInfo(BigInt(props.row.original.round));
+			return (
+				<div className={''}>
+					<BetValue value={data?.volume ?? 0n} withIcon />
+				</div>
+			);
+		},
 	});
 
 	const getPlayerRoundsTableColumns = (columns: unknown[]) => {
@@ -121,26 +127,18 @@ export default RoundsTable;
 
 const columnHelper = createColumnHelper<Round>();
 
-const AllRoundsTable: FC<{ columns: unknown[] }> = ({ columns }) => {
+const AllRoundsTable: FC<{ columns: ColumnDef<Round, never>[] }> = ({ columns }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = useRounds(address);
 	const navigate = useNavigate();
-	const { interval } = Route.useParams();
+	const { interval } = useParams({ from: '/luro/$interval' });
 
-	const handleClick = (row: Round) => {
-		navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });
+	const handleClick = async (row: Round) => {
+		await navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });
 	};
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-			{/*// @ts-ignore*/}
-			<DataTable
-				data={rounds}
-				columns={columns as ColumnDef<Round, unknown>[]}
-				onRowClick={handleClick}
-				isLoading={isLoading}
-				loaderClassName="h-[185px]"
-				noResultsClassName="h-[185px]"
-			/>
+			<DataTable data={rounds} columns={columns} onRowClick={handleClick} isLoading={isLoading} loaderClassName="h-[185px]" noResultsClassName="h-[185px]" />
 		</motion.div>
 	);
 };
@@ -168,16 +166,12 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	);
 };
 
-const WinnerInfo: FC<{ round: number }> = ({ round }) => {
+const WinnerInfo: FC<{ winner: Address }> = ({ winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 	const { address } = useAccount();
 
-	const { data: winner = null, isLoading, isFetching } = useWinner(round);
-	if (isLoading || isFetching) {
-		return <Loader className={'w-3 h-3 animate-spin'} />;
-	}
 	if (!winner) {
 		return <div>{t('waiting')}</div>;
 	}
-	return <div className={cn(address?.toLowerCase() === winner.player.toLowerCase() && 'text-green-500')}>{truncateEthAddress(winner.player)}</div>;
+	return <div className={cn(address?.toLowerCase() === winner.toLowerCase() && 'text-green-500')}>{truncateEthAddress(winner)}</div>;
 };
