@@ -4,7 +4,7 @@ import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
-import { useAvailableBonus, useClaimBonus } from '../../lib/query';
+import { useAvailableBonus, useClaimBonus } from '../lib/query';
 
 const BonusClaimBlock: FC = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'bonusClaimBlock' });

@@ -1,7 +1,7 @@
 import { hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { getCurrentRoundInfo } from '../../lib/api';
+import { getCurrentRoundInfo } from '../lib/api';
 import {
 	useLuroState,
 	usePlaceBet,
@@ -14,7 +14,7 @@ import {
 	useRoundWinner,
 	useStartRound,
 	useVisibleRound,
-} from '../../lib/query';
+} from '../lib/query';
 
 import { toast, useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';

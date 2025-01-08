@@ -1,7 +1,7 @@
-import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
 import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
+import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';

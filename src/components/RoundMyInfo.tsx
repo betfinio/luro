@@ -5,8 +5,8 @@ import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { UserIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCurrentRoundInfo } from '../../lib/api';
-import { useRoundBank, useRoundBets, useVisibleRound } from '../../lib/query';
+import { getCurrentRoundInfo } from '../lib/api';
+import { useRoundBank, useRoundBets, useVisibleRound } from '../lib/query';
 
 export const RoundMyInfo = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'myInfo' });

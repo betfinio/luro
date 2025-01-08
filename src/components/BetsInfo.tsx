@@ -1,6 +1,6 @@
-import { BetsTab } from '@/src/components/luro/tabs/BetsTab.tsx';
-import { BonusTab } from '@/src/components/luro/tabs/BonusTab.tsx';
-import { PlayersTab } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { BetsTab } from '@/src/components/tabs/BetsTab.tsx';
+import { BonusTab } from '@/src/components/tabs/BonusTab.tsx';
+import { PlayersTab } from '@/src/components/tabs/PlayersTab.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/ui';
 import { useTranslation } from 'react-i18next';
 

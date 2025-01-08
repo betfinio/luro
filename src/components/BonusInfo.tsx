@@ -1,4 +1,4 @@
-import { BonusChart } from '@/src/components/luro/BonusChart.tsx';
+import { BonusChart } from '@/src/components/BonusChart.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
@@ -7,7 +7,7 @@ import { CircleHelp } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
-import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '../../lib/query';
+import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '../lib/query';
 
 export const BonusInfo = () => {
 	const { t } = useTranslation('luro');

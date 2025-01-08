@@ -1,4 +1,4 @@
-import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
+import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
 import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
 import { addressToColor } from 'betfinio_context/lib/utils';
@@ -12,9 +12,9 @@ import {
 	useRoundBonusShare,
 	useVisibleRound,
 	useWinners,
-} from '../../lib/query';
+} from '../lib/query';
 
-import logger from '@/src/config/logger';
+import logger from '@/src/config/logger.ts';
 import type { Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
