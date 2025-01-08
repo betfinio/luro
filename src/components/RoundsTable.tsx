@@ -12,7 +12,7 @@ import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../../lib/query';
+import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
