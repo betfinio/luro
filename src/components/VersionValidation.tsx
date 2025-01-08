@@ -1,9 +1,10 @@
 import logger from '@/src/config/logger.ts';
 import { toast } from '@betfinio/components/hooks';
 import { Button } from '@betfinio/components/ui';
-import { useLatestVersion } from 'betfinio_app/github';
+import { useLatestVersion } from 'betfinio_context/lib/query';
 import { type FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+
 interface VersionValidationProps {
 	repository: string;
 	branch: string;
@@ -15,7 +16,7 @@ export const VersionValidation: FC<VersionValidationProps> = ({ branch, reposito
 	useEffect(() => {
 		logger.warn('Latest version:', version);
 		logger.warn('Deployed version:', current);
-		if (!version || !current) return;
+		if (!version || !current || current === 'undefined') return;
 		if (version.toLowerCase() !== current.toLowerCase()) {
 			logger.warn('New version available!');
 			toast({

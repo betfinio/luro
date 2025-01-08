@@ -1,7 +1,7 @@
 import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
 import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
-import { addressToColor } from 'betfinio_app/lib/utils';
+import { addressToColor } from 'betfinio_context/lib/utils';
 import {
 	useBonusDistribution,
 	useCalculate,
@@ -16,7 +16,7 @@ import {
 
 import logger from '@/src/config/logger';
 import type { Round, RoundModalPlayer } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';

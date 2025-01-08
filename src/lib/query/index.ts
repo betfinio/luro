@@ -1,12 +1,12 @@
 import logger from '@/src/config/logger.ts';
 import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
 import type { LuroBet, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/hooks';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type WriteContractReturnType, readContract } from '@wagmi/core';
-import { getTransactionLink } from 'betfinio_app/helpers';
+import { getTransactionLink } from 'betfinio_context/lib/helpers';
 import { useTranslation } from 'react-i18next';
 import type { Address, WriteContractErrorType } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
