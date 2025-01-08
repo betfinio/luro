@@ -2,15 +2,15 @@ import { PlaceBet } from '@/src/components/luro/PlaceBet.tsx';
 import { RoundCircle } from '@/src/components/luro/RoundCircle.tsx';
 import logger from '@/src/config/logger';
 import { useLuroAddress } from '@/src/lib';
-import { Route } from '@/src/routes/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSearch } from '@tanstack/react-router';
 import { useWatchContractEvent } from 'wagmi';
 import { useLuroState, useVisibleRound } from '../../lib/query';
 
 export const CurrentRound = () => {
 	const { data: round } = useVisibleRound();
-	const search = Route.useSearch();
+	const search = useSearch({ from: '/games/luro/$interval' });
 	const observedRound = search?.round ? search.round : round;
 
 	const { updateState } = useLuroState(round);

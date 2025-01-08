@@ -13,7 +13,7 @@ import logger from '@/src/config/logger.ts';
 import type { Round, WinnerInfo } from '@/src/lib/types.ts';
 import { LuckyRoundABI } from '@betfinio/abi';
 import { readContract } from '@wagmi/core';
-import { wagmiConfig } from 'betfinio_app/config';
+import { wagmiConfig } from 'betfinio_context/config';
 import type { ExecutionResult } from 'graphql/execution';
 import type { Address } from 'viem';
 

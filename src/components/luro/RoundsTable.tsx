@@ -1,5 +1,5 @@
 import type { Round } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
@@ -131,10 +131,10 @@ const AllRoundsTable: FC<{ columns: ColumnDef<Round, never>[] }> = ({ columns })
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = useRounds(address);
 	const navigate = useNavigate();
-	const { interval } = useParams({ from: '/luro/$interval' });
+	const { interval } = useParams({ from: '/games/luro/$interval' });
 
 	const handleClick = async (row: Round) => {
-		await navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });
+		await navigate({ to: '/games/luro/$interval', params: { interval }, search: { round: row.round } });
 	};
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
@@ -150,7 +150,7 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	const { interval } = Route.useParams();
 
 	const handleClick = (row: Round) => {
-		navigate({ to: '/luro/$interval', params: { interval }, search: { round: row.round } });
+		navigate({ to: '/games/luro/$interval', params: { interval }, search: { round: row.round } });
 	};
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>

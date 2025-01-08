@@ -5,13 +5,13 @@ import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
-import { addressToColor } from 'betfinio_app/lib/utils';
+import { addressToColor } from 'betfinio_context/lib/utils';
 import { AnimatePresence, animate, motion, useAnimation } from 'framer-motion';
 import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
 import { DateTime } from 'luxon';

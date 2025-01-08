@@ -12,8 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as LuroIndexImport } from './routes/luro/index'
-import { Route as LuroIntervalImport } from './routes/luro/$interval'
+import { Route as GamesLuroIndexImport } from './routes/games/luro/index'
+import { Route as GamesLuroIntervalImport } from './routes/games/luro/$interval'
 
 // Create/Update Routes
 
@@ -23,15 +23,15 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LuroIndexRoute = LuroIndexImport.update({
-  id: '/luro/',
-  path: '/luro/',
+const GamesLuroIndexRoute = GamesLuroIndexImport.update({
+  id: '/games/luro/',
+  path: '/games/luro/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LuroIntervalRoute = LuroIntervalImport.update({
-  id: '/luro/$interval',
-  path: '/luro/$interval',
+const GamesLuroIntervalRoute = GamesLuroIntervalImport.update({
+  id: '/games/luro/$interval',
+  path: '/games/luro/$interval',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,18 +46,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/luro/$interval': {
-      id: '/luro/$interval'
-      path: '/luro/$interval'
-      fullPath: '/luro/$interval'
-      preLoaderRoute: typeof LuroIntervalImport
+    '/games/luro/$interval': {
+      id: '/games/luro/$interval'
+      path: '/games/luro/$interval'
+      fullPath: '/games/luro/$interval'
+      preLoaderRoute: typeof GamesLuroIntervalImport
       parentRoute: typeof rootRoute
     }
-    '/luro/': {
-      id: '/luro/'
-      path: '/luro'
-      fullPath: '/luro'
-      preLoaderRoute: typeof LuroIndexImport
+    '/games/luro/': {
+      id: '/games/luro/'
+      path: '/games/luro'
+      fullPath: '/games/luro'
+      preLoaderRoute: typeof GamesLuroIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -67,42 +67,42 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/luro/$interval': typeof LuroIntervalRoute
-  '/luro': typeof LuroIndexRoute
+  '/games/luro/$interval': typeof GamesLuroIntervalRoute
+  '/games/luro': typeof GamesLuroIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/luro/$interval': typeof LuroIntervalRoute
-  '/luro': typeof LuroIndexRoute
+  '/games/luro/$interval': typeof GamesLuroIntervalRoute
+  '/games/luro': typeof GamesLuroIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/luro/$interval': typeof LuroIntervalRoute
-  '/luro/': typeof LuroIndexRoute
+  '/games/luro/$interval': typeof GamesLuroIntervalRoute
+  '/games/luro/': typeof GamesLuroIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/luro/$interval' | '/luro'
+  fullPaths: '/' | '/games/luro/$interval' | '/games/luro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/luro/$interval' | '/luro'
-  id: '__root__' | '/' | '/luro/$interval' | '/luro/'
+  to: '/' | '/games/luro/$interval' | '/games/luro'
+  id: '__root__' | '/' | '/games/luro/$interval' | '/games/luro/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LuroIntervalRoute: typeof LuroIntervalRoute
-  LuroIndexRoute: typeof LuroIndexRoute
+  GamesLuroIntervalRoute: typeof GamesLuroIntervalRoute
+  GamesLuroIndexRoute: typeof GamesLuroIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LuroIntervalRoute: LuroIntervalRoute,
-  LuroIndexRoute: LuroIndexRoute,
+  GamesLuroIntervalRoute: GamesLuroIntervalRoute,
+  GamesLuroIndexRoute: GamesLuroIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -116,18 +116,18 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/luro/$interval",
-        "/luro/"
+        "/games/luro/$interval",
+        "/games/luro/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/luro/$interval": {
-      "filePath": "luro/$interval.tsx"
+    "/games/luro/$interval": {
+      "filePath": "games/luro/$interval.tsx"
     },
-    "/luro/": {
-      "filePath": "luro/index.tsx"
+    "/games/luro/": {
+      "filePath": "games/luro/index.tsx"
     }
   }
 }

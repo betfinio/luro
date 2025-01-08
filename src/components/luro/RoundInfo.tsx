@@ -1,7 +1,7 @@
 import RoundMobileInfo from '@/src/components/luro/RoundMobileInfo.tsx';
 import SwitchModal from '@/src/components/luro/SwitchModal.tsx';
 import type { LuroInterval } from '@/src/lib';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';

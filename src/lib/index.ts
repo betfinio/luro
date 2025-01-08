@@ -1,7 +1,7 @@
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import type { ILanguageErrorKeys } from '@/src/i18next';
 import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { toast } from '@betfinio/components/hooks';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
