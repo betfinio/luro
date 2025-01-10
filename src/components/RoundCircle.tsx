@@ -1,19 +1,18 @@
-import { TabItem, WinnerCard } from '@/src/components/luro/tabs/PlayersTab.tsx';
-import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound } from '@/src/lib';
+import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
+import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { useLuroState, useObserveBet, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../../lib/query';
+import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/luro/$interval.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
-import anime from 'animejs';
-import { addressToColor } from 'betfinio_app/lib/utils';
-import { AnimatePresence, animate, motion } from 'framer-motion';
+import { addressToColor } from 'betfinio_context/lib/utils';
+import { AnimatePresence, animate, motion, useAnimation } from 'framer-motion';
 import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
 import { DateTime } from 'luxon';
 import millify from 'millify';
@@ -25,7 +24,6 @@ import { useAccount } from 'wagmi';
 
 import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
-import { LURO, LURO_5MIN } from '@/src/global.ts';
 import { Bet } from '@betfinio/components/icons';
 import { useTranslation } from 'react-i18next';
 
@@ -54,15 +52,23 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	} = useLuroState(round);
 
 	const singleRotationDuration = 5000;
-	// todo: Extract states to enum
-	useEffect(() => {
-		if (round !== currentRound) {
-			return;
+	const controls = useAnimation();
+	const wheelRef = useRef(null);
+
+	const wheelAngle = useMemo(() => {
+		if (currentRound !== round) {
+			if (roundData?.status === 2) {
+				return Number((winner?.offset ?? 0n) * 360n) / valueToNumber(roundData?.total.volume);
+			}
 		}
+		return 0;
+	}, [winner, roundData?.total.volume]);
+
+	useEffect(() => {
+		if (round !== currentRound) return;
+
 		if (wheelState.state === 'standby') {
-			anime.set(['.LOTTERY'], {
-				rotate: () => 0,
-			});
+			controls.set({ rotate: 0 });
 		}
 		if (wheelState.state === 'spinning') {
 			spinWheel();
@@ -81,38 +87,22 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 			}
 		}
 	}, [wheelState]);
-	const wheelRef = useRef(null);
-
-	const wheelAngle = useMemo(() => {
-		if (currentRound !== round) {
-			if (roundData?.status === 2) {
-				return Number((winner?.offset ?? 0n) * 360n) / valueToNumber(roundData?.total.volume);
-			}
-		}
-		return 0;
-	}, [winner, roundData?.total.volume]);
 
 	function spinWheel() {
 		if (wheelState.state !== 'spinning') return;
 
-		anime({
-			targets: ['.LOTTERY'],
-			duration: 2000, // random duration
-			rotate: '720',
-			easing: 'easeInQuad',
-			complete: () => {
-				anime.set(['.LOTTERY'], {
-					rotate: () => 0,
+		controls
+			.start({
+				rotate: 720,
+				transition: { duration: 2, ease: [0.55, 0.085, 0.68, 0.53] },
+			})
+			.then(() => {
+				controls.set({ rotate: 0 });
+				controls.start({
+					rotate: 360,
+					transition: { duration: 0.5, ease: 'linear', repeat: Number.POSITIVE_INFINITY },
 				});
-				anime({
-					targets: ['.LOTTERY'],
-					duration: 500, // random duration
-					rotate: '360',
-					easing: 'linear',
-					loop: true,
-				});
-			},
-		});
+			});
 	}
 
 	async function stopWheel(result: number, bet: string) {
@@ -122,18 +112,12 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 
 		const totalRotation = Math.floor(Math.random() * (wheelMaxNumberOfSpins - wheelMinNumberOfSpins + 1) + wheelMinNumberOfSpins) * 360 - result;
 
-		anime.remove('.LOTTERY');
-		anime({
-			targets: ['.LOTTERY'],
-			rotate: () => {
-				return totalRotation; // random number
-			},
-			duration: singleRotationDuration, // random duration
-			easing: `cubicBezier(${bezier.join(',')})`,
-			complete: () => {
-				updateWheelState({ state: 'stopped', result, bet }, round);
-			},
+		controls.stop();
+		await controls.start({
+			rotate: totalRotation,
+			transition: { duration: singleRotationDuration / 1000, ease: bezier },
 		});
+		updateWheelState({ state: 'stopped', result, bet }, round);
 	}
 
 	const data: CustomLuroBet[] = useMemo(() => {
@@ -164,7 +148,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 					'border-border border relative p-4 flex-grow xl:p-8 rounded-xl bg-background-light flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
 					className,
 				)}
-				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'transparent' }}
+				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'hsl(var(--background-light))' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
 				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
@@ -185,7 +169,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 
 						{data.length > 0 ? (
 							round === currentRound ? (
-								<div className={'LOTTERY'} ref={wheelRef}>
+								<motion.div ref={wheelRef} animate={controls}>
 									<Pie
 										data={data}
 										colors={{ datum: 'data.color' }}
@@ -197,7 +181,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 										isInteractive={wheelState.state === 'standby' || wheelState.state === 'waiting'}
 										tooltip={CustomTooltip(roundData?.total.volume || 0n)}
 									/>
-								</div>
+								</motion.div>
 							) : (
 								<div>
 									<Pie
@@ -273,8 +257,8 @@ const EffectsLayer: FC<{ round: number }> = ({ round }) => {
 		const arr = Array.from(new Array(30));
 		return arr.map(() => ({
 			color: addressToColor(address ?? ZeroAddress),
-			x: Math.floor(Math.random() * (width + 40)) - 20, // Adjusted for wider range
-			y: Math.floor(Math.random() * (height + 40)) - 20, // Adjusted for wider range
+			x: Math.floor(Math.random() * (width + 40)) - 20,
+			y: Math.floor(Math.random() * (height + 40)) - 20,
 		}));
 	};
 
@@ -349,6 +333,7 @@ const CustomTooltip =
 			/>
 		);
 	};
+
 const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round }) => {
 	const { data: roundData } = useRound(round);
 	const { data: bank = 0n, isLoading: isBankLoading } = useRoundBank(round);
@@ -383,7 +368,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		}
 	};
 
-	const luroAddress = interval === '1d' ? LURO : LURO_5MIN;
+	const luroAddress = useLuroAddress();
 
 	const handleRoundEnd = () => {
 		if (bank === 0n) {
@@ -413,7 +398,6 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	const to = useMemo(() => {
 		const value = Math.floor(valueToNumber(isBankLoading ? 0n : bank));
-
 		setTimeout(() => {
 			setFrom(value);
 		}, 1000);
@@ -429,7 +413,6 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
 				const finalVolume = (volume * 935) / 1000;
-
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
@@ -442,7 +425,6 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const volume = valueToNumber(roundData?.total.volume ?? 1n);
 
 				const finalVolume = (volume * 935) / 1000;
-
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
@@ -518,7 +500,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 				<div className={'flex items-center gap-1'}>
 					<span className={'text-secondary-foreground'}>{coef}x</span> {t('win')}
 				</div>
-				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
+				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</div>
 		</motion.div>
 	);
@@ -531,18 +513,20 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 
 	const winner = useRoundWinner(round);
 
+	const { data: playerRoundInfo = { bets: 0, volume: 0n } } = usePlayerRoundInfo(BigInt(round));
+
 	const { address = ZeroAddress } = useAccount();
-	if (isLoading || isFetching) return <Loader size={40} className={'animate-spin'} color={'white'} />;
+	if (isLoading || isFetching) return <Loader size={40} className={'animate-spin text-foreground'} />;
 	if (!roundData) return null;
-	if (roundData.player.bets === 0n) {
+	if (playerRoundInfo.bets === 0) {
 		return (
 			<>
 				<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 					{t('couldWin')}
-					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-blue-500 text-xs'}>+ {t('bonus')}</div>
+				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</>
 		);
 	}
@@ -552,14 +536,11 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 			<>
 				<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-blue-500 text-sm flex flex-row items-center justify-center gap-1'}>
-					{/*TODO: return bonus*/}+ {t('bonus')}
-				</div>
-
+				<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>+ {t('bonus')}</div>
 				<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
-				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n) + 20} withIcon />
+				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 			</>
 		);
 	}
@@ -567,7 +548,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 	return (
 		<>
 			<div className={'text-xl font-semibold mb-4'}>{t('yourBonus')}</div>
-			<div className={'text-blue-500 text-sm flex flex-row items-center justify-center gap-1'}>
+			<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
 				+<BetValue value={20} withIcon />
 			</div>
 		</>
@@ -575,7 +556,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 };
 
 export const Counter: FC<{ from: number; to: number; doMillify?: boolean }> = ({ from, to, doMillify = false }) => {
-	const nodeRef = useRef<HTMLParagraphElement | null>(null);
+	const nodeRef = useRef<HTMLDivElement | null>(null);
 
 	function formatNumber(value: number) {
 		if (value === 0) return '0';

@@ -8,11 +8,11 @@ import type { FC } from 'react';
 const SwitchModal: FC<{ selected: LuroInterval }> = ({ selected }) => {
 	const types = ['5m', '1d'];
 	return (
-		<motion.div layoutId={'switcher'} className={'rounded-lg border-border border bg-background p-2 w-[300px] mx-auto text-white'}>
+		<motion.div layoutId={'switcher'} className={'rounded-lg border-border border bg-background p-2 w-[300px] mx-auto text-foreground'}>
 			{types.map((pair, index) => (
 				<DialogClose asChild key={index}>
 					<Link
-						to={`/luro/${pair}`}
+						to={`/games/luro/${pair}`}
 						className={cn(' flex flex-row items-center gap-2 p-4 py-2', pair === selected && 'border-border border bg-background-lighter rounded-lg')}
 					>
 						{pair}

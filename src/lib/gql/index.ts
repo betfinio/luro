@@ -1,8 +1,7 @@
 import {
-	LuroPlayerBetsDocument,
-	type LuroPlayerBetsQuery,
-	LuroRoundStartsDocument,
-	type LuroRoundStartsQuery,
+	LuroRoundsByPlayerDocument,
+	LuroRoundsDocument,
+	type LuroRoundsQuery,
 	LuroWinnerDocument,
 	type LuroWinnerQuery,
 	LuroWinnersDocument,
@@ -11,27 +10,56 @@ import {
 	execute,
 } from '@/.graphclient';
 import logger from '@/src/config/logger.ts';
-import type { WinnerInfo } from '@/src/lib/types.ts';
+import type { Round, WinnerInfo } from '@/src/lib/types.ts';
+import { LuckyRoundABI } from '@betfinio/abi';
+import { readContract } from '@wagmi/core';
+import { wagmiConfig } from 'betfinio_context/config';
 import type { ExecutionResult } from 'graphql/execution';
 import type { Address } from 'viem';
 
-export const requestRounds = async (address: Address): Promise<{ round: number }[]> => {
-	logger.start('[luro]', 'fetching rounds by game', address);
-	const data: ExecutionResult<LuroRoundStartsQuery> = await execute(LuroRoundStartsDocument, { address });
-	logger.success('[luro]', 'fetching rounds by game', data.data?.roundStarts.length);
+export const requestRounds = async (address: Address): Promise<Round[]> => {
+	logger.start('fetching rounds by game', address);
+	const data: ExecutionResult<LuroRoundsQuery> = await execute(LuroRoundsDocument, { address });
+	logger.success('fetched rounds by game', data.data?.rounds.length);
 	if (data.data) {
-		return data.data.roundStarts.map((round) => ({ round: Number(round.round) }));
+		return populateRounds(data.data);
 	}
 	return [];
 };
-export const requestPlayerRounds = async (address: Address, player: Address): Promise<{ round: number }[]> => {
-	logger.start('[luro]', 'fetching rounds by game and player', address, player);
-	const data: ExecutionResult<LuroPlayerBetsQuery> = await execute(LuroPlayerBetsDocument, { address, player });
-	logger.success('[luro]', 'fetching rounds by game and player', data.data?.betCreateds.length);
+export const requestPlayerRounds = async (address: Address, player: Address): Promise<Round[]> => {
+	logger.start('fetching rounds by game and player', address, player);
+	const data: ExecutionResult<LuroRoundsQuery> = await execute(LuroRoundsByPlayerDocument, { address, player });
+	logger.success('fetching rounds by game and player', data.data?.rounds.length);
 	if (data.data) {
-		return data.data.betCreateds.map((round) => ({ round: Number(round.round) }));
+		return populateRounds(data.data);
 	}
 	return [];
+};
+
+export const populateRounds = async (result: LuroRoundsQuery): Promise<Round[]> => {
+	return await Promise.all(
+		result.rounds.map(async (round: LuroRoundsQuery['rounds'][0]) => {
+			const status = await readContract(wagmiConfig, {
+				abi: LuckyRoundABI,
+				address: round.address as Address,
+				functionName: 'roundStatus',
+				args: [round.round],
+			});
+			return {
+				round: Number(round.round),
+				total: {
+					volume: BigInt(round.betsAmount),
+					bets: BigInt(round.betsCount),
+					bonus: (BigInt(round.betsAmount) * 5n) / 100n,
+					staking: (BigInt(round.betsAmount) * 36n) / 1000n,
+				},
+				status: status,
+				address: round.address,
+				winnerAddress: round.winnerAddress,
+				winnerOffset: round.winnerOffset ? BigInt(round.winnerOffset) : undefined,
+			} as Round;
+		}),
+	);
 };
 
 export const fetchWinners = async (luro: Address): Promise<WinnerInfo[]> => {
@@ -43,6 +71,7 @@ export const fetchWinners = async (luro: Address): Promise<WinnerInfo[]> => {
 	}
 	return [];
 };
+
 export const fetchWinner = async (luro: Address, round: number): Promise<WinnerInfo | null> => {
 	logger.start('[luro]', 'fetching winner by game and round', luro, round);
 	const data: ExecutionResult<LuroWinnerQuery> = await execute(LuroWinnerDocument, { address: luro, round: round });

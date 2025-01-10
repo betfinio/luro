@@ -45,15 +45,15 @@ export interface Round {
 		bonus: bigint;
 		staking: bigint;
 	};
-	player: {
-		bets: bigint;
-		volume: bigint;
-		bonus: bigint;
-	};
 	status: RoundStatusEnum;
-	winner?: WinnerInfo;
-	winnerOffset?: bigint;
 	address: Address;
+	winnerOffset?: bigint;
+	winnerAddress?: Address;
+}
+
+export interface PlayerRoundInfo {
+	bets: number;
+	volume: bigint;
 }
 
 export interface WinnerInfo {
