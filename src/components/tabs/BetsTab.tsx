@@ -1,4 +1,4 @@
-import { TabItem } from '@/src/components/luro/tabs/PlayersTab.tsx';
+import { TabItem } from '@/src/components/tabs/PlayersTab.tsx';
 import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 import { valueToNumber } from '@betfinio/abi';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';

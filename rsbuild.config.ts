@@ -4,10 +4,6 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import { TanStackRouterRspack } from '@tanstack/router-plugin/rspack';
 import { dependencies } from './package.json';
 
-const getApp = () => {
-	return;
-};
-
 const PORT = 4005;
 
 export default defineConfig({
@@ -20,6 +16,7 @@ export default defineConfig({
 	html: {
 		title: 'Betfin Lucky Round',
 		favicon: './src/assets/favicon.svg',
+		template: './src/assets/index.html',
 	},
 	output: {
 		assetPrefix: process.env.PUBLIC_OUTPUT_URL,
@@ -29,10 +26,15 @@ export default defineConfig({
 		pluginModuleFederation({
 			name: 'betfinio_luro',
 			remotes: {
-				betfinio_app: `betfinio_app@${process.env.PUBLIC_APP_URL}/mf-manifest.json`,
+				betfinio_context: `betfinio_context@${process.env.PUBLIC_CONTEXT_URL}/mf-manifest.json`,
 			},
-			manifest: false,
-			dts: false,
+			exposes: {
+				'./style': './src/style',
+				'./i18n': './src/i18n',
+				'./route': './src/routes/games/luro/$interval',
+			},
+			manifest: true,
+			dts: true,
 			shared: {
 				react: {
 					singleton: true,
@@ -62,19 +64,12 @@ export default defineConfig({
 					singleton: true,
 					requiredVersion: dependencies.wagmi,
 				},
-				'i18next-browser-languagedetector': {
-					singleton: true,
-					requiredVersion: dependencies['i18next-browser-languagedetector'],
-				},
 			},
 		}),
 	],
 	tools: {
 		rspack: {
 			ignoreWarnings: [/Critical dependency: the request of a dependency is an expression/],
-			output: {
-				uniqueName: 'betfinio_luro',
-			},
 			plugins: [TanStackRouterRspack()],
 		},
 	},

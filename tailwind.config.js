@@ -1,13 +1,11 @@
+import preset from '@betfinio/components/tailwind-config';
+import animate from 'tailwindcss-animate';
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	darkMode: ['class'],
 	important: '.luro',
-	presets: [require('@betfinio/components/tailwind-config')],
+	presets: [preset],
 	content: ['./src/**/*.{ts,tsx}'],
-	theme: {
-		extend: {
-			colors: {},
-		},
-	},
-	plugins: [require('tailwindcss-animate')],
+	plugins: [animate],
 };
