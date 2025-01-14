@@ -318,7 +318,7 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-center justify-center'}
+			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-start justify-center'}
 		>
 			<DotLottieReact
 				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
@@ -327,8 +327,8 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 				renderConfig={{ autoResize: true }}
 				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
 			/>
-			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-background bg-opacity-75'}>
-				<div className={'flex items-end pb-4 gap-2 '}>
+			<div className={'flex flex-col justify-center items-center relative z-10 p-5 bg-background bg-opacity-75 mt-10'}>
+				<div className={'flex items-end pb-4 gap-2'}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
 				</div>
