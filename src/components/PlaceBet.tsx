@@ -137,7 +137,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		return getCurrentRoundInfo(bets);
 	}, [bets]);
 
-	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address, round]);
+	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address]);
 	const expectedWinning = (valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume)) * 0.914;
 	const coef = expectedWinning / Number(amount);
 

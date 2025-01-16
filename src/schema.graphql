@@ -20,7 +20,7 @@ query LuroWinners($address: Bytes) {
 
 
 query LuroRounds($address: Bytes) {
-    rounds(where: { address: $address }, orderBy: round, orderDirection: desc) {
+    rounds(where: { address: $address }, orderBy: round, orderDirection: desc, first: 1000) {
         round
         address
         betsAmount
