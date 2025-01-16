@@ -28,7 +28,7 @@ import {
 	placeBet,
 	startRound,
 } from '../api';
-import { fetchWinner, fetchWinners } from '../gql';
+import { fetchWinner } from '../gql';
 
 export const useObserveBet = (round: number) => {
 	const queryClient = useQueryClient();
@@ -295,15 +295,6 @@ export const useClaimBonus = () => {
 			queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
 		},
 		onSettled: () => logger.log('bonusClaim settled'),
-	});
-};
-
-export const useWinners = () => {
-	const luroAddress = useLuroAddress();
-
-	return useQuery<WinnerInfo[]>({
-		queryKey: ['luro', luroAddress, 'winners'],
-		queryFn: () => fetchWinners(luroAddress),
 	});
 };
 
