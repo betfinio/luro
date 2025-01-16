@@ -16,6 +16,7 @@ import {
 	useVisibleRound,
 } from '../lib/query';
 
+import { NET_COEF } from '@/src/global.ts';
 import { toast, useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
@@ -137,7 +138,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		return getCurrentRoundInfo(bets);
 	}, [bets]);
 
-	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address, round]);
+	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address]);
 	const expectedWinning = (valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume)) * 0.914;
 	const coef = expectedWinning / Number(amount);
 
@@ -318,7 +319,7 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-center justify-center'}
+			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-start justify-center'}
 		>
 			<DotLottieReact
 				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
@@ -327,8 +328,8 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 				renderConfig={{ autoResize: true }}
 				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
 			/>
-			<div className={'flex flex-col  justify-center items-center relative z-10 p-5 bg-background bg-opacity-75'}>
-				<div className={'flex items-end pb-4 gap-2 '}>
+			<div className={'flex flex-col justify-center items-center relative z-10 p-5 bg-background bg-opacity-75 mt-10'}>
+				<div className={'flex items-end pb-4 gap-2'}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
 				</div>
@@ -418,7 +419,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 					<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
 					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 						{t('couldWin')}
-						<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+						<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)} withIcon />
 					</div>
 					<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 				</div>
@@ -450,7 +451,11 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-secondary-foreground'}>
 					<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
 					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-						<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+						<BetValue
+							className={'text-secondary-foreground text-lg font-semibold'}
+							value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)}
+							withIcon
+						/>
 					</div>
 					<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
 						+bonus <BetValue value={bonus?.bonus || 0} withIcon />
@@ -459,7 +464,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 					<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
 					<BetValue
 						className={'text-secondary-foreground text-lg font-semibold'}
-						value={valueToNumber((roundData.total.volume * 935n) / 1000n) + (bonus?.bonus ?? 0)}
+						value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n) + (bonus?.bonus ?? 0)}
 						withIcon
 					/>
 				</div>

@@ -4,8 +4,6 @@ import {
 	type LuroRoundsQuery,
 	LuroWinnerDocument,
 	type LuroWinnerQuery,
-	LuroWinnersDocument,
-	type LuroWinnersQuery,
 	type WinnerCalculated,
 	execute,
 } from '@/.graphclient';
@@ -60,16 +58,6 @@ export const populateRounds = async (result: LuroRoundsQuery): Promise<Round[]> 
 			} as Round;
 		}),
 	);
-};
-
-export const fetchWinners = async (luro: Address): Promise<WinnerInfo[]> => {
-	logger.start('[luro]', 'fetching winners by game', luro);
-	const data: ExecutionResult<LuroWinnersQuery> = await execute(LuroWinnersDocument, { address: luro });
-	logger.success('[luro]', 'fetching winners by game', data.data?.winnerCalculateds.length);
-	if (data.data) {
-		return data.data.winnerCalculateds.map(populateWinner);
-	}
-	return [];
 };
 
 export const fetchWinner = async (luro: Address, round: number): Promise<WinnerInfo | null> => {

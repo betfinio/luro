@@ -11,7 +11,7 @@ import {
 	useRoundBets,
 	useRoundBonusShare,
 	useVisibleRound,
-	useWinners,
+	useWinner,
 } from '../lib/query';
 
 import logger from '@/src/config/logger.ts';
@@ -44,9 +44,8 @@ export const ModalContent: FC<{
 
 	const { data: volume = 0n } = useRoundBank(roundId);
 	const { data: bonusShare = 0n } = useRoundBonusShare(roundId);
-	const { data: winners = [] } = useWinners();
+	const { data: winner } = useWinner(roundId);
 	const { mutate } = useCalculate(round?.round || 0);
-	const winner = winners.find((w) => w.round === roundId)?.player || ZeroAddress;
 
 	const handleCalculate = useCallback(() => {
 		mutate();
@@ -85,7 +84,7 @@ export const ModalContent: FC<{
 					<RoundCircle round={roundId} className={'aspect-auto py-10 px-2 md:px-10 '} />
 				</div>
 				<WinnerBetInfo round={roundId} />
-				<BetsTable round={roundId} volume={volume} bonusShare={bonusShare} winner={(winner || ZeroAddress).toLowerCase() as Address} />
+				<BetsTable round={roundId} volume={volume} bonusShare={bonusShare} winner={(winner?.player || ZeroAddress).toLowerCase() as Address} />
 				<BonusDistribution round={roundId} />
 			</div>
 		</ScrollArea>
@@ -182,10 +181,8 @@ const columnHelper = createColumnHelper<RoundModalPlayer>();
 const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.winnerBet' });
 
-	const { data: winners = [], isLoading, isFetching } = useWinners();
+	const { data: winner, isLoading, isFetching } = useWinner(round);
 	const { data: currentRound } = useVisibleRound();
-
-	const winner = winners.find((w) => w.round === round);
 
 	if (round === currentRound || winner === undefined) {
 		return null;
@@ -196,8 +193,8 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 			{isLoading || isFetching ? (
 				<Loader className={'w-3 h-3 animate-spin'} />
 			) : (
-				<a target={'_blank'} rel={'noreferrer'} href={`${ETHSCAN}/address/${winner.bet}`} className={'underline'}>
-					{winner.bet}
+				<a target={'_blank'} rel={'noreferrer'} href={`${ETHSCAN}/address/${winner?.bet}`} className={'underline'}>
+					{winner?.bet}
 				</a>
 			)}
 
@@ -208,8 +205,8 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 				) : (
 					<>
 						<ShieldCheckIcon className={'text-[#38BB7F] w-5 h-5'} />
-						<Link target={'_blank'} to={`${ETHSCAN}/tx/${winner.tx}`} className={'underline'}>
-							{truncateEthAddress(winner.tx)}
+						<Link target={'_blank'} to={`${ETHSCAN}/tx/${winner?.tx}`} className={'underline'}>
+							{truncateEthAddress(winner?.tx || ZeroAddress)}
 						</Link>
 					</>
 				)}
