@@ -16,6 +16,7 @@ import {
 	useVisibleRound,
 } from '../lib/query';
 
+import { NET_COEF } from '@/src/global.ts';
 import { toast, useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
@@ -418,7 +419,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 					<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
 					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 						{t('couldWin')}
-						<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+						<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)} withIcon />
 					</div>
 					<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 				</div>
@@ -450,7 +451,11 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-secondary-foreground'}>
 					<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
 					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-						<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 935n) / 1000n)} withIcon />
+						<BetValue
+							className={'text-secondary-foreground text-lg font-semibold'}
+							value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)}
+							withIcon
+						/>
 					</div>
 					<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
 						+bonus <BetValue value={bonus?.bonus || 0} withIcon />
@@ -459,7 +464,7 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 					<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
 					<BetValue
 						className={'text-secondary-foreground text-lg font-semibold'}
-						value={valueToNumber((roundData.total.volume * 935n) / 1000n) + (bonus?.bonus ?? 0)}
+						value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n) + (bonus?.bonus ?? 0)}
 						withIcon
 					/>
 				</div>

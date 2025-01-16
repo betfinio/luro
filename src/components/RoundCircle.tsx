@@ -24,6 +24,7 @@ import { useAccount } from 'wagmi';
 
 import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
+import { NET_COEF } from '@/src/global.ts';
 import { Bet } from '@betfinio/components/icons';
 import { useTranslation } from 'react-i18next';
 
@@ -410,9 +411,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		if (currentRound !== round) {
 			if (roundData?.status === 2) {
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
-				const volume = valueToNumber(roundData?.total.volume ?? 1n);
+				const volume = roundData?.total.volume || 1n;
+				const netVolume = (volume * NET_COEF) / 1000n;
 
-				const finalVolume = (volume * 935) / 1000;
+				const finalVolume = valueToNumber(netVolume);
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
@@ -422,9 +424,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 		switch (wheelState.data.state) {
 			case 'stopped': {
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
-				const volume = valueToNumber(roundData?.total.volume ?? 1n);
+				const volume = roundData?.total.volume || 1n;
+				const netVolume = (volume * NET_COEF) / 1000n;
 
-				const finalVolume = (volume * 935) / 1000;
+				const finalVolume = valueToNumber(netVolume);
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
