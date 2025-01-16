@@ -5,3 +5,8 @@ export const LURO_5MIN = import.meta.env.PUBLIC_LUCKY_ROUND_5MIN_ADDRESS;
 export const BETS_MEMORY = import.meta.env.PUBLIC_BETS_MEMORY_ADDRESS;
 export const PUBLIC_BRANCH = import.meta.env.PUBLIC_BRANCH;
 export const PUBLIC_DEPLOYED = import.meta.env.PUBLIC_DEPLOYED;
+
+export const staking_fee = 36n;
+export const bonus_fee = 50n;
+
+export const netCoef = 1000n - staking_fee - bonus_fee;
