@@ -65,7 +65,7 @@
 		}
 	},
 	"roundCircle": {
-		"waiting": "Waiting for transaction. Any second now...",
+		"waiting": "Waiting for automated spin. Any second now...",
 		"ended": "Ended",
 		"over": "Round is over",
 		"win": "WIN",

@@ -1,7 +1,17 @@
 import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
 import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { useLuroState, useObserveBet, usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundWinner, useVisibleRound } from '../lib/query';
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import {
+	useCalculate,
+	useLuroState,
+	useObserveBet,
+	usePlayerRoundInfo,
+	useRound,
+	useRoundBank,
+	useRoundBets,
+	useRoundWinner,
+	useVisibleRound,
+} from '../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
 import type { CustomLuroBet } from '@/src/lib/types.ts';
@@ -46,6 +56,10 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const { data: currentRound } = useVisibleRound();
 	const { data: roundData } = useRound(round);
 	const winner = useRoundWinner(round);
+	const { mutate: spin } = useCalculate(round);
+	const handleManualSpin = () => {
+		spin();
+	};
 
 	const {
 		state: { data: wheelState },
@@ -216,7 +230,12 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				</div>
 				{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
 					<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
-						{roundData?.status === 0 && t('waiting')}
+						{roundData?.status === 0 && (
+							<div className={'flex flex-col gap-2'}>
+								{t('waiting')}
+								<Button onClick={handleManualSpin}>SPIN now</Button>
+							</div>
+						)}
 
 						{roundData?.status === 2 && (
 							<>
