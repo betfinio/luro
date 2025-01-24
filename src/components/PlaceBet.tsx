@@ -21,7 +21,7 @@ import { toast, useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { Button, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
