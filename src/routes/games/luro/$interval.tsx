@@ -7,16 +7,22 @@ import RoundModal from '@/src/components/RoundModal.tsx';
 import { RoundMyInfo } from '@/src/components/RoundMyInfo.tsx';
 import RoundsTable from '@/src/components/RoundsTable.tsx';
 import { VersionValidation } from '@/src/components/VersionValidation.tsx';
-import { PUBLIC_BRANCH, PUBLIC_DEPLOYED } from '@/src/global.ts';
+import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
 import i18n from '@/src/i18n.ts';
+import type { LuroInterval } from '@/src/lib';
 import { Toaster, TooltipProvider } from '@betfinio/components/ui';
-import { Link, createFileRoute, useSearch } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect, useSearch } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/games/luro/$interval')({
 	validateSearch: (search: Record<string, unknown>) => {
 		if (!search.round) return {};
 		return { round: Number(search.round) || 0 };
+	},
+	beforeLoad: ({ params }) => {
+		if (!types.includes(params.interval as LuroInterval)) {
+			throw redirect({ to: '/games/luro/$interval', params: { interval: '5m' } });
+		}
 	},
 	component: LuroPage,
 });

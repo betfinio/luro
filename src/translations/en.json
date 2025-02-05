@@ -58,6 +58,10 @@
 	"roundInfo": {
 		"luro": "Lucky Round",
 		"howToPlay": "How to play?",
+		"interval": {
+			"five_minutes": "5 min",
+			"one_day": "1 day"
+		},
 		"stats": {
 			"totalBets": "Total Bets",
 			"totalVolume": "Total Volume",
