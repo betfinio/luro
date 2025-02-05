@@ -11,7 +11,7 @@ import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
 import i18n from '@/src/i18n.ts';
 import type { LuroInterval } from '@/src/lib';
 import { Toaster, TooltipProvider } from '@betfinio/components/ui';
-import { Link, createFileRoute, redirect, useSearch } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/games/luro/$interval')({
@@ -19,16 +19,18 @@ export const Route = createFileRoute('/games/luro/$interval')({
 		if (!search.round) return {};
 		return { round: Number(search.round) || 0 };
 	},
-	beforeLoad: ({ params }) => {
-		if (!types.includes(params.interval as LuroInterval)) {
-			throw redirect({ to: '/games/luro/$interval', params: { interval: '5m' } });
-		}
-	},
 	component: LuroPage,
 });
 
 export function LuroPage() {
 	const search = useSearch({ from: '/games/luro/$interval' });
+	const { interval } = useParams({ from: '/games/luro/$interval' });
+	const navigate = useNavigate();
+
+	if (!types.includes(interval as LuroInterval)) {
+		navigate({ to: '/games/luro/$interval', params: { interval: '5m' } });
+	}
+
 	const { t } = useTranslation('luro');
 	return (
 		<div className={'w-full h-full luro'}>

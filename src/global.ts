@@ -13,9 +13,4 @@ export const BONUS_FEE = 50n;
 
 export const NET_COEF = 1000n - STAKING_FEE - BONUS_FEE;
 
-export const intervalMap = {
-	'5m': 'five_minutes',
-	'1d': 'one_day',
-} as const;
-
 export const types: LuroInterval[] = ['5m', '1d'];

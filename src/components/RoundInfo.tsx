@@ -11,7 +11,6 @@ import { motion } from 'framer-motion';
 import { ArrowLeftRight, CircleHelp, Menu } from 'lucide-react';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { intervalMap } from '../global';
 import { useBetsCount, useTotalVolume, useVisibleRound } from '../lib/query';
 
 const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched: boolean }> = ({ betsCount, volume, staking, isFetched }) => {
@@ -65,7 +64,7 @@ export const RoundInfo = () => {
 						<div className={'flex flex-col'}>
 							<span className={'md:text-lg leading-5 text-sm'}>{t('luro')}</span>
 							<div className="text-sm leading-5 text-gray-300 flex items-center gap-1">
-								{t(`interval.${intervalMap[interval as LuroInterval]}`)}
+								{t(`interval.${interval as LuroInterval}`)}
 								<ArrowLeftRight className={'w-3 h-3'} />
 							</div>
 						</div>
