@@ -8,7 +8,7 @@ import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@betfinio/components/ui';
 import { motion } from 'framer-motion';
-import { CircleHelp, Menu } from 'lucide-react';
+import { ArrowLeftRight, CircleHelp, Menu } from 'lucide-react';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBetsCount, useTotalVolume, useVisibleRound } from '../lib/query';
@@ -43,7 +43,6 @@ const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched:
 
 export const RoundInfo = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundInfo' });
-	const { data: currentRound } = useVisibleRound();
 	const { data: betsCount = 0, isFetched: isBetsFetched } = useBetsCount();
 	const { data: volume = 0n, isFetched: isVolumeFetched } = useTotalVolume();
 	const { interval } = Route.useParams();
@@ -64,7 +63,10 @@ export const RoundInfo = () => {
 						<LuckyRound className={'w-8 h-8 md:w-10 md:h-10 text-secondary-foreground'} />
 						<div className={'flex flex-col'}>
 							<span className={'md:text-lg leading-5 text-sm'}>{t('luro')}</span>
-							<span className={'text-sm leading-5 text-gray-300'}>#{currentRound}</span>
+							<div className="text-sm leading-5 text-gray-300 flex items-center gap-1">
+								{t(`interval.${interval as LuroInterval}`)}
+								<ArrowLeftRight className={'w-3 h-3'} />
+							</div>
 						</div>
 					</motion.div>
 				</DialogTrigger>
