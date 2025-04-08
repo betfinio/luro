@@ -10,7 +10,7 @@ import { VersionValidation } from '@/src/components/VersionValidation.tsx';
 import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
 import i18n from '@/src/i18n.ts';
 import type { LuroInterval } from '@/src/lib';
-import { Toaster, TooltipProvider } from '@betfinio/components/ui';
+import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
 import { Link, createFileRoute, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -34,10 +34,10 @@ export function LuroPage() {
 	const { t } = useTranslation('luro');
 	return (
 		<div className={'w-full h-full luro'}>
-			<div className={'col-span-4 p-2 md:p-3 lg:p-4 lg:col-start-2 2xl:pr-0'}>
+			<div className={'col-span-4 p-2 md:p-3 lg:p-4 lg:col-start-2 2xl:px-0'}>
 				<TooltipProvider delayDuration={0}>
 					<RoundInfo />
-					<div className={'grid grid-cols-4 md:grid-cols-3 lg:grid-cols-[repeat(21,minmax(0,_1fr))] xl:grid-cols-12 gap-4 md:pt-4 relative'}>
+					<div className={'grid grid-cols-4 md:grid-cols-3 lg:grid-cols-[repeat(21,minmax(0,1fr))] xl:grid-cols-12 gap-4 md:pt-4 relative'}>
 						<div className={'col-span-4 md:col-span-2 lg:col-[span_15_/_span_15] xl:col-span-8 flex flex-col justify-between'}>
 							<CurrentRound />
 							<BonusInfo />
@@ -64,7 +64,7 @@ export function LuroPage() {
 					</div>
 				</TooltipProvider>
 			</div>
-			<Toaster />
+			<SonnerToaster />
 			<VersionValidation repository={'luro'} branch={PUBLIC_BRANCH} current={PUBLIC_DEPLOYED} />
 		</div>
 	);

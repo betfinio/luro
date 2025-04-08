@@ -2,7 +2,7 @@ import { LURO, LURO_5MIN } from '@/src/global.ts';
 import type { ILanguageErrorKeys } from '@/src/i18next';
 import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { toast } from '@betfinio/components/hooks';
+import { toast } from '@betfinio/components/ui';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import type { Address } from 'viem';
@@ -73,7 +73,7 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 };
 
 export const handleError = (e: Error, t: TFunction<'shared', 'errors'>) => {
-	toast({ variant: 'destructive', description: t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown') });
+	toast.error(t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown'));
 };
 
 export const getLuroInterval = (interval: LuroInterval) => {

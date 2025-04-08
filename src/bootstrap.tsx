@@ -1,8 +1,6 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import '@/src/globals.css';
-import '@betfinio/components';
 
 import { routeTree } from './routeTree.gen';
 

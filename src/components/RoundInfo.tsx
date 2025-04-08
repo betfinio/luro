@@ -19,13 +19,13 @@ const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched:
 		<div className={'hidden md:flex gap-4 sm:gap-5 items-center justify-end grow text-xs'}>
 			<div className={'flex flex-col'}>
 				<span>{t('totalBets')}</span>
-				<div className={cn('font-semibold flex flex-row items-center gap-0 duration-300', !isFetched && 'animate-pulse blur-sm')}>{betsCount}</div>
+				<div className={cn('font-semibold flex flex-row items-center gap-0 duration-300', !isFetched && 'animate-pulse blur-xs')}>{betsCount}</div>
 			</div>
 			<div className={'w-[1px] bg-white h-[36px] hidden md:block'} />
 
 			<div className={'flex flex-col'}>
 				<span>{t('totalVolume')}</span>
-				<div className={cn('font-semibold flex flex-row items-center gap-1 duration-300', !isFetched && 'animate-pulse blur-sm')}>
+				<div className={cn('font-semibold flex flex-row items-center gap-1 duration-300', !isFetched && 'animate-pulse blur-xs')}>
 					<BetValue precision={1} value={valueToNumber(volume)} withIcon={true} iconClassName={'w-3 h-3'} />
 				</div>
 			</div>
@@ -33,7 +33,7 @@ const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched:
 
 			<div className={'flex flex-col'}>
 				<span>{t('stakingRewards')}</span>
-				<div className={cn('font-semibold flex flex-row items-center gap-1 duration-300', !isFetched && 'animate-pulse blur-sm')}>
+				<div className={cn('font-semibold flex flex-row items-center gap-1 duration-300', !isFetched && 'animate-pulse blur-xs')}>
 					<BetValue precision={1} value={valueToNumber(staking)} withIcon={true} iconClassName={'w-3 h-3'} />
 				</div>
 			</div>
@@ -62,8 +62,8 @@ export const RoundInfo = () => {
 						<Menu className={'w-8 md:w-10 aspect-square text-white'} />
 						<LuckyRound className={'w-8 h-8 md:w-10 md:h-10 text-secondary-foreground'} />
 						<div className={'flex flex-col'}>
-							<span className={'md:text-lg leading-5 text-sm'}>{t('luro')}</span>
-							<div className="text-sm leading-5 text-gray-300 flex items-center gap-1">
+							<span className={'md:text-lg text-sm'}>{t('luro')}</span>
+							<div className="text-sm text-gray-300 flex items-center gap-1">
 								{t(`interval.${interval as LuroInterval}`)}
 								<ArrowLeftRight className={'w-3 h-3'} />
 							</div>

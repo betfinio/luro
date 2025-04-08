@@ -23,19 +23,19 @@ export const RoundMyInfo = () => {
 			<div className={'bg-background rounded-lg p-[10px] flex justify-between gap-1 items-center text-white font-semibold'}>
 				<div className={'flex flex-row items-center gap-1 text-secondary-foreground'}>
 					<LuckyRound className={'h-4 w-4 '} />
-					<div className={cn('flex flex-row gap-1 items-center', { 'blur-sm animate-pulse': !isFetched })}>
+					<div className={cn('flex flex-row gap-1 items-center', { 'blur-xs animate-pulse': !isFetched })}>
 						<BetValue value={roundInfo.volume} precision={2} withIcon />
 					</div>
 				</div>
 				<div className={'flex flex-row items-center gap-1 text-secondary-foreground'}>
-					<div className={cn('flex flex-row gap-1 items-center', { 'blur-sm animate-pulse': !isFetched })}>{roundInfo.usersCount}</div>
+					<div className={cn('flex flex-row gap-1 items-center', { 'blur-xs animate-pulse': !isFetched })}>{roundInfo.usersCount}</div>
 					<UserIcon className={'h-4 w-4'} />
 				</div>
 			</div>
 
 			<div className={'bg-background rounded-lg p-[10px] flex justify-between gap-1 items-center font-semibold'}>
 				<div className={'flex flex-row items-center gap-1 text-muted-foreground'}>{t('totalBonus')}</div>
-				<div className={cn('text-blue-400 flex flex-row gap-1 items-center', { 'blur-sm animate-pulse': !isFetched })}>
+				<div className={cn('text-blue-400 flex flex-row gap-1 items-center', { 'blur-xs animate-pulse': !isFetched })}>
 					<BetValue value={valueToNumber((volume / 100n) * 5n)} withIcon iconClassName={'text-bonus'} />
 				</div>
 			</div>
