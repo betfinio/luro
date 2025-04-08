@@ -1,7 +1,7 @@
 import { valueToNumber } from '@betfinio/abi';
+import { LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { LuckyRound } from '@betfinio/ui/dist/icons/LuckyRound';
 import { UserIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
