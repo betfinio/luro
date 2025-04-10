@@ -132,13 +132,22 @@ const AllRoundsTable: FC<{ columns: ColumnDef<Round, never>[] }> = ({ columns })
 	const { data: rounds = [], isLoading } = useRounds(address);
 	const navigate = useNavigate();
 	const { interval } = useParams({ from: '/games/luro/$interval' });
+	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
 
 	const handleClick = async (row: Round) => {
 		await navigate({ to: '/games/luro/$interval', params: { interval }, search: { round: row.round } });
 	};
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-			<DataTable data={rounds} columns={columns} onRowClick={handleClick} isLoading={isLoading} loaderClassName="h-[185px]" noResultsClassName="h-[185px]" />
+			<DataTable
+				t={tShared}
+				data={rounds}
+				columns={columns}
+				onRowClick={handleClick}
+				isLoading={isLoading}
+				loaderClassName="h-[185px]"
+				noResultsClassName="h-[185px]"
+			/>
 		</motion.div>
 	);
 };
@@ -148,6 +157,7 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	const { data: rounds = [], isLoading } = usePlayerRounds(address);
 	const navigate = useNavigate();
 	const { interval } = Route.useParams();
+	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
 
 	const handleClick = (row: Round) => {
 		navigate({ to: '/games/luro/$interval', params: { interval }, search: { round: row.round } });
@@ -155,6 +165,7 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 	return (
 		<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
 			<DataTable
+				t={tShared}
 				data={rounds}
 				columns={columns as ColumnDef<Round, never>[]}
 				onRowClick={handleClick}

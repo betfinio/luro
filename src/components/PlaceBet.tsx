@@ -17,11 +17,11 @@ import {
 } from '../lib/query';
 
 import { NET_COEF } from '@/src/global.ts';
-import { toast, useMediaQuery } from '@betfinio/components/hooks';
+import { useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { Button, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { Slider, Tooltip, TooltipContent, TooltipTrigger, toast } from '@betfinio/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
@@ -83,43 +83,26 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 	const handleBet = () => {
 		if (address === ZeroAddress) {
-			toast({
-				description: t('toast.connect'),
-				variant: 'destructive',
-			});
+			toast.error(t('toast.connect'));
 			return;
 		}
 		if (!isMember) {
-			toast({
-				description: t('toast.notMember'),
-				variant: 'destructive',
-			});
+			toast.error(t('toast.notMember'));
 			return;
 		}
 		if (amount === '') {
-			toast({
-				description: t('toast.amount'),
-				variant: 'destructive',
-			});
+			toast.error(t('toast.amount'));
 			return;
 		}
 		if (Number(amount) < 1000) {
-			toast({
-				title: t('toast.minimalBet'),
-				description: '',
-				variant: 'destructive',
-			});
+			toast.error(t('toast.minimalBet'));
 			return;
 		}
 
 		try {
 			BigInt(Number(amount));
 		} catch (e) {
-			toast({
-				title: t('toast.invalidAmount'),
-				description: '',
-				variant: 'destructive',
-			});
+			toast.error(t('toast.invalidAmount'));
 			return;
 		}
 

@@ -3,7 +3,7 @@ import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuro
 import type { LuroBet, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
-import { toast } from '@betfinio/components/hooks';
+import { toast } from '@betfinio/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type WriteContractReturnType, readContract } from '@wagmi/core';
 import { getTransactionLink } from 'betfinio_context/lib/helpers';
@@ -71,45 +71,28 @@ export const usePlaceBet = () => {
 		mutationKey: ['luro', luroAddress, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
 		onError: (e) => {
-			toast({
-				// @ts-ignore
-				title: errors('default'),
-				variant: 'destructive',
+			toast.error(errors('default'), {
 				// @ts-ignore
 				description: errors(e.cause?.reason),
 			});
 		},
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
-			const { update, id } = toast({
-				title: t('placeBet.title') as string,
-				description: t('placeBet.description') as string,
-				variant: 'loading',
-				duration: 10000,
-			});
-			const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+			const promise = async () => {
+				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+				if (receipt.status === 'reverted') {
+					throw new Error('Transaction reverted');
+				}
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+			};
 
-			if (receipt.status === 'reverted') {
-				update({
-					id,
-					variant: 'destructive',
-					description: '',
-					title: t('transactionFailed.title'),
-					action: getTransactionLink(data),
-					duration: 5000,
-				});
-				return;
-			}
-			update({
-				id,
-				variant: 'default',
-				description: t('betPlaced.description'),
-				title: t('betPlaced.title'),
+			toast.promise(promise, {
+				loading: t('placeBet.title'),
+				success: t('placeBet.title'),
+				error: t('transactionFailed.title'),
 				action: getTransactionLink(data),
-				duration: 5000,
 			});
-			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
-			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 		},
 		onSettled: () => logger.log('placeBet settled'),
 	});
@@ -128,32 +111,20 @@ export const useStartRound = (round: number) => {
 		onError: (e) => handleError(e, errors),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
-			const { update, id } = toast({
-				title: t('startingRound.title'),
-				description: t('startingRound.description'),
-				variant: 'loading',
-				duration: 10000,
-			});
-			const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+			const promise = async () => {
+				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+				if (receipt.status === 'reverted') {
+					throw new Error('Transaction reverted');
+				}
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+			};
 
-			if (receipt.status === 'reverted') {
-				update({
-					id,
-					variant: 'destructive',
-					description: '',
-					title: t('transactionFailed.title'),
-					action: getTransactionLink(data),
-					duration: 5000,
-				});
-				return;
-			}
-			update({
-				id,
-				variant: 'default',
-				description: t('roundRequested.title'),
-				title: t('roundRequested.title'),
+			toast.promise(promise, {
+				loading: t('startingRound.title'),
+				success: t('startingRound.title'),
+				error: t('transactionFailed.title'),
 				action: getTransactionLink(data),
-				duration: 5000,
 			});
 			queryClient.setQueryData(['luro', luroAddress, 'requested', round], true);
 		},
@@ -277,22 +248,20 @@ export const useClaimBonus = () => {
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
-			const { update, id } = toast({
-				title: t('claimingBonus.title'),
-				description: t('claimingBonus.description'),
-				variant: 'loading',
-				duration: 10000,
-			});
-			await waitForTransactionReceipt(config.getClient(), { hash: data });
-			update({
-				id,
-				variant: 'default',
-				description: t('bonusClaimed.description'),
-				title: t('bonusClaimed.title'),
+			const promise = async () => {
+				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+				if (receipt.status === 'reverted') {
+					throw new Error('Transaction reverted');
+				}
+				queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
+			};
+
+			toast.promise(promise, {
+				loading: t('claimingBonus.title'),
+				success: t('claimingBonus.title'),
+				error: t('transactionFailed.title'),
 				action: getTransactionLink(data),
-				duration: 5000,
 			});
-			queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
 		},
 		onSettled: () => logger.log('bonusClaim settled'),
 	});

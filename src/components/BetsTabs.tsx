@@ -22,7 +22,7 @@ export const BetsTabs: FC<BetsTabsProps> = ({ activeTab, handleTabClick, tabs })
 						<motion.div layoutId="bubble" className="absolute inset-0 rounded-md bg-primary" transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
 					)}
 					<div
-						className={`text-xs font-semibold relative text-center transition-all transition-300 ${activeTab === i ? '!text-black' : 'text-muted-foreground'}`}
+						className={`text-xs font-semibold relative text-center transition-all transition-300 ${activeTab === i ? 'text-black!' : 'text-muted-foreground'}`}
 					>
 						{tab}
 					</div>

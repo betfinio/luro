@@ -97,7 +97,7 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
 							{formatPlayer(username || truncateEthAddress(player))}

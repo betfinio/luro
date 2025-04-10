@@ -217,7 +217,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 
 const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusShare: bigint; winner: Address }> = ({ round, volume, bonusShare, winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.table' });
-
+	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
 	const { data: bets = [] } = useRoundBets(round);
 	const { address = ZeroAddress } = useAccount();
 	const { data: roundData } = useRound(round);
@@ -231,7 +231,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			header: '',
 			id: 'color',
 			meta: {
-				className: '!w-[8px] !p-0 hidden lg:table-cell',
+				className: 'w-[8px]! p-0! hidden lg:table-cell',
 			},
 			cell: (props) => <div className={'h-[40px] w-[8px] rounded-l'} style={{ backgroundColor: addressToColor(props.row.getValue('player')) }} />,
 		}),
@@ -239,7 +239,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			header: '',
 			id: 'trophy',
 			meta: {
-				className: '!w-[32px] h-[40px] !pr-0 hidden lg:table-cell',
+				className: 'w-[32px]! h-[40px] pr-0! hidden lg:table-cell',
 			},
 			cell: (props) => (
 				<div className={'w-full h-full flex items-center justify-center'}>
@@ -306,7 +306,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 
 	return (
 		<div className={'mt-4'}>
-			<DataTable columns={columns} data={players} state={{ columnVisibility: { totalWin: (roundData?.winnerOffset || 0n) > 0n } }} />
+			<DataTable t={tShared} columns={columns} data={players} state={{ columnVisibility: { totalWin: (roundData?.winnerOffset || 0n) > 0n } }} />
 		</div>
 	);
 };

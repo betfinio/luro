@@ -10,7 +10,7 @@ import {
 import logger from '@/src/config/logger.ts';
 import type { Round, WinnerInfo } from '@/src/lib/types.ts';
 import { LuckyRoundABI } from '@betfinio/abi';
-import { readContract } from '@wagmi/core';
+import { type Config, readContract } from '@wagmi/core';
 import { wagmiConfig } from 'betfinio_context/config';
 import type { ExecutionResult } from 'graphql/execution';
 import type { Address } from 'viem';
@@ -37,7 +37,7 @@ export const requestPlayerRounds = async (address: Address, player: Address): Pr
 export const populateRounds = async (result: LuroRoundsQuery): Promise<Round[]> => {
 	return await Promise.all(
 		result.rounds.map(async (round: LuroRoundsQuery['rounds'][0]) => {
-			const status = await readContract(wagmiConfig, {
+			const status = await readContract(wagmiConfig as Config, {
 				abi: LuckyRoundABI,
 				address: round.address as Address,
 				functionName: 'roundStatus',
