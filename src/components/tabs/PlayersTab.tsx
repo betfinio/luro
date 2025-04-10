@@ -100,7 +100,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
 							{formatPlayer(customUsername || username || truncateEthAddress(player))}
@@ -147,7 +147,7 @@ export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amo
 						<a
 							href={`${ETHSCAN}/address/${player}`}
 							target={'_blank'}
-							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && '!text-secondary-foreground')}
+							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
 							{formatPlayer(customUsername || username || truncateEthAddress(player))}

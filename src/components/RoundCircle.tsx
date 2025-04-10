@@ -160,13 +160,13 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		<Tooltip>
 			<motion.div
 				className={cn(
-					'border-border border relative p-4 flex-grow xl:p-8 rounded-xl bg-background-light flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
+					'border-border border relative p-4 grow xl:p-8 rounded-xl bg-background-light flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
 					className,
 				)}
 				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'hsl(var(--background-light))' }}
 			>
 				{currentRound === round && <EffectsLayer round={round} />}
-				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && '!h-[300px] md:!h-[325px]')} ref={boxRef}>
+				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && 'h-[300px]! md:h-[325px]!')} ref={boxRef}>
 					<div className={'relative'}>
 						<ProgressBar round={round} authors={data} />
 
@@ -347,7 +347,7 @@ const CustomTooltip =
 				key={id}
 				amount={value}
 				betsNumber={(data as CustomLuroBet)?.betsNumber}
-				className={'min-w-[250px]  !z-15'}
+				className={'min-w-[250px]  z-15!'}
 				player={label as Address}
 				percent={(value * 100) / valueToNumber(bank)}
 			/>
@@ -488,7 +488,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 					<TriangleIcon fill={'#FFC800'} stroke={'#FFC800'} className={cn('text-secondary-foreground w-6 h-6 duration-300 delay-300 opacity-100')} />
 				</div>
 
-				<CircularProgressbar className={cn('opacity-100 duration-300', wheelState.data.state !== 'standby' && '!opacity-0')} styles={styles} value={progress} />
+				<CircularProgressbar className={cn('opacity-100 duration-300', wheelState.data.state !== 'standby' && 'opacity-0!')} styles={styles} value={progress} />
 			</motion.div>
 
 			{renderInside()}
@@ -511,7 +511,7 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.5 }}
-			className={cn('absolute flex flex-col items-center justify-center w-full h-full top-0 gap-2 duration-300', loading && 'blur-sm')}
+			className={cn('absolute flex flex-col items-center justify-center w-full h-full top-0 gap-2 duration-300', loading && 'blur-xs')}
 		>
 			<img alt={'crown'} src={Crown as string} />
 			<div className={'z-10'}>
@@ -623,7 +623,7 @@ export const Counter: FC<{ from: number; to: number; doMillify?: boolean }> = ({
 	return (
 		<>
 			<TooltipTrigger>
-				<div className={'flex gap-1 lg:gap-2 items-center relative z-[10]'}>
+				<div className={'flex gap-1 lg:gap-2 items-center relative z-10'}>
 					<Bet className={'text-secondary-foreground w-5 h-5 lg:w-7 lg:h-7'} />
 					<div className={''} ref={nodeRef} />
 				</div>
