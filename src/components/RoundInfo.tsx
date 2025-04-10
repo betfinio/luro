@@ -85,7 +85,7 @@ export const RoundInfo = () => {
 
 				<a
 					target={'_blank'}
-					href={'https://betfin.gitbook.io/betfin-public/games-guide/lucky-round-luro'}
+					href={'https://betfin.gitbook.io/betfin-public/games-manual/games-guide/lucky-round-luro'}
 					className={
 						'flex flex-col items-center justify-center cursor-pointer text-secondary-foreground hover:text-secondary-foreground lg:text-white duration-300'
 					}
