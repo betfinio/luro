@@ -622,7 +622,7 @@ export const Counter: FC<{ from: number; to: number; doMillify?: boolean }> = ({
 
 	return (
 		<>
-			<TooltipTrigger>
+			<TooltipTrigger tabIndex={-1}>
 				<div className={'flex gap-1 lg:gap-2 items-center relative z-10'}>
 					<Bet className={'text-secondary-foreground w-5 h-5 lg:w-7 lg:h-7'} />
 					<div className={''} ref={nodeRef} />
