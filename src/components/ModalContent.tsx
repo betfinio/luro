@@ -56,10 +56,12 @@ export const ModalContent: FC<{
 				onClick={(e) => e.stopPropagation()}
 				className={'relative mx-auto text-white h-full w-full  min-h-[300px] rounded-xl flex flex-col p-2 md:p-3 lg:p-4 pt-5'}
 			>
-				<X
-					className={'absolute top-5 right-5 w-6 h-6  border-2 border-white rounded-full cursor-pointer hover:text-red-500 hover:border-red-500 duration-300'}
-					onClick={() => onClose()}
-				/>
+				<button type="button" onClick={() => onClose()}>
+					<X
+						className={'absolute top-5 right-5 w-6 h-6  border-2 border-white rounded-full cursor-pointer hover:text-red-500 hover:border-red-500 duration-300'}
+					/>
+				</button>
+
 				<div className={'flex flex-row gap-2 justify-start items-center'}>
 					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap cursor-pointer'} onClick={handleCalculate}>
 						{isFinished ? (
