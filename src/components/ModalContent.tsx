@@ -21,7 +21,7 @@ import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
 import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
-import { Button, ScrollArea } from '@betfinio/components/ui';
+import { Button, DialogClose, ScrollArea } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
@@ -56,11 +56,11 @@ export const ModalContent: FC<{
 				onClick={(e) => e.stopPropagation()}
 				className={'relative mx-auto text-white h-full w-full  min-h-[300px] rounded-xl flex flex-col p-2 md:p-3 lg:p-4 pt-5'}
 			>
-				<button type="button" onClick={() => onClose()}>
+				<DialogClose>
 					<X
 						className={'absolute top-5 right-5 w-6 h-6  border-2 border-white rounded-full cursor-pointer hover:text-red-500 hover:border-red-500 duration-300'}
 					/>
-				</button>
+				</DialogClose>
 
 				<div className={'flex flex-row gap-2 justify-start items-center'}>
 					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap cursor-pointer'} onClick={handleCalculate}>
