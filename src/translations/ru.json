@@ -87,7 +87,41 @@
 		"titleFinished": "Результат раунда",
 		"activity": "Активность ставок",
 		"volume": "Общий объем раунда",
+		"staking": "Вклад в стейкинг",
+		"users": "{players} пользователи",
+		"bets": "{bets} ставки",
+		"details": {
+			"bets": "ставки",
+			"totalBets": "Всего ставок",
+			"totalBonus": "Общий бонус",
+			"paidToStaking": "Выплачено в стейкинг"
+		},
+		"winnerBet": {
+			"winningBet": "Выигрышная ставка:",
+			"proofOfRandom": "Доказательство случайности:"
+		},
+		"table": {
+			"you": "ВЫ",
+			"columns": {
+				"player": "Игрок",
+				"bets": "Ставки",
+				"amount": "Сумма",
+				"result": "Результат",
+				"bonus": "Бонус",
+				"totalResult": "Общий результат"
+			}
+		}
+	},
+	"statsModal": {
+		"bets": "Количество ставок",
+		"volume": "Общий объем",
 		"staking": "Вклад в стейкинг"
+	},
+	"table": {
+		"tabs": {
+			"all": "Все раунды",
+			"my": "Мои раунды"
+		}
 	},
 	"title": "Шаблон"
 }
