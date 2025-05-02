@@ -40,7 +40,7 @@
 		"couldWin": "Вы могли выиграть",
 		"backToGame": "Вернуться к игре",
 		"youWin": "Вы ПОБЕДИЛИ!",
-		"total": "суммарно",
+		"total": "В ощем",
 		"yourBonus": "Ваш бонус:"
 	},
 	"bonusClaimBlock": {
@@ -76,7 +76,7 @@
 		"couldWin": "Вы могли выиграть",
 		"youWin": "Вы ПОБЕДИЛИ!",
 		"bonus": "бонус",
-		"total": "Суммарно",
+		"total": "В общем",
 		"yourBonus": "Ваш бонус;"
 	},
 	"myInfo": {
