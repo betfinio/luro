@@ -71,12 +71,13 @@ export interface TabItemProps {
 }
 
 const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
-	const { data: username } = useUsername(player);
 	const { address } = useAccount();
+	const { data: username } = useUsername(player, address);
 
-	const formatPlayer = (player: string) => {
-		if (player.length > 10) {
-			return `${player.slice(0, 10)}...`;
+	const formatPlayer = (player?: string) => {
+		if (!player) return '';
+		if (player.length > 12) {
+			return `${player.slice(0, 12)}...`;
 		}
 		return player;
 	};
@@ -100,7 +101,7 @@ const TabItem: FC<TabItemProps> = ({ player, bonus }) => {
 							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
-							{formatPlayer(username || truncateEthAddress(player))}
+							{formatPlayer(username)}
 						</a>
 					</div>
 				</div>

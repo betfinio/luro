@@ -1,11 +1,11 @@
 import { ETHSCAN } from '@/src/global.ts';
 import { mapBetsToAuthors } from '@/src/lib';
 import { useRoundBets, useVisibleRound } from '@/src/lib/query';
-import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { Fox } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { useCustomUsername, useUsername } from 'betfinio_context/lib/query';
+import { useUsername } from 'betfinio_context/lib/query';
 import { addressToColor } from 'betfinio_context/lib/utils';
 import { motion } from 'framer-motion';
 import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
@@ -74,11 +74,11 @@ export interface TabItemProps {
 }
 
 export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, betsNumber = 0, className }) => {
-	const { data: username } = useUsername(player);
 	const { address = ZeroAddress } = useAccount();
-	const { data: customUsername } = useCustomUsername(address, player);
+	const { data: username } = useUsername(player, address);
 
-	const formatPlayer = (player: string) => {
+	const formatPlayer = (player?: string) => {
+		if (!player) return '';
 		if (player.length > 12) {
 			return `${player.slice(0, 12)}...`;
 		}
@@ -103,7 +103,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
-							{formatPlayer(customUsername || username || truncateEthAddress(player))}
+							{formatPlayer(username)}
 						</a>
 						<span className={cn('opacity-0', betsNumber > 0 && 'opacity-100')}>{betsNumber} bets</span>
 					</div>
@@ -121,11 +121,11 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 });
 
 export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amount, id, betsNumber = 0, className }) => {
-	const { data: username } = useUsername(player);
 	const { address = ZeroAddress } = useAccount();
-	const { data: customUsername } = useCustomUsername(address, player);
+	const { data: username } = useUsername(player, address);
 
-	const formatPlayer = (player: string) => {
+	const formatPlayer = (player?: string) => {
+		if (!player) return '';
 		if (player.length > 12) {
 			return `${player.slice(0, 12)}...`;
 		}
@@ -150,7 +150,7 @@ export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amo
 							className={cn('font-semibold text-sm text-muted-foreground hover:underline', player === address && 'text-secondary-foreground!')}
 							rel="noreferrer"
 						>
-							{formatPlayer(customUsername || username || truncateEthAddress(player))}
+							{formatPlayer(username)}
 						</a>
 					</div>
 				</div>
