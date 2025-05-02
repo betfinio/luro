@@ -239,7 +239,7 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					whileHover={{ scale: 1.03 }}
 					disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
 					className={
-						'hidden text-xs font-semibold flex-col hover:scale-110 items-center justify-center text-center w-full h-[40px] bg-primary mt-[30px] min-w-[210px] rounded-lg text-primary-foreground disabled:grayscale disabled:pointer-events-none duration-300 sm:flex'
+						'hidden text-xs font-semibold flex-col items-center justify-center text-center w-full h-[40px] bg-primary mt-[30px] min-w-[210px] rounded-lg text-primary-foreground disabled:grayscale disabled:pointer-events-none duration-300 sm:flex'
 					}
 				>
 					{isPending ? (
@@ -302,7 +302,7 @@ const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'grow relative min-h-[230px] md:min-h-[390px] flex items-start justify-center'}
+			className={'grow relative min-h-[390px] flex items-start justify-center'}
 		>
 			<DotLottieReact
 				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
@@ -349,7 +349,7 @@ const SpinningScreen: FC<{ round: number }> = () => {
 				autoplay={true}
 				loop={true}
 			/>
-			<div className={'flex items-end pb-4 mt-10 gap-2'}>
+			<div className={'flex items-end pb-4 mt-10 lg:mt-20 gap-2'}>
 				<span className={'leading-[12px]'}>{t('winnerIsBeingDecided')}</span>
 				<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
 			</div>

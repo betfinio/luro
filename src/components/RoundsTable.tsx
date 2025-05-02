@@ -1,11 +1,12 @@
 import type { Round } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/ui';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { useUsername } from 'betfinio_context/lib/query';
 import { motion } from 'framer-motion';
 import { Expand } from 'lucide-react';
 import type { FC } from 'react';
@@ -180,9 +181,12 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 const WinnerInfo: FC<{ winner: Address }> = ({ winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 	const { address } = useAccount();
+	console.log(address, winner);
+
+	const { data: username } = useUsername(winner, address);
 
 	if (!winner) {
 		return <div>{t('waiting')}</div>;
 	}
-	return <div className={cn(address?.toLowerCase() === winner.toLowerCase() && 'text-green-500')}>{truncateEthAddress(winner)}</div>;
+	return <div className={cn(address?.toLowerCase() === winner.toLowerCase() && 'text-green-500')}>{username}</div>;
 };
