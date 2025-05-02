@@ -121,6 +121,49 @@
 		"tabs": {
 			"all": "Все раунды",
 			"my": "Мои раунды"
+		},
+		"columns": {
+			"round": "Раунд",
+			"bets": "Ставки",
+			"myBets": "Мои ставки",
+			"totalBets": "Всего ставок",
+			"totalBonuses": "Всего бонусов",
+			"winner": "Победитель",
+			"stakingEarnings": "Доходы в стейкинг"
+		},
+		"waiting": "Ожидание"
+	},
+	"toast": {
+		"newVersion": {
+			"title": "Доступна новая версия!",
+			"action": "Обновить"
+		},
+		"placeBet": {
+			"title": "Осуществление ставки",
+			"description": "Ожидание транзакции"
+		},
+		"transactionFailed": {
+			"title": "Транзакция не удалась"
+		},
+		"betPlaced": {
+			"title": "Ставка сделана",
+			"description": "Транзакция подтверждена"
+		},
+		"startingRound": {
+			"title": "Начинаем раунд",
+			"description": "Ожидание транзакции"
+		},
+		"roundRequested": {
+			"title": "Раунд запрошен",
+			"description": "Транзакция подтверждена"
+		},
+		"claimingBonus": {
+			"title": "Получение бонуса",
+			"description": "Ожидание транзакции"
+		},
+		"bonusClaimed": {
+			"title": "Бонус получен!",
+			"description": "Транзакция подтверждена"
 		}
 	},
 	"title": "Шаблон"
