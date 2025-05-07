@@ -1,6 +1,7 @@
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
-import { type LuroInterval, getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
+import { getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
+import type { LuroInterval } from '@/src/lib/types.ts';
 import { addressToColor } from 'betfinio_context/lib/utils';
 import {
 	useBonusDistribution,

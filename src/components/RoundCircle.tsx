@@ -1,5 +1,5 @@
 import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
-import { type LuroInterval, getTimesByRound, hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
+import { getTimesByRound, hexToRgbA, jumpToCurrentRound, shootConfetti, useLuroAddress } from '@/src/lib';
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import {
 	useCalculate,
@@ -14,7 +14,7 @@ import {
 } from '../lib/query';
 
 import Chainlink from '@/src/assets/chainlink.svg';
-import type { CustomLuroBet } from '@/src/lib/types.ts';
+import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { ZeroAddress, valueToNumber } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
@@ -28,7 +28,6 @@ import { DateTime } from 'luxon';
 import millify from 'millify';
 import { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import { CircularProgressbar } from 'react-circular-progressbar';
-import ConfettiExplosion from 'react-confetti-explosion';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
@@ -38,18 +37,9 @@ import { NET_COEF } from '@/src/global.ts';
 import { Bet } from '@betfinio/components/icons';
 import { useTranslation } from 'react-i18next';
 
-const largeProps = {
-	force: 0.8,
-	duration: 3000,
-	particleCount: 300,
-	width: 1600,
-	colors: ['#041E43', '#1471BF', '#5BB4DC', '#FC027B', '#66D805'],
-};
-
 export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
 
-	const [confettiExploding, setConfettiExploding] = useState(false);
 	const [winnerColor, setWinnerColor] = useState<string | null>(null);
 	const { address } = useAccount();
 	const { data: bets = [] } = useRoundBets(round);
@@ -93,7 +83,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		}
 		if (wheelState.state === 'stopped') {
 			if (winner?.player === address) {
-				setConfettiExploding(true);
+				shootConfetti();
 			} else {
 				setWinnerColor(addressToColor(winner?.player ?? ZeroAddress));
 				setTimeout(() => {
@@ -169,18 +159,6 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && 'h-[300px]! md:h-[325px]!')} ref={boxRef}>
 					<div className={'relative'}>
 						<ProgressBar round={round} authors={data} />
-
-						{confettiExploding && (
-							<div className={'top-1/2 left-1/2'}>
-								<ConfettiExplosion
-									force={largeProps.force}
-									duration={largeProps.duration}
-									particleCount={largeProps.particleCount}
-									width={largeProps.width}
-									colors={largeProps.colors}
-								/>
-							</div>
-						)}
 
 						{data.length > 0 ? (
 							round === currentRound ? (

@@ -1,4 +1,4 @@
-import type { LuroInterval } from './lib';
+import type { LuroInterval } from './lib/types.ts';
 
 export const PARTNER = import.meta.env.PUBLIC_PARTNER_ADDRESS;
 export const ETHSCAN = import.meta.env.PUBLIC_ETHSCAN;
