@@ -1,6 +1,6 @@
 import logger from '@/src/config/logger.ts';
-import { type LuroInterval, animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
-import type { LuroBet, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
+import { animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
+import type { LuroBet, LuroInterval, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/ui';
