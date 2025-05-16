@@ -96,3 +96,5 @@ export interface CustomLuroBet {
 	color: string;
 	betsNumber?: number;
 }
+
+export type LuroInterval = '1d' | '5m';

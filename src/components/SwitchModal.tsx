@@ -1,4 +1,4 @@
-import type { LuroInterval } from '@/src/lib';
+import type { LuroInterval } from '@/src/lib/types.ts';
 import { cn } from '@betfinio/components/lib';
 import { DialogClose } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';

@@ -1,5 +1,6 @@
 import { ModalContent } from '@/src/components/ModalContent.tsx';
-import { type LuroInterval, getLuroInterval } from '@/src/lib';
+import { getLuroInterval } from '@/src/lib';
+import type { LuroInterval } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { Dialog, DialogContent, DialogDescription, DialogPortal, DialogTitle } from '@betfinio/components/ui';
 import { useNavigate } from '@tanstack/react-router';

@@ -1,9 +1,10 @@
 import { LURO, LURO_5MIN } from '@/src/global.ts';
 import type { ILanguageErrorKeys } from '@/src/i18next';
-import type { LuroAuthor, LuroBet, RoundModalPlayer } from '@/src/lib/types.ts';
+import type { LuroAuthor, LuroBet, LuroInterval, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { toast } from '@betfinio/components/ui';
 import type { QueryClient } from '@tanstack/react-query';
+import confetti from 'canvas-confetti';
 import type { TFunction } from 'i18next';
 import type { Address } from 'viem';
 
@@ -117,8 +118,6 @@ export function hexToRgbA(hex: string) {
 	throw new Error('Bad Hex');
 }
 
-export type LuroInterval = '1d' | '5m';
-
 export const useLuroAddress = (): Address => {
 	const { interval } = Route.useParams();
 	switch (interval) {
@@ -129,4 +128,27 @@ export const useLuroAddress = (): Address => {
 		default:
 			return LURO;
 	}
+};
+
+export const shootConfetti = () => {
+	confetti({
+		particleCount: 100,
+		angle: -90,
+		spread: 360,
+		startVelocity: 30,
+		origin: { x: 0.5, y: 0.1 },
+		colors: ['#FF2A51', '#B100A8', '#FFB300', '#B0D100', '#2462E7'],
+	});
+
+	confetti({
+		particleCount: 50,
+		spread: 360,
+		startVelocity: 40,
+		gravity: 0,
+		decay: 0.96,
+		scalar: 2,
+		shapes: ['circle'],
+		colors: ['#FF2A51', '#B100A8', '#FFB300', '#B0D100', '#2462E7'],
+		origin: { x: 0.5, y: 0.4 },
+	});
 };
