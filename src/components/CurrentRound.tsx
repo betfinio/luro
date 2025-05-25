@@ -1,4 +1,4 @@
-import { PlaceBet } from '@/src/components/PlaceBet.tsx';
+import { PlaceBet } from '@/src/components/PlaceBet/PlaceBet';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import logger from '@/src/config/logger.ts';
 import { useLuroAddress } from '@/src/lib';

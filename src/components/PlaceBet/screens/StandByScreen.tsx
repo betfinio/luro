@@ -1,62 +1,29 @@
-import { hexToRgbA, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { getCurrentRoundInfo } from '../lib/api';
-import {
-	useLuroState,
-	usePlaceBet,
-	usePlayerRoundInfo,
-	useRound,
-	useRoundBank,
-	useRoundBets,
-	useRoundBonusShare,
-	useRoundRequested,
-	useRoundWinner,
-	useStartRound,
-	useVisibleRound,
-} from '../lib/query';
+import type { FC } from 'react';
 
-import { NET_COEF } from '@/src/global.ts';
+import { hexToRgbA, useLuroAddress } from '@/src/lib';
+import { getCurrentRoundInfo } from '@/src/lib/api';
+import { usePlaceBet, useRoundBets } from '@/src/lib/query';
+import { ZeroAddress } from '@betfinio/abi';
+import { valueToNumber } from '@betfinio/abi';
 import { useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
-import { BetValue } from '@betfinio/components/shared';
-import { Slider, Tooltip, TooltipContent, TooltipTrigger, toast } from '@betfinio/components/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { Slider } from '@betfinio/components/ui';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
 import { addressToColor } from 'betfinio_context/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import millify from 'millify';
-import { type FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NumericFormat } from 'react-number-format';
+import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 
-export const PlaceBet = () => {
-	const { data: round } = useVisibleRound();
-
-	const { state: luroState } = useLuroState(round);
-
-	const renderScreen = () => {
-		switch (luroState.data.state) {
-			case 'waiting':
-				return <WaitingScreen round={round} />;
-			case 'spinning':
-			case 'landed':
-				return <SpinningScreen round={round} />;
-			case 'stopped':
-				return <RoundResult round={round} />;
-			default:
-				return <StandByScreen round={round} />;
-		}
-	};
-
-	return <AnimatePresence>{renderScreen()}</AnimatePresence>;
-};
-
-const StandByScreen: FC<{ round: number }> = ({ round }) => {
+export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
@@ -283,218 +250,6 @@ const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					</div>
 				</div>
 			</div>
-		</motion.div>
-	);
-};
-
-const WaitingScreen: FC<{ round: number }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
-
-	const { mutate: startRound, isPending } = useStartRound(round);
-	const { data: isRoundRequested } = useRoundRequested(round);
-
-	const handleSpin = () => {
-		startRound();
-	};
-	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.3 }}
-			className={'grow relative min-h-[390px] flex items-start justify-center'}
-		>
-			<DotLottieReact
-				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
-				autoplay={true}
-				loop={true}
-				renderConfig={{ autoResize: true }}
-				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
-			/>
-			<div className={'flex flex-col justify-center items-center relative z-10 p-5 bg-background bg-opacity-75 mt-10'}>
-				<div className={'flex items-end pb-4 gap-2'}>
-					<span className={'leading-[12px]'}>{t('waiting')}</span>
-					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
-				</div>
-				{!isRoundRequested && (
-					<button
-						type={'button'}
-						onClick={handleSpin}
-						disabled={isPending}
-						className={'bg-primary disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
-					>
-						{isPending ? t('spinning') : t('spinTheWheel')}
-					</button>
-				)}
-			</div>
-		</motion.div>
-	);
-};
-
-const SpinningScreen: FC<{ round: number }> = () => {
-	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
-
-	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col items-center min-h-[290px] sm:min-h-[390px] relative'}
-		>
-			<DotLottieReact
-				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lambo.lottie'}
-				renderConfig={{ autoResize: true }}
-				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
-				autoplay={true}
-				loop={true}
-			/>
-			<div className={'flex items-end pb-4 mt-10 lg:mt-20 gap-2'}>
-				<span className={'leading-[12px]'}>{t('winnerIsBeingDecided')}</span>
-				<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
-			</div>
-		</motion.div>
-	);
-};
-
-const RoundResult: FC<{ round: number }> = ({ round }) => {
-	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
-
-	const queryClient = useQueryClient();
-
-	const { data: roundData } = useRound(round);
-	const { address = ZeroAddress } = useAccount();
-
-	const { data: bets = [] } = useRoundBets(round);
-	const { data: volume = 0n } = useRoundBank(round);
-	const { data: bonusShare = 0n } = useRoundBonusShare(round);
-	const { data: playerInfo = { bets: 0, volume: 0n } } = usePlayerRoundInfo(BigInt(round));
-
-	const winner = useRoundWinner(round);
-
-	const bonus = useMemo(() => {
-		const bonuses = bets.map((bet, index) => {
-			if (bonusShare === 0n) return { bet, bonus: 0 };
-			const bonusPool = (volume / 100n) * 5n;
-			const weight = bet.amount * BigInt(bets.length - index);
-			return {
-				bet,
-				bonus: valueToNumber((bonusPool * weight) / bonusShare),
-			};
-		});
-		return bonuses.find((bonus) => bonus?.bet?.address === winner?.address);
-	}, [bets, volume, address]);
-
-	const luroAddress = useLuroAddress();
-
-	if (!roundData) return null;
-
-	if (playerInfo.bets === 0) {
-		return (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
-				transition={{ duration: 0.3 }}
-				className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
-			>
-				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-secondary-foreground'}>
-					<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
-					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-						{t('couldWin')}
-						<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)} withIcon />
-					</div>
-					<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
-				</div>
-				<motion.button
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					onClick={() => {
-						jumpToCurrentRound(queryClient, luroAddress);
-					}}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 1, delay: 2 }}
-					className={'w-3/4 bg-secondary-foreground py-3 text-black rounded-[10px]'}
-				>
-					{t('backToGame')}
-				</motion.button>
-			</motion.div>
-		);
-	}
-
-	if (winner?.player === address) {
-		return (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
-				transition={{ duration: 0.3 }}
-				className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
-			>
-				<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-secondary-foreground'}>
-					<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
-					<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-						<BetValue
-							className={'text-secondary-foreground text-lg font-semibold'}
-							value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n)}
-							withIcon
-						/>
-					</div>
-					<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
-						+bonus <BetValue value={bonus?.bonus || 0} withIcon />
-					</div>
-
-					<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
-					<BetValue
-						className={'text-secondary-foreground text-lg font-semibold'}
-						value={valueToNumber((roundData.total.volume * NET_COEF) / 1000n) + (bonus?.bonus ?? 0)}
-						withIcon
-					/>
-				</div>
-
-				<motion.button
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					onClick={() => {
-						jumpToCurrentRound(queryClient, luroAddress);
-					}}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 1, delay: 2 }}
-					className={'w-3/4 bg-primary py-3 text-black rounded-[10px]'}
-				>
-					{t('backToGame')}
-				</motion.button>
-			</motion.div>
-		);
-	}
-
-	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.3 }}
-			className={'grow flex flex-col gap-5 items-center justify-center min-h-[290px] md:min-h-[390px]'}
-		>
-			<div className={'flex flex-col w-3/4 h-[200px] items-center justify-center border rounded-[10px] border-secondary-foreground'}>
-				<div className={'text-xl font-semibold mb-4'}>{t('yourBonus')}</div>
-				<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
-					+<BetValue value={bonus?.bonus ?? 0} withIcon />
-				</div>
-			</div>
-
-			<motion.button
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
-				transition={{ duration: 1, delay: 2 }}
-				onClick={() => {
-					jumpToCurrentRound(queryClient, luroAddress);
-				}}
-				className={'w-3/4 bg-primary py-3 text-black rounded-[10px]'}
-			>
-				{t('backToGame')}
-			</motion.button>
 		</motion.div>
 	);
 };
