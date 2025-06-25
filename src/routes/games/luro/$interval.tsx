@@ -6,8 +6,7 @@ import { RoundInfo } from '@/src/components/RoundInfo.tsx';
 import RoundModal from '@/src/components/RoundModal.tsx';
 import { RoundMyInfo } from '@/src/components/RoundMyInfo.tsx';
 import RoundsTable from '@/src/components/RoundsTable.tsx';
-import { VersionValidation } from '@/src/components/VersionValidation.tsx';
-import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
+import { types } from '@/src/global.ts';
 import i18n from '@/src/i18n.ts';
 import type { LuroInterval } from '@/src/lib/types.ts';
 import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
@@ -65,7 +64,6 @@ export function LuroPage() {
 				</TooltipProvider>
 			</div>
 			<SonnerToaster />
-			<VersionValidation repository={'luro'} branch={PUBLIC_BRANCH} current={PUBLIC_DEPLOYED} />
 		</div>
 	);
 }

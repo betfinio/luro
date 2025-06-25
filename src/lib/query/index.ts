@@ -1,12 +1,12 @@
 import logger from '@/src/config/logger.ts';
-import { animateNewBet, getCurrentRound, handleError, useLuroAddress } from '@/src/lib';
+import { animateNewBet, getCurrentRound, useLuroAddress } from '@/src/lib';
 import type { LuroBet, LuroInterval, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type WriteContractReturnType, readContract } from '@wagmi/core';
-import { getTransactionLink } from 'betfinio_context/lib/helpers';
+import { getTransactionLink, handleError } from 'betfinio_context/lib/helpers';
 import { useTranslation } from 'react-i18next';
 import type { Address, WriteContractErrorType } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
@@ -61,7 +61,8 @@ export const useObserveBet = (round: number) => {
 };
 
 export const usePlaceBet = () => {
-	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
@@ -70,12 +71,7 @@ export const usePlaceBet = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType, PlaceBetParams>({
 		mutationKey: ['luro', luroAddress, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
-		onError: (e) => {
-			toast.error(errors('default'), {
-				// @ts-ignore
-				description: errors(e.cause?.reason),
-			});
-		},
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
 			const promise = async () => {
@@ -100,7 +96,8 @@ export const usePlaceBet = () => {
 
 export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
-	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -108,7 +105,7 @@ export const useStartRound = (round: number) => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'round', 'start'],
 		mutationFn: () => startRound(luroAddress, round, config),
-		onError: (e) => handleError(e, errors),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
 			const promise = async () => {
@@ -185,7 +182,8 @@ export const useRoundBonusShare = (round: number) => {
 };
 
 export const useDistributeBonus = () => {
-	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -193,7 +191,7 @@ export const useDistributeBonus = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
 		mutationKey: ['luro', 'bonus', 'distribute'],
 		mutationFn: (params) => distributeBonus({ ...params, address: luroAddress }, config),
-		onError: (e) => handleError(e, errors),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
 		onMutate: () => logger.log('distribute bonus'),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus'] });
@@ -223,7 +221,8 @@ export const useAvailableBonus = (address: Address) => {
 };
 
 export const useClaimBonus = () => {
-	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
@@ -234,7 +233,7 @@ export const useClaimBonus = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'bonus', 'claim'],
 		mutationFn: () => claimBonus({ player, address: luroAddress }, config),
-		onError: (e) => handleError(e, errors),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
