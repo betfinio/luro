@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@betfinio/abi": "^2.4.2",
-		"@betfinio/components": "^2.0.2",
+		"@betfinio/components": "^2.2.1",
 		"@lottiefiles/dotlottie-react": "^0.13.3",
 		"@module-federation/enhanced": "^0.11.4",
 		"@nivo/bar": "^0.88.0",
