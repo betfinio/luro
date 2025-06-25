@@ -11,7 +11,7 @@ import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
 import i18n from '@/src/i18n.ts';
 import type { LuroInterval } from '@/src/lib/types.ts';
 import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
-import { Link, createFileRoute, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { Link, createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/games/luro/$interval')({
