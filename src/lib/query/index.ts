@@ -185,7 +185,7 @@ export const useRoundBonusShare = (round: number) => {
 };
 
 export const useDistributeBonus = () => {
-	const { t } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: errors } = useTranslation('shared', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -193,9 +193,7 @@ export const useDistributeBonus = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
 		mutationKey: ['luro', 'bonus', 'distribute'],
 		mutationFn: (params) => distributeBonus({ ...params, address: luroAddress }, config),
-		onError: (e) => {
-			handleError(e, t);
-		},
+		onError: (e) => handleError(e, errors),
 		onMutate: () => logger.log('distribute bonus'),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus'] });
@@ -236,15 +234,7 @@ export const useClaimBonus = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'bonus', 'claim'],
 		mutationFn: () => claimBonus({ player, address: luroAddress }, config),
-		onError: (e) => {
-			toast({
-				// @ts-ignore
-				title: errors(e.cause?.reason),
-				variant: 'destructive',
-				// @ts-ignore
-				description: errors(e.cause?.reason),
-			});
-		},
+		onError: (e) => handleError(e, errors),
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
