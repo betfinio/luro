@@ -62,7 +62,7 @@ export const useObserveBet = (round: number) => {
 
 export const usePlaceBet = () => {
 	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
@@ -71,7 +71,7 @@ export const usePlaceBet = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType, PlaceBetParams>({
 		mutationKey: ['luro', luroAddress, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('placeBet'),
 		onSuccess: async (data) => {
 			const promise = async () => {
@@ -97,7 +97,7 @@ export const usePlaceBet = () => {
 export const useStartRound = (round: number) => {
 	const queryClient = useQueryClient();
 	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -105,7 +105,7 @@ export const useStartRound = (round: number) => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'round', 'start'],
 		mutationFn: () => startRound(luroAddress, round, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
 			const promise = async () => {
@@ -183,7 +183,7 @@ export const useRoundBonusShare = (round: number) => {
 
 export const useDistributeBonus = () => {
 	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
@@ -191,7 +191,7 @@ export const useDistributeBonus = () => {
 	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
 		mutationKey: ['luro', 'bonus', 'distribute'],
 		mutationFn: (params) => distributeBonus({ ...params, address: luroAddress }, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('distribute bonus'),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus'] });
@@ -221,19 +221,20 @@ export const useAvailableBonus = (address: Address) => {
 };
 
 export const useClaimBonus = () => {
-	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrorrrors } = useTranslation('luro', { keyPrefix: 'errors' });
-	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
+
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
 
 	const { address: player = ZeroAddress } = useAccount();
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'bonus', 'claim'],
 		mutationFn: () => claimBonus({ player, address: luroAddress }, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrorrrors)),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('bonusClaim'),
 		onSuccess: async (data) => {
 			logger.log(data);
