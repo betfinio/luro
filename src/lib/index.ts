@@ -73,10 +73,6 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 	queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], { address, strength });
 };
 
-export const handleError = (e: Error, t: TFunction<'shared', 'errors'>) => {
-	toast.error(t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown'));
-};
-
 export const getLuroInterval = (interval: LuroInterval) => {
 	if (interval === '5m') {
 		return 60 * 5;
