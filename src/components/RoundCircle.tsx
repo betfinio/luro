@@ -6,7 +6,7 @@ import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/compo
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
 import { addressToColor } from 'betfinio_context/lib/utils';
-import { AnimatePresence, animate, type BezierDefinition, Easing, motion, useAnimation } from 'framer-motion';
+import { AnimatePresence, animate, type BezierDefinition, motion, useAnimation } from 'framer-motion';
 import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
 import { DateTime } from 'luxon';
 import millify from 'millify';
