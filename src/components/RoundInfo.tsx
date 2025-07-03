@@ -1,7 +1,3 @@
-import RoundMobileInfo from '@/src/components/RoundMobileInfo.tsx';
-import SwitchModal from '@/src/components/SwitchModal.tsx';
-import type { LuroInterval } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { valueToNumber } from '@betfinio/abi';
 import { LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
@@ -11,7 +7,11 @@ import { motion } from 'framer-motion';
 import { ArrowLeftRight, CircleHelp, Menu } from 'lucide-react';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBetsCount, useTotalVolume, useVisibleRound } from '../lib/query';
+import RoundMobileInfo from '@/src/components/RoundMobileInfo.tsx';
+import SwitchModal from '@/src/components/SwitchModal.tsx';
+import type { LuroInterval } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
+import { useBetsCount, useTotalVolume } from '../lib/query';
 
 const Stats: FC<{ betsCount: number; volume: bigint; staking: bigint; isFetched: boolean }> = ({ betsCount, volume, staking, isFetched }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundInfo.stats' });

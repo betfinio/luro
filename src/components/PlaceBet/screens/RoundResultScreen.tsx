@@ -1,15 +1,12 @@
-import { ZeroAddress } from '@betfinio/abi';
-import type { FC } from 'react';
-
-import { NET_COEF } from '@/src/global';
-import { useRound } from '@/src/lib/query';
-import { usePlayerRoundInfo, useRoundBank, useRoundBets, useRoundBonusShare, useRoundWinner } from '@/src/lib/query';
-import { valueToNumber } from '@betfinio/abi';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components';
 import { motion } from 'framer-motion';
+import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
+import { NET_COEF } from '@/src/global';
+import { usePlayerRoundInfo, useRound, useRoundBank, useRoundBets, useRoundBonusShare, useRoundWinner } from '@/src/lib/query';
 import { BackToGameButton } from '../BackToGameButton';
 
 export const RoundResultScreen: FC<{ round: number }> = ({ round }) => {

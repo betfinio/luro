@@ -1,8 +1,8 @@
-import { useLuroAddress } from '@/src/lib';
-import { jumpToCurrentRound } from '@/src/lib/index';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useLuroAddress } from '@/src/lib';
+import { jumpToCurrentRound } from '@/src/lib/index';
 
 export const BackToGameButton = () => {
 	const queryClient = useQueryClient();

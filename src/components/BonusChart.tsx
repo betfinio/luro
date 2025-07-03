@@ -1,10 +1,10 @@
-import type { LuroBet } from '@/src/lib/types.ts';
 import { arrayFrom, truncateEthAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
 import { type BarDatum, type BarTooltipProps, ResponsiveBar } from '@nivo/bar';
 import { addressToColor } from 'betfinio_context/lib/utils';
 import { type FC, useMemo } from 'react';
 import type { Address } from 'viem';
+import type { LuroBet } from '@/src/lib/types.ts';
 
 interface BonusItem extends BarDatum {
 	bet: Address;

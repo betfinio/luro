@@ -1,7 +1,6 @@
-import type { FC } from 'react';
-
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 import { useAvailableBonus, useClaimBonus } from '../lib/query';

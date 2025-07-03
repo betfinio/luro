@@ -1,9 +1,8 @@
-import { useRoundRequested, useStartRound } from '@/src/lib/query';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoundRequested, useStartRound } from '@/src/lib/query';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });

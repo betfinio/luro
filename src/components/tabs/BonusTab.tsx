@@ -1,6 +1,4 @@
-import { ETHSCAN } from '@/src/global.ts';
-import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '@/src/lib/query';
-import { truncateEthAddress, valueToNumber } from '@betfinio/abi';
+import { valueToNumber } from '@betfinio/abi';
 import { Fox } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
@@ -11,6 +9,8 @@ import { type CSSProperties, type FC, useEffect, useMemo, useRef, useState } fro
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { ETHSCAN } from '@/src/global.ts';
+import { useRoundBank, useRoundBets, useRoundBonusShare, useVisibleRound } from '@/src/lib/query';
 
 export const BonusTab = () => {
 	const { data: round } = useVisibleRound();

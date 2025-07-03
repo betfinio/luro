@@ -1,6 +1,5 @@
-import { useLuroState, useVisibleRound } from '../../lib/query';
-
 import { AnimatePresence } from 'framer-motion';
+import { useLuroState, useVisibleRound } from '../../lib/query';
 import { RoundResultScreen } from './screens/RoundResultScreen';
 import { SpinningScreen } from './screens/SpinningScreen';
 import { StandByScreen } from './screens/StandByScreen';

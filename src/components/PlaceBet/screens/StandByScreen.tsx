@@ -1,15 +1,8 @@
-import type { FC } from 'react';
-
-import { hexToRgbA, useLuroAddress } from '@/src/lib';
-import { getCurrentRoundInfo } from '@/src/lib/api';
-import { usePlaceBet, useRoundBets } from '@/src/lib/query';
-import { ZeroAddress } from '@betfinio/abi';
-import { valueToNumber } from '@betfinio/abi';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
-import { Slider } from '@betfinio/components/ui';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
@@ -17,11 +10,15 @@ import { addressToColor } from 'betfinio_context/lib/utils';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import millify from 'millify';
+import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NumericFormat } from 'react-number-format';
 import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
+import { hexToRgbA, useLuroAddress } from '@/src/lib';
+import { getCurrentRoundInfo } from '@/src/lib/api';
+import { usePlaceBet, useRoundBets } from '@/src/lib/query';
 
 export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
@@ -68,7 +65,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 		try {
 			BigInt(Number(amount));
-		} catch (e) {
+		} catch {
 			toast.error(t('toast.invalidAmount'));
 			return;
 		}
