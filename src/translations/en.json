@@ -165,5 +165,21 @@
 			"title": "Bonus claimed!",
 			"description": "Transaction is confirmed"
 		}
+	},
+	"errors": {
+		"L01": "invalid staking contract",
+		"L02": "player address mismatch",
+		"L03": "amount mismatch",
+		"L04": "round mismatch",
+		"L05": "amount too low",
+		"L06": "new amount out of range",
+		"L07": "round is full",
+		"L08": "round already distributed",
+		"L09": "round not finished",
+		"L10": "round already requested",
+		"L11": "round is empty",
+		"L12": "round is not finished",
+		"L13": "only core can place bets",
+		"L14": "error when tranfering tokens"
 	}
 }
