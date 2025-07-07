@@ -22,8 +22,6 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 		}));
 	}, [bonuses]);
 
-	const [min, max] = data.reduce<[number, number]>(([minVal, maxVal], bar) => [Math.min(minVal, bar.bonus), Math.max(maxVal, bar.bonus)], [0, 0]);
-
 	const desiredLength = 15;
 	const resultData = [...data];
 
