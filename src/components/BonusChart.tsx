@@ -63,8 +63,6 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 				keys={['bonus']}
 				indexBy="bet"
 				colors={(bar) => bar.data.bonusColor}
-				minValue={min < 0 ? min : 0}
-				maxValue={max}
 				enableGridX={false}
 				enableGridY={false}
 				axisLeft={null}

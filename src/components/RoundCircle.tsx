@@ -323,7 +323,7 @@ const CustomTooltip =
 				key={id}
 				amount={value}
 				betsNumber={(data as CustomLuroBet)?.betsNumber}
-				className={'min-w-[250px]  z-15!'}
+				className={'min-w-[250px]  z-15! border rounded-xl'}
 				player={label as Address}
 				percent={(value * 100) / valueToNumber(bank)}
 			/>
