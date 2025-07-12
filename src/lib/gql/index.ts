@@ -1,19 +1,19 @@
+import { LuckyRoundABI } from '@betfinio/abi';
+import { type Config, readContract } from '@wagmi/core';
+import { wagmiConfig } from 'betfinio_context/config';
+import type { ExecutionResult } from 'graphql/execution';
+import type { Address } from 'viem';
 import {
+	execute,
 	LuroRoundsByPlayerDocument,
 	LuroRoundsDocument,
 	type LuroRoundsQuery,
 	LuroWinnerDocument,
 	type LuroWinnerQuery,
 	type WinnerCalculated,
-	execute,
 } from '@/.graphclient';
 import logger from '@/src/config/logger.ts';
 import type { Round, WinnerInfo } from '@/src/lib/types.ts';
-import { LuckyRoundABI } from '@betfinio/abi';
-import { type Config, readContract } from '@wagmi/core';
-import { wagmiConfig } from 'betfinio_context/config';
-import type { ExecutionResult } from 'graphql/execution';
-import type { Address } from 'viem';
 
 export const requestRounds = async (address: Address): Promise<Round[]> => {
 	logger.start('fetching rounds by game', address);

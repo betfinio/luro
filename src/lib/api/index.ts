@@ -1,11 +1,11 @@
-import logger from '@/src/config/logger.ts';
-import { BETS_MEMORY, PARTNER } from '@/src/global.ts';
-import type { BonusClaimParams, LuroBet, PlaceBetParams, PlayerRoundInfo, Round, RoundStatusEnum } from '@/src/lib/types.ts';
-import { BetsMemoryABI, LuckyRoundABI, LuckyRoundBetABI, PartnerABI, ZeroAddress, arrayFrom, defaultMulticall, valueToNumber } from '@betfinio/abi';
+import { arrayFrom, BetsMemoryABI, defaultMulticall, LuckyRoundABI, LuckyRoundBetABI, PartnerABI, valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { writeContract } from '@wagmi/core';
 import { type Address, type Client, encodeAbiParameters, parseAbiParameters } from 'viem';
 import { multicall, readContract } from 'viem/actions';
 import type { Config } from 'wagmi';
+import logger from '@/src/config/logger.ts';
+import { BETS_MEMORY, PARTNER } from '@/src/global.ts';
+import type { BonusClaimParams, LuroBet, PlaceBetParams, PlayerRoundInfo, Round, RoundStatusEnum } from '@/src/lib/types.ts';
 import { requestPlayerRounds, requestRounds } from '../gql';
 import type { ICurrentRoundInfo } from '../query';
 
@@ -125,7 +125,7 @@ export const getCurrentRoundInfo = (iBets: LuroBet[]): ICurrentRoundInfo => {
 	};
 };
 
-export const fetchRounds = async (address: Address, player: Address, config?: Client): Promise<Round[]> => {
+export const fetchRounds = async (address: Address, _player: Address, config?: Client): Promise<Round[]> => {
 	if (!config) return [];
 	return await requestRounds(address);
 };

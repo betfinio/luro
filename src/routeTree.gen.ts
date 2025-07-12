@@ -8,82 +8,43 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamesLuroIndexRouteImport } from './routes/games/luro/index'
+import { Route as GamesLuroIntervalRouteImport } from './routes/games/luro/$interval'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/index'
-import { Route as GamesLuroIndexImport } from './routes/games/luro/index'
-import { Route as GamesLuroIntervalImport } from './routes/games/luro/$interval'
-
-// Create/Update Routes
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const GamesLuroIndexRoute = GamesLuroIndexImport.update({
+const GamesLuroIndexRoute = GamesLuroIndexRouteImport.update({
   id: '/games/luro/',
   path: '/games/luro/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const GamesLuroIntervalRoute = GamesLuroIntervalImport.update({
+const GamesLuroIntervalRoute = GamesLuroIntervalRouteImport.update({
   id: '/games/luro/$interval',
   path: '/games/luro/$interval',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/games/luro/$interval': {
-      id: '/games/luro/$interval'
-      path: '/games/luro/$interval'
-      fullPath: '/games/luro/$interval'
-      preLoaderRoute: typeof GamesLuroIntervalImport
-      parentRoute: typeof rootRoute
-    }
-    '/games/luro/': {
-      id: '/games/luro/'
-      path: '/games/luro'
-      fullPath: '/games/luro'
-      preLoaderRoute: typeof GamesLuroIndexImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/games/luro/$interval': typeof GamesLuroIntervalRoute
   '/games/luro': typeof GamesLuroIndexRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/games/luro/$interval': typeof GamesLuroIntervalRoute
   '/games/luro': typeof GamesLuroIndexRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/games/luro/$interval': typeof GamesLuroIntervalRoute
   '/games/luro/': typeof GamesLuroIndexRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/games/luro/$interval' | '/games/luro'
@@ -92,11 +53,36 @@ export interface FileRouteTypes {
   id: '__root__' | '/' | '/games/luro/$interval' | '/games/luro/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GamesLuroIntervalRoute: typeof GamesLuroIntervalRoute
   GamesLuroIndexRoute: typeof GamesLuroIndexRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/luro/': {
+      id: '/games/luro/'
+      path: '/games/luro'
+      fullPath: '/games/luro'
+      preLoaderRoute: typeof GamesLuroIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/luro/$interval': {
+      id: '/games/luro/$interval'
+      path: '/games/luro/$interval'
+      fullPath: '/games/luro/$interval'
+      preLoaderRoute: typeof GamesLuroIntervalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -104,31 +90,6 @@ const rootRouteChildren: RootRouteChildren = {
   GamesLuroIntervalRoute: GamesLuroIntervalRoute,
   GamesLuroIndexRoute: GamesLuroIndexRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/games/luro/$interval",
-        "/games/luro/"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/games/luro/$interval": {
-      "filePath": "games/luro/$interval.tsx"
-    },
-    "/games/luro/": {
-      "filePath": "games/luro/index.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

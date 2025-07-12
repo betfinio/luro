@@ -1,6 +1,4 @@
-import type { Round } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/ui';
@@ -13,12 +11,14 @@ import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import type { Round } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 
-	const columns: ColumnDef<Round, never>[] = [
+	const columns: ColumnDef<Round, any>[] = [
 		columnHelper.accessor('round', {
 			header: t('columns.round'),
 			meta: { className: 'md:w-[120px]' },
@@ -96,7 +96,7 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 		},
 	});
 
-	const getPlayerRoundsTableColumns = (columns: unknown[]) => {
+	const getPlayerRoundsTableColumns = (columns: ColumnDef<Round, any>[]) => {
 		const newColumns = [...columns];
 		newColumns.splice(2, 0, myBetsColumn);
 		return newColumns;
@@ -128,7 +128,7 @@ export default RoundsTable;
 
 const columnHelper = createColumnHelper<Round>();
 
-const AllRoundsTable: FC<{ columns: ColumnDef<Round, never>[] }> = ({ columns }) => {
+const AllRoundsTable: FC<{ columns: ColumnDef<Round, any>[] }> = ({ columns }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = useRounds(address);
 	const navigate = useNavigate();
@@ -153,7 +153,7 @@ const AllRoundsTable: FC<{ columns: ColumnDef<Round, never>[] }> = ({ columns })
 	);
 };
 
-const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
+const PlayerRoundsTable: FC<{ columns: ColumnDef<Round, any>[] }> = ({ columns }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: rounds = [], isLoading } = usePlayerRounds(address);
 	const navigate = useNavigate();
@@ -168,7 +168,7 @@ const PlayerRoundsTable: FC<{ columns: unknown }> = ({ columns }) => {
 			<DataTable
 				t={tShared}
 				data={rounds}
-				columns={columns as ColumnDef<Round, never>[]}
+				columns={columns}
 				onRowClick={handleClick}
 				isLoading={isLoading}
 				loaderClassName="h-[185px]"

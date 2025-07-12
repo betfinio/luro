@@ -1,3 +1,6 @@
+import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { Trans, useTranslation } from 'react-i18next';
 import { BetsInfo } from '@/src/components/BetsInfo.tsx';
 import BonusClaimBlock from '@/src/components/BonusClaimBlock.tsx';
 import { BonusInfo } from '@/src/components/BonusInfo.tsx';
@@ -6,13 +9,9 @@ import { RoundInfo } from '@/src/components/RoundInfo.tsx';
 import RoundModal from '@/src/components/RoundModal.tsx';
 import { RoundMyInfo } from '@/src/components/RoundMyInfo.tsx';
 import RoundsTable from '@/src/components/RoundsTable.tsx';
-import { VersionValidation } from '@/src/components/VersionValidation.tsx';
-import { PUBLIC_BRANCH, PUBLIC_DEPLOYED, types } from '@/src/global.ts';
+import { types } from '@/src/global';
 import i18n from '@/src/i18n.ts';
 import type { LuroInterval } from '@/src/lib/types.ts';
-import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
-import { Link, createFileRoute, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/games/luro/$interval')({
 	validateSearch: (search: Record<string, unknown>) => {
@@ -33,7 +32,7 @@ export function LuroPage() {
 
 	const { t } = useTranslation('luro');
 	return (
-		<div className={'w-full h-full luro'}>
+		<div className={'luro w-full h-full '}>
 			<div className={'col-span-4 p-2 md:p-3 lg:p-4 lg:col-start-2 2xl:px-0'}>
 				<TooltipProvider delayDuration={0}>
 					<RoundInfo />
@@ -65,7 +64,6 @@ export function LuroPage() {
 				</TooltipProvider>
 			</div>
 			<SonnerToaster />
-			<VersionValidation repository={'luro'} branch={PUBLIC_BRANCH} current={PUBLIC_DEPLOYED} />
 		</div>
 	);
 }
