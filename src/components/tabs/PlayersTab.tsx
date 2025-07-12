@@ -1,7 +1,4 @@
-import { ETHSCAN } from '@/src/global.ts';
-import { mapBetsToAuthors } from '@/src/lib';
-import { useRoundBets, useVisibleRound } from '@/src/lib/query';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { Fox } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
@@ -12,6 +9,9 @@ import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { ETHSCAN } from '@/src/global.ts';
+import { mapBetsToAuthors } from '@/src/lib';
+import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 
 export const PlayersTab = () => {
 	const { data: round } = useVisibleRound();
@@ -73,7 +73,7 @@ export interface TabItemProps {
 	betsNumber?: number;
 }
 
-export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, betsNumber = 0, className }) => {
+export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, betsNumber = 0, className }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: username } = useUsername(player, address);
 
@@ -120,7 +120,7 @@ export const TabItem: FC<TabItemProps> = memo(({ player, amount, percent, id, be
 	);
 });
 
-export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amount, id, betsNumber = 0, className }) => {
+export const WinnerCard: FC<Omit<TabItemProps, 'percent'>> = memo(({ player, amount, className }) => {
 	const { address = ZeroAddress } = useAccount();
 	const { data: username } = useUsername(player, address);
 

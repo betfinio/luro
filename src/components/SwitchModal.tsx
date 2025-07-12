@@ -1,10 +1,10 @@
-import type { LuroInterval } from '@/src/lib/types.ts';
 import { cn } from '@betfinio/components/lib';
 import { DialogClose } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { LuroInterval } from '@/src/lib/types.ts';
 import { types } from '../global';
 
 const SwitchModal: FC<{ selected: LuroInterval }> = ({ selected }) => {

@@ -1,8 +1,23 @@
+import { truncateEthAddress, valueToNumber, ZeroAddress } from '@betfinio/abi';
+import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
+import { cn } from '@betfinio/components/lib';
+import { BetValue, DataTable } from '@betfinio/components/shared';
+import { Button, DialogClose, ScrollArea } from '@betfinio/components/ui';
+import { Link } from '@tanstack/react-router';
+import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { addressToColor } from 'betfinio_context/lib/utils';
+import { Loader, ShieldCheckIcon, X } from 'lucide-react';
+import { DateTime } from 'luxon';
+import { type FC, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { Address } from 'viem';
+import { useAccount } from 'wagmi';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
+import logger from '@/src/config/logger.ts';
 import { ETHSCAN } from '@/src/global.ts';
 import { getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
-import type { LuroInterval } from '@/src/lib/types.ts';
-import { addressToColor } from 'betfinio_context/lib/utils';
+import type { LuroInterval, Round, RoundModalPlayer } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import {
 	useBonusDistribution,
 	useCalculate,
@@ -15,29 +30,10 @@ import {
 	useWinner,
 } from '../lib/query';
 
-import logger from '@/src/config/logger.ts';
-import type { Round, RoundModalPlayer } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { ZeroAddress, truncateEthAddress, valueToNumber } from '@betfinio/abi';
-import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
-import { cn } from '@betfinio/components/lib';
-import { BetValue, DataTable } from '@betfinio/components/shared';
-import { Button, DialogClose, ScrollArea } from '@betfinio/components/ui';
-import { Link } from '@tanstack/react-router';
-import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { Loader, ShieldCheckIcon, X } from 'lucide-react';
-import { DateTime } from 'luxon';
-import { type FC, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { Address } from 'viem';
-import { useAccount } from 'wagmi';
-
 export const ModalContent: FC<{
-	onClose: () => void;
 	roundId: number;
-	interval: number;
 	round: Round | null;
-}> = ({ onClose, roundId, round }) => {
+}> = ({ roundId, round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { interval } = Route.useParams();
 	const { start, end } = getTimesByRound(roundId, interval as LuroInterval);
@@ -70,11 +66,9 @@ export const ModalContent: FC<{
 								{t('titleFinished')} #{roundId}
 							</div>
 						) : (
-							<>
-								<div className={'text-lg'}>
-									{t('title')} #{roundId}
-								</div>
-							</>
+							<div className={'text-lg'}>
+								{t('title')} #{roundId}
+							</div>
 						)}
 						<span className={'-mt-1 text-sm'}>
 							{DateTime.fromMillis(start).toFormat('dd.MM.yyyy / HH:mm')} - {DateTime.fromMillis(end).toFormat('dd.MM.yyyy / HH:mm')}
@@ -229,7 +223,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address);
 	}, [bets, winner, address]);
 
-	const columns: ColumnDef<RoundModalPlayer, never>[] = [
+	const columns: ColumnDef<RoundModalPlayer, any>[] = [
 		columnHelper.display({
 			header: '',
 			id: 'color',

@@ -1,10 +1,10 @@
-import type { LuroBet } from '@/src/lib/types.ts';
 import { arrayFrom, truncateEthAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
 import { type BarDatum, type BarTooltipProps, ResponsiveBar } from '@nivo/bar';
 import { addressToColor } from 'betfinio_context/lib/utils';
 import { type FC, useMemo } from 'react';
 import type { Address } from 'viem';
+import type { LuroBet } from '@/src/lib/types.ts';
 
 interface BonusItem extends BarDatum {
 	bet: Address;
@@ -21,8 +21,6 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 			index,
 		}));
 	}, [bonuses]);
-
-	const [min, max] = data.reduce<[number, number]>(([minVal, maxVal], bar) => [Math.min(minVal, bar.bonus), Math.max(maxVal, bar.bonus)], [0, 0]);
 
 	const desiredLength = 15;
 	const resultData = [...data];
@@ -63,8 +61,6 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 				keys={['bonus']}
 				indexBy="bet"
 				colors={(bar) => bar.data.bonusColor}
-				minValue={min < 0 ? min : 0}
-				maxValue={max}
 				enableGridX={false}
 				enableGridY={false}
 				axisLeft={null}

@@ -1,19 +1,15 @@
-import { LURO, LURO_5MIN } from '@/src/global.ts';
-import type { ILanguageErrorKeys } from '@/src/i18next';
-import type { LuroAuthor, LuroBet, LuroInterval, RoundModalPlayer } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { toast } from '@betfinio/components/ui';
 import type { QueryClient } from '@tanstack/react-query';
 import confetti from 'canvas-confetti';
-import type { TFunction } from 'i18next';
 import type { Address } from 'viem';
+import { LURO, LURO_5MIN } from '@/src/global.ts';
+import type { LuroAuthor, LuroBet, LuroInterval, RoundModalPlayer } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 
 export const mapBetsToAuthors = (bets: LuroBet[]): LuroAuthor[] => {
 	return [...bets].reduce((acc: LuroAuthor[], val) => {
 		const author = acc.findIndex((bet) => bet.player === val.player);
 		if (author === -1) {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
-			return [...acc, { ...val, betsNumber: 1 }];
+			return acc.concat([{ ...val, betsNumber: 1 }]);
 		}
 		acc[author].amount += val.amount;
 		acc[author].betsNumber += 1;
@@ -71,10 +67,6 @@ export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, volume: bi
 
 export const animateNewBet = (address: Address, strength: number, queryClient: QueryClient, luroAddress: string) => {
 	queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], { address, strength });
-};
-
-export const handleError = (e: Error, t: TFunction<'shared', 'errors'>) => {
-	toast.error(t(`${(e.cause as { reason: ILanguageErrorKeys })?.reason}` || 'unknown'));
 };
 
 export const getLuroInterval = (interval: LuroInterval) => {

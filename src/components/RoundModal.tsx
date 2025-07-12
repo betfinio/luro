@@ -1,10 +1,8 @@
-import { ModalContent } from '@/src/components/ModalContent.tsx';
-import { getLuroInterval } from '@/src/lib';
-import type { LuroInterval } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { Dialog, DialogContent, DialogDescription, DialogPortal, DialogTitle } from '@betfinio/components/ui';
 import { useNavigate } from '@tanstack/react-router';
 import type { FC } from 'react';
+import { ModalContent } from '@/src/components/ModalContent.tsx';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { useRound } from '../lib/query';
 
 const RoundModal: FC<{ round: number }> = ({ round }) => {
@@ -18,10 +16,10 @@ const RoundModal: FC<{ round: number }> = ({ round }) => {
 	return (
 		<Dialog open={true} onOpenChange={handleClose}>
 			<DialogPortal>
-				<DialogContent className={'luro max-w-0 w-auto rounded-xl'}>
+				<DialogContent className={'luro w-auto rounded-xl'}>
 					<DialogTitle className={'hidden'} />
 					<DialogDescription className={'hidden'} />
-					<ModalContent onClose={handleClose} interval={getLuroInterval(interval as LuroInterval)} roundId={round} round={data} />
+					<ModalContent roundId={round} round={data} />
 				</DialogContent>
 			</DialogPortal>
 		</Dialog>

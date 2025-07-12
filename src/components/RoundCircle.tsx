@@ -1,6 +1,28 @@
-import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
-import { getTimesByRound, hexToRgbA, jumpToCurrentRound, shootConfetti, useLuroAddress } from '@/src/lib';
+import { valueToNumber, ZeroAddress } from '@betfinio/abi';
+import { Bet } from '@betfinio/components/icons';
+import { cn } from '@betfinio/components/lib';
+import { BetValue } from '@betfinio/components/shared';
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { Pie, type PieTooltipProps } from '@nivo/pie';
+import { useQueryClient } from '@tanstack/react-query';
+import { addressToColor } from 'betfinio_context/lib/utils';
+import { AnimatePresence, animate, type BezierDefinition, motion, useAnimation } from 'framer-motion';
+import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
+import { DateTime } from 'luxon';
+import millify from 'millify';
+import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { CircularProgressbar } from 'react-circular-progressbar';
+import { useTranslation } from 'react-i18next';
+import type { Address } from 'viem';
+import { useAccount } from 'wagmi';
+import Chainlink from '@/src/assets/chainlink.svg';
+import Crown from '@/src/assets/luro/crown.svg';
+import Duck from '@/src/assets/luro/duck.png';
+import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
+import { NET_COEF } from '@/src/global.ts';
+import { getTimesByRound, hexToRgbA, jumpToCurrentRound, shootConfetti, useLuroAddress } from '@/src/lib';
+import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
+import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import {
 	useCalculate,
 	useLuroState,
@@ -12,30 +34,6 @@ import {
 	useRoundWinner,
 	useVisibleRound,
 } from '../lib/query';
-
-import Chainlink from '@/src/assets/chainlink.svg';
-import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
-import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { ZeroAddress, valueToNumber } from '@betfinio/abi';
-import { cn } from '@betfinio/components/lib';
-import { BetValue } from '@betfinio/components/shared';
-import { Pie, type PieTooltipProps } from '@nivo/pie';
-import { useQueryClient } from '@tanstack/react-query';
-import { addressToColor } from 'betfinio_context/lib/utils';
-import { AnimatePresence, animate, motion, useAnimation } from 'framer-motion';
-import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
-import { DateTime } from 'luxon';
-import millify from 'millify';
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
-import { CircularProgressbar } from 'react-circular-progressbar';
-import type { Address } from 'viem';
-import { useAccount } from 'wagmi';
-
-import Crown from '@/src/assets/luro/crown.svg';
-import Duck from '@/src/assets/luro/duck.png';
-import { NET_COEF } from '@/src/global.ts';
-import { Bet } from '@betfinio/components/icons';
-import { useTranslation } from 'react-i18next';
 
 export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
@@ -111,7 +109,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	}
 
 	async function stopWheel(result: number, bet: string) {
-		const bezier = [0.165, 0.84, 0.44, 1.005];
+		const bezier: BezierDefinition = [0.165, 0.84, 0.44, 1.005];
 		const wheelMinNumberOfSpins = 3;
 		const wheelMaxNumberOfSpins = 4;
 
@@ -325,7 +323,7 @@ const CustomTooltip =
 				key={id}
 				amount={value}
 				betsNumber={(data as CustomLuroBet)?.betsNumber}
-				className={'min-w-[250px]  z-15!'}
+				className={'min-w-[250px]  z-15! border rounded-xl'}
 				player={label as Address}
 				percent={(value * 100) / valueToNumber(bank)}
 			/>
