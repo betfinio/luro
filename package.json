@@ -15,11 +15,11 @@
 		"build:schema:dev": "dotenv -e .env.development.local -- graphclient build",
 		"build:schema:prod": "dotenv -e .env.production.local -- graphclient build",
 		"secret:dev": "bun run secret.ts -- development dev",
-		"secret:prod": "bun run secret.ts -- production prod/io"
+		"secret:prod": "bun run secret.ts -- production prod/bet"
 	},
 	"dependencies": {
 		"@betfinio/abi": "^2.9.0",
-		"@betfinio/components": "^2.4.0-dev.4",
+		"@betfinio/components": "^2.6.0",
 		"@lottiefiles/dotlottie-react": "^0.14.2",
 		"@module-federation/enhanced": "^0.16.0",
 		"@nivo/bar": "^0.99.0",
@@ -36,9 +36,9 @@
 		"intl-messageformat": "^10.7.16",
 		"lucide-react": "^0.525.0",
 		"luxon": "^3.6.1",
-		"react": "^19.1.0",
+		"react": "19.1.0",
 		"react-circular-progressbar": "^2.2.0",
-		"react-dom": "^19.1.0",
+		"react-dom": "19.1.0",
 		"react-i18next": "^15.5.3",
 		"react-number-format": "^5.4.4",
 		"react-virtualized": "^9.22.6",
