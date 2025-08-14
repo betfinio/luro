@@ -2,7 +2,7 @@ import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
-import { Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { type NumberFormatValues, NumericInput, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
@@ -13,7 +13,6 @@ import millify from 'millify';
 import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NumericFormat } from 'react-number-format';
 import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
@@ -40,7 +39,8 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			handleBet();
 		}
 	}, [requested]);
-	const handleBetChange = (value: string) => {
+	const handleBetChange = (values: NumberFormatValues) => {
+		const { value } = values;
 		setAmount(value);
 	};
 	const luroAddress = useLuroAddress();
@@ -131,22 +131,15 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>
-					<NumericFormat
+					<NumericInput
 						className={cn(
 							'w-full rounded-lg border border-secondary-foreground text-center text-base lg:text-lg bg-background py-3 font-semibold text-white disabled:cursor-not-allowed duration-300',
 							valueToNumber(balance) < Number(amount) && 'text-red-400',
 						)}
-						thousandSeparator={','}
-						min={1}
-						allowNegative={false}
-						maxLength={15}
 						disabled={loading}
 						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
 						value={amount}
-						onValueChange={(values) => {
-							const { value } = values;
-							handleBetChange(value);
-						}}
+						onValueChange={handleBetChange}
 					/>
 
 					<motion.button
