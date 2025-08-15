@@ -132,12 +132,11 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>
 					<NumericInput
-						className={cn(
-							'w-full rounded-lg border border-secondary-foreground text-center text-base lg:text-lg bg-background py-3 font-semibold text-white disabled:cursor-not-allowed duration-300',
-							valueToNumber(balance) < Number(amount) && 'text-red-400',
-						)}
-						disabled={loading}
+						className={'border-secondary-foreground text-white'}
+						scale="lg"
 						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
+						hasError={valueToNumber(balance) < Number(amount)}
+						disabled={loading || balance <= 0n}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
