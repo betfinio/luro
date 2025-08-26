@@ -136,7 +136,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						scale="lg"
 						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
 						hasError={valueToNumber(balance) < Number(amount)}
-						disabled={loading || balance <= 0n}
+						disabled={loading}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
@@ -171,6 +171,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						max={valueToNumber(balance) - 1}
 						value={[Number(amount)]}
 						defaultValue={[10000]}
+						disabled={balance <= 0n}
 						onValueChange={(value: number[]) => {
 							handleSliderChange(value[0]);
 						}}
