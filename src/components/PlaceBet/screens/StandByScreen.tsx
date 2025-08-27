@@ -107,6 +107,23 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		setAmount(value.toFixed(0));
 	};
 
+	// Логика для определения параметров слайдера в зависимости от баланса
+	const sliderParams = useMemo(() => {
+		const balanceNumber = valueToNumber(balance);
+		if (balanceNumber <= 1000) {
+			return {
+				min: 0,
+				max: 100,
+				value: 0,
+			};
+		}
+		return {
+			min: 1000,
+			max: balanceNumber - 1,
+			value: Number(amount),
+		};
+	}, [balance, amount]);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -134,8 +151,8 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					<NumericInput
 						className={'border-secondary-foreground text-white'}
 						scale="lg"
-						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
-						hasError={valueToNumber(balance) < Number(amount)}
+						placeholder={t('placeholder.Amount')}
+						hasError={true}
 						disabled={loading}
 						value={amount}
 						onValueChange={handleBetChange}
@@ -167,10 +184,10 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 				<div className={cn('relative mt-4 h-[24px]', balance === 0n && 'grayscale pointer-events-none')}>
 					<Slider
-						min={1000}
-						max={valueToNumber(balance) - 1}
-						value={[Number(amount)]}
-						defaultValue={[10000]}
+						min={sliderParams.min}
+						max={sliderParams.max}
+						value={[balance > 0n ? sliderParams.value : 0]}
+						defaultValue={[sliderParams.value]}
 						disabled={balance <= 0n}
 						onValueChange={(value: number[]) => {
 							handleSliderChange(value[0]);
