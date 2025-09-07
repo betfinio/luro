@@ -14,6 +14,7 @@ import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { parseEther } from 'viem';
 import { useAccount } from 'wagmi';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
 import { getCurrentRoundInfo } from '@/src/lib/api';
@@ -23,7 +24,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
-	const { data: allowance = 0n, isFetching: loading } = useAllowance(address);
+	const { data: allowance = 0n } = useAllowance(address);
 	const { data: balance = 0n } = useBalance(address);
 	const { data: isMember = false } = useIsMember(address);
 	const { mutate: placeBet, isPending, isSuccess, data } = usePlaceBet();
@@ -64,14 +65,14 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		}
 
 		try {
-			BigInt(Number(amount));
+			parseEther(amount);
 		} catch {
 			toast.error(t('toast.invalidAmount'));
 			return;
 		}
 
-		if (allowance < BigInt(Number(amount)) * 10n ** 18n) {
-			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
+		if (allowance < parseEther(amount)) {
+			requestAllowance?.('bet', parseEther(amount));
 			return;
 		}
 		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
@@ -152,8 +153,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						className={'border-secondary-foreground text-white'}
 						scale="lg"
 						placeholder={t('placeholder.Amount')}
-						hasError={true}
-						disabled={loading}
+						hasError={parseEther(amount) > balance}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
@@ -162,7 +162,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						whileTap={{ scale: 0.95 }}
 						onClick={handleBet}
 						whileHover={{ scale: 1.03 }}
-						disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
+						disabled={Number(amount) === 0 || isPending || balance < parseEther(amount)}
 						className={
 							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-primary rounded-lg text-primary-foreground disabled:grayscale disabled:pointer-events-none duration-300 sm:hidden'
 						}
