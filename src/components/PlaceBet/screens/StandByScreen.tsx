@@ -2,7 +2,7 @@ import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { useMediaQuery } from '@betfinio/components/hooks';
 import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
-import { Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { type NumberFormatValues, NumericInput, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
@@ -13,8 +13,8 @@ import millify from 'millify';
 import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NumericFormat } from 'react-number-format';
 import { toast } from 'sonner';
+import { parseEther } from 'viem';
 import { useAccount } from 'wagmi';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
 import { getCurrentRoundInfo } from '@/src/lib/api';
@@ -24,7 +24,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
-	const { data: allowance = 0n, isFetching: loading } = useAllowance(address);
+	const { data: allowance = 0n } = useAllowance(address);
 	const { data: balance = 0n } = useBalance(address);
 	const { data: isMember = false } = useIsMember(address);
 	const { mutate: placeBet, isPending, isSuccess, data } = usePlaceBet();
@@ -40,7 +40,8 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			handleBet();
 		}
 	}, [requested]);
-	const handleBetChange = (value: string) => {
+	const handleBetChange = (values: NumberFormatValues) => {
+		const { value } = values;
 		setAmount(value);
 	};
 	const luroAddress = useLuroAddress();
@@ -64,14 +65,14 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		}
 
 		try {
-			BigInt(Number(amount));
+			parseEther(amount);
 		} catch {
 			toast.error(t('toast.invalidAmount'));
 			return;
 		}
 
-		if (allowance < BigInt(Number(amount)) * 10n ** 18n) {
-			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
+		if (allowance < parseEther(amount)) {
+			requestAllowance?.('bet', parseEther(amount));
 			return;
 		}
 		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
@@ -107,6 +108,23 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		setAmount(value.toFixed(0));
 	};
 
+	// Логика для определения параметров слайдера в зависимости от баланса
+	const sliderParams = useMemo(() => {
+		const balanceNumber = valueToNumber(balance);
+		if (balanceNumber <= 1000) {
+			return {
+				min: 0,
+				max: 100,
+				value: 0,
+			};
+		}
+		return {
+			min: 1000,
+			max: balanceNumber - 1,
+			value: Number(amount),
+		};
+	}, [balance, amount]);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -131,29 +149,20 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>
-					<NumericFormat
-						className={cn(
-							'w-full rounded-lg border border-secondary-foreground text-center text-base lg:text-lg bg-background py-3 font-semibold text-white disabled:cursor-not-allowed duration-300',
-							valueToNumber(balance) < Number(amount) && 'text-red-400',
-						)}
-						thousandSeparator={','}
-						min={1}
-						allowNegative={false}
-						maxLength={15}
-						disabled={loading}
-						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
+					<NumericInput
+						className={'border-secondary-foreground text-white'}
+						scale="lg"
+						placeholder={t('placeholder.Amount')}
+						hasError={parseEther(amount) > balance}
 						value={amount}
-						onValueChange={(values) => {
-							const { value } = values;
-							handleBetChange(value);
-						}}
+						onValueChange={handleBetChange}
 					/>
 
 					<motion.button
 						whileTap={{ scale: 0.95 }}
 						onClick={handleBet}
 						whileHover={{ scale: 1.03 }}
-						disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
+						disabled={Number(amount) === 0 || isPending || balance < parseEther(amount)}
 						className={
 							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-primary rounded-lg text-primary-foreground disabled:grayscale disabled:pointer-events-none duration-300 sm:hidden'
 						}
@@ -175,10 +184,11 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 				<div className={cn('relative mt-4 h-[24px]', balance === 0n && 'grayscale pointer-events-none')}>
 					<Slider
-						min={1000}
-						max={valueToNumber(balance) - 1}
-						value={[Number(amount)]}
-						defaultValue={[10000]}
+						min={sliderParams.min}
+						max={sliderParams.max}
+						value={[balance > 0n ? sliderParams.value : 0]}
+						defaultValue={[sliderParams.value]}
+						disabled={balance <= 0n}
 						onValueChange={(value: number[]) => {
 							handleSliderChange(value[0]);
 						}}

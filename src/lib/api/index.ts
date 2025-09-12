@@ -83,7 +83,7 @@ export const fetchRoundBets = async (address: Address, roundId: number, config: 
 		functionName: 'roundBets',
 		args: [roundId, i],
 	}));
-	// @ts-ignore (type deep error?) todo
+	// @ts-expect-error (type deep error?) todo
 	const result = await multicall(config.getClient(), {
 		multicallAddress: defaultMulticall,
 		contracts: prepared,

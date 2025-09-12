@@ -45,15 +45,6 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 		);
 	}
 
-	const CustomTooltip: FC<BarTooltipProps<BonusItem>> = ({ data }) => (
-		<div className="border border-border text-xs rounded-lg bg-background p-2 flex flex-col">
-			<div>{truncateEthAddress(data.bet)}</div>
-			<div className="flex flex-row items-center gap-1">
-				Bonus: <BetValue value={Math.abs(data.bonus)} withIcon />
-			</div>
-		</div>
-	);
-
 	return (
 		<div style={{ height: 90 }}>
 			<ResponsiveBar
@@ -73,3 +64,12 @@ export const BonusChart: FC<{ bonuses: { bet: LuroBet; bonus: number }[] }> = ({
 		</div>
 	);
 };
+
+const CustomTooltip: FC<BarTooltipProps<BonusItem>> = ({ data }) => (
+	<div className="border border-border text-xs rounded-lg bg-background p-2 flex flex-col">
+		<div>{truncateEthAddress(data.bet)}</div>
+		<div className="flex flex-row items-center gap-1">
+			Bonus: <BetValue value={Math.abs(data.bonus)} withIcon />
+		</div>
+	</div>
+);
