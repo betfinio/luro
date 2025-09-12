@@ -1,6 +1,6 @@
+import '@/src/globals.css';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { createRoot } from 'react-dom/client';
-import '@/src/globals.css';
 
 import { routeTree } from './routeTree.gen';
 
