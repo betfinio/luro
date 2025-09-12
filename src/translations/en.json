@@ -27,7 +27,6 @@
 			"transactionFailed": "Transaction failed"
 		},
 		"placeholder": {
-			"balance": "Please top-up balance",
 			"Amount": "Amount"
 		},
 		"activeBets": "Your active bets",

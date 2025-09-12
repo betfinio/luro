@@ -14,6 +14,7 @@ import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { parseEther } from 'viem';
 import { useAccount } from 'wagmi';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
 import { getCurrentRoundInfo } from '@/src/lib/api';
@@ -23,7 +24,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
-	const { data: allowance = 0n, isFetching: loading } = useAllowance(address);
+	const { data: allowance = 0n } = useAllowance(address);
 	const { data: balance = 0n } = useBalance(address);
 	const { data: isMember = false } = useIsMember(address);
 	const { mutate: placeBet, isPending, isSuccess, data } = usePlaceBet();
@@ -64,14 +65,14 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		}
 
 		try {
-			BigInt(Number(amount));
+			parseEther(amount);
 		} catch {
 			toast.error(t('toast.invalidAmount'));
 			return;
 		}
 
-		if (allowance < BigInt(Number(amount)) * 10n ** 18n) {
-			requestAllowance?.('bet', BigInt(Number(amount)) * 10n ** 18n);
+		if (allowance < parseEther(amount)) {
+			requestAllowance?.('bet', parseEther(amount));
 			return;
 		}
 		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
@@ -107,6 +108,23 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 		setAmount(value.toFixed(0));
 	};
 
+	// Логика для определения параметров слайдера в зависимости от баланса
+	const sliderParams = useMemo(() => {
+		const balanceNumber = valueToNumber(balance);
+		if (balanceNumber <= 1000) {
+			return {
+				min: 0,
+				max: 100,
+				value: 0,
+			};
+		}
+		return {
+			min: 1000,
+			max: balanceNumber - 1,
+			value: Number(amount),
+		};
+	}, [balance, amount]);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -134,9 +152,8 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					<NumericInput
 						className={'border-secondary-foreground text-white'}
 						scale="lg"
-						placeholder={valueToNumber(balance) < Number(amount) ? t('placeholder.balance') : t('placeholder.Amount')}
-						hasError={valueToNumber(balance) < Number(amount)}
-						disabled={loading || balance <= 0n}
+						placeholder={t('placeholder.Amount')}
+						hasError={parseEther(amount) > balance}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
@@ -145,7 +162,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						whileTap={{ scale: 0.95 }}
 						onClick={handleBet}
 						whileHover={{ scale: 1.03 }}
-						disabled={Number(amount) === 0 || isPending || valueToNumber(balance) < Number(amount)}
+						disabled={Number(amount) === 0 || isPending || balance < parseEther(amount)}
 						className={
 							'text-xs font-semibold flex flex-col hover:scale-110 items-center justify-center text-center w-full h-[50px] bg-primary rounded-lg text-primary-foreground disabled:grayscale disabled:pointer-events-none duration-300 sm:hidden'
 						}
@@ -167,10 +184,11 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 
 				<div className={cn('relative mt-4 h-[24px]', balance === 0n && 'grayscale pointer-events-none')}>
 					<Slider
-						min={1000}
-						max={valueToNumber(balance) - 1}
-						value={[Number(amount)]}
-						defaultValue={[10000]}
+						min={sliderParams.min}
+						max={sliderParams.max}
+						value={[balance > 0n ? sliderParams.value : 0]}
+						defaultValue={[sliderParams.value]}
+						disabled={balance <= 0n}
 						onValueChange={(value: number[]) => {
 							handleSliderChange(value[0]);
 						}}
