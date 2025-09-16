@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useLuroAddress } from '@/src/lib';
 import { jumpToCurrentRound } from '@/src/lib/index';

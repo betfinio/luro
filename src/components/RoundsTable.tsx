@@ -5,8 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@betfinio/components/u
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useUsername } from 'betfinio_context/lib/query';
-import { motion } from 'framer-motion';
 import { Expand } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';

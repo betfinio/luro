@@ -1,6 +1,6 @@
 import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
