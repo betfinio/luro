@@ -1,8 +1,8 @@
 import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { BetValue } from '@betfinio/components/shared';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
-import { AnimatePresence, motion } from 'framer-motion';
 import { CircleHelp } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';

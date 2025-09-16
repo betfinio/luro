@@ -1,4 +1,4 @@
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useLuroState, useVisibleRound } from '../../lib/query';
 import { RoundResultScreen } from './screens/RoundResultScreen';
 import { SpinningScreen } from './screens/SpinningScreen';
