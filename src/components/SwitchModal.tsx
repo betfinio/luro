@@ -1,7 +1,7 @@
 import { cn } from '@betfinio/components/lib';
 import { DialogClose } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LuroInterval } from '@/src/lib/types.ts';

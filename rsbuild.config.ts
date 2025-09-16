@@ -37,7 +37,11 @@ export default defineConfig({
 					'./route': './src/routes/games/luro/$interval',
 				},
 				manifest: true,
-				dts: true,
+				dts: {
+					consumeTypes: {
+						typesOnBuild: true,
+					},
+				},
 				shared: ['react', 'react-dom', '@tanstack/react-router', '@tanstack/react-query', 'i18next', 'react-i18next', 'wagmi'],
 			},
 			{},

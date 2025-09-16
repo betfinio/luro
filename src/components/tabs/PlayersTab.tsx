@@ -4,7 +4,7 @@ import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
 import { useUsername } from 'betfinio_context/lib/query';
 import { addressToColor } from 'betfinio_context/lib/utils';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { type CSSProperties, type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { List } from 'react-virtualized';
 import type { Address } from 'viem';

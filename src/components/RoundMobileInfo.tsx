@@ -1,7 +1,7 @@
 import { valueToNumber } from '@betfinio/abi';
 import { Dialog, DialogContent, DialogTrigger } from '@betfinio/components/ui';
-import { motion } from 'framer-motion';
 import { ChartBarIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
