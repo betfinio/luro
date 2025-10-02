@@ -26,9 +26,9 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 				autoplay={true}
 				loop={true}
 				renderConfig={{ autoResize: true }}
-				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
+				style={{ position: 'absolute', width: '100%', height: '295px', right: 0, bottom: 0, left: 0 }}
 			/>
-			<div className={'flex flex-col justify-center items-center relative z-10 p-5 bg-background bg-opacity-75 mt-10'}>
+			<div className={'flex flex-col justify-center items-center relative p-5 bg-background bg-opacity-75 mt-10'}>
 				<div className={'flex items-end pb-4 gap-2'}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
