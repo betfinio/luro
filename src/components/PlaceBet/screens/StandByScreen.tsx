@@ -153,7 +153,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						className={'border-secondary-foreground text-white'}
 						scale="lg"
 						placeholder={t('placeholder.Amount')}
-						hasError={parseEther(amount) > balance}
+						hasError={address !== ZeroAddress && parseEther(amount) > balance}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
