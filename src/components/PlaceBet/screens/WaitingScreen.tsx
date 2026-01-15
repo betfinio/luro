@@ -2,6 +2,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { useRoundRequested, useStartRound } from '@/src/lib/query';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
@@ -22,13 +23,13 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			className={'grow relative min-h-[390px] flex items-start justify-center'}
 		>
 			<DotLottieReact
-				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
+				src={`${ASSETS_IPFS_BASE_URL}/throw.lottie`}
 				autoplay={true}
 				loop={true}
 				renderConfig={{ autoResize: true }}
-				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
+				style={{ position: 'absolute', width: '100%', height: '295px', right: 0, bottom: 0, left: 0 }}
 			/>
-			<div className={'flex flex-col justify-center items-center relative z-10 p-5 bg-background bg-opacity-75 mt-10'}>
+			<div className={'flex flex-col justify-center items-center relative p-5 bg-background bg-opacity-75 mt-10'}>
 				<div className={'flex items-end pb-4 gap-2'}>
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />

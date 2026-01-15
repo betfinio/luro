@@ -2,6 +2,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 
 export const SpinningScreen: FC<{ round: number }> = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
@@ -15,7 +16,7 @@ export const SpinningScreen: FC<{ round: number }> = () => {
 			className={'grow flex flex-col items-center min-h-[290px] sm:min-h-[390px] relative'}
 		>
 			<DotLottieReact
-				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lambo.lottie'}
+				src={`${ASSETS_IPFS_BASE_URL}/lambo.lottie`}
 				renderConfig={{ autoResize: true }}
 				style={{ position: 'absolute', width: '100%', height: '295px', zIndex: 2, right: 0, bottom: 0, left: 0 }}
 				autoplay={true}

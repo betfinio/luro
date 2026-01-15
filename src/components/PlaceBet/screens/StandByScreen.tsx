@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { parseEther } from 'viem';
 import { useAccount } from 'wagmi';
+import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
 import { getCurrentRoundInfo } from '@/src/lib/api';
 import { usePlaceBet, useRoundBets } from '@/src/lib/query';
@@ -153,7 +154,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						className={'border-secondary-foreground text-white'}
 						scale="lg"
 						placeholder={t('placeholder.Amount')}
-						hasError={parseEther(amount) > balance}
+						hasError={address !== ZeroAddress && parseEther(amount) > balance}
 						value={amount}
 						onValueChange={handleBetChange}
 					/>
@@ -173,7 +174,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 							<span className={'flex flex-row items-center text-base uppercase'}>
 								{t('bet')}
 								<DotLottieReact
-									src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lightning-bolt.lottie'}
+									src={`${ASSETS_IPFS_BASE_URL}/lightning-bolt.lottie`}
 									autoplay={true}
 									style={{ width: '16px', height: '16px', bottom: 0, left: 0 }}
 								/>
@@ -222,7 +223,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						<span className={'flex flex-row items-center text-base uppercase'}>
 							{t('bet')}
 							<DotLottieReact
-								src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/lightning-bolt.lottie'}
+								src={`${ASSETS_IPFS_BASE_URL}/lightning-bolt.lottie`}
 								autoplay={true}
 								style={{ width: '16px', height: '16px', bottom: 0, left: 0 }}
 							/>
