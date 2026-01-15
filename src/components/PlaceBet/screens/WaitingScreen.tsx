@@ -2,6 +2,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { useRoundRequested, useStartRound } from '@/src/lib/query';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
@@ -22,7 +23,7 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			className={'grow relative min-h-[390px] flex items-start justify-center'}
 		>
 			<DotLottieReact
-				src={'https://betfin-assets.s3.eu-central-1.amazonaws.com/throw.lottie'}
+				src={`${ASSETS_IPFS_BASE_URL}/throw.lottie`}
 				autoplay={true}
 				loop={true}
 				renderConfig={{ autoResize: true }}

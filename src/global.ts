@@ -13,3 +13,5 @@ export const BONUS_FEE = 50n;
 export const NET_COEF = 1000n - STAKING_FEE - BONUS_FEE;
 
 export const types: LuroInterval[] = ['5m', '1d'];
+
+export const ASSETS_IPFS_BASE_URL = 'https://ipfs.io/ipfs/bafybeie2rznelu7cvml7divpm2e57rngvzjobhq55yrtvzk3ajizbl2y6y';
