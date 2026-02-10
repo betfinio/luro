@@ -134,7 +134,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			transition={{ duration: 0.3 }}
 			className={'flex flex-col grow justify-between duration-300 lg:max-w-[300px]'}
 		>
-			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-10 my-2 sm:flex'}>
+			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-5 my-2 sm:flex'}>
 				{t('title')}
 				<LuckyRound className={'w-5 h-5 text-secondary-foreground'} />
 			</div>
