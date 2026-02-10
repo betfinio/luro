@@ -12,8 +12,6 @@
 		"prebuild": "graphclient build",
 		"dev": "bun run build:schema:dev && rsbuild dev --open",
 		"prod": "bun run build:schema:prod && rsbuild dev --env-mode production --open",
-		"local": "bun run build:schema:local && rsbuild dev --env-mode localhost --open",
-		"build:schema:local": "dotenv -e .env.localhost.local -- graphclient build",
 		"build:schema:dev": "dotenv -e .env.development.local -- graphclient build",
 		"build:schema:prod": "dotenv -e .env.production.local -- graphclient build",
 		"secret:dev": "bun scripts/op-secret.ts development dev",
@@ -47,7 +45,7 @@
 		"tailwindcss": "4.1.17",
 		"viem": "2.33.3",
 		"wagmi": "2.16.2",
-		"hono": "4.11.1"
+		"hono": "4.11.7"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.4",
