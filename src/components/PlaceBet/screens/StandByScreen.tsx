@@ -146,7 +146,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					setHovering(false);
 				}}
 				style={{ filter: isMobile ? '' : compiledShadow }}
-				className={cn('rounded-xl bg-background-light border-border border p-4 relative w-full duration-300')}
+				className={cn('rounded-xl bg-[var(--background-light)] border-border border p-4 relative w-full duration-300')}
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>
@@ -232,7 +232,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 				</motion.button>
 			</div>
 
-			<div className={cn('block rounded-xl bg-background-light p-3 relative w-full lg:w-full mt-3 border-border border')}>
+			<div className={cn('block rounded-xl bg-[var(--background-light)] p-3 relative w-full lg:w-full mt-3 border-border border')}>
 				<div className={'grid grid-cols-2 gap-2 text-xs'}>
 					<div className={'bg-background py-2 text-center flex flex-col gap-1 rounded-[8px]'}>
 						<div className={'text-gray-500'}>{t('activeBets')}</div>

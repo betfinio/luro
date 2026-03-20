@@ -58,7 +58,7 @@ export const BonusInfo = () => {
 							</div>
 						</TooltipContent>
 					</div>
-					<div className={'bg-background-light rounded-xl p-4 border-border border'}>
+					<div className={'bg-[var(--background-light)] rounded-xl p-4 border-border border'}>
 						<div className={'relative'}>
 							<div className={'lg:px-20 relative z-10'}>
 								<BonusChart bonuses={bonuses} />

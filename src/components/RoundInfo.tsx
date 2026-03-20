@@ -53,7 +53,7 @@ export const RoundInfo = () => {
 	return (
 		<div
 			className={
-				'px-3 py-2 bg-background-light border-border border rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative md:px-5 md:py-6'
+				'px-3 py-2 bg-[var(--background-light)] border-border border rounded-lg max-h-[80px] flex gap-5 xl:gap-10 flex-row justify-between md:items-center relative md:px-5 md:py-6'
 			}
 		>
 			<Dialog>
@@ -70,7 +70,7 @@ export const RoundInfo = () => {
 						</div>
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'w-fit luro'} aria-describedby={undefined}>
+				<DialogContent className={'w-fit'} aria-describedby={undefined}>
 					<DialogTitle className={'hidden'} />
 					<SwitchModal selected={interval as LuroInterval} />
 				</DialogContent>
