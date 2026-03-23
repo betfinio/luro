@@ -42,13 +42,12 @@ export interface Round {
 	total: {
 		volume: bigint;
 		bets: bigint;
-		bonus: bigint;
-		staking: bigint;
 	};
 	status: RoundStatusEnum;
 	address: Address;
 	winnerOffset?: bigint;
 	winnerAddress?: Address;
+	winnerPayout?: bigint;
 }
 
 export interface PlayerRoundInfo {
@@ -62,6 +61,7 @@ export interface WinnerInfo {
 	player: Address;
 	tx: Address;
 	round: number;
+	payout: bigint;
 }
 
 export interface RoundModalPlayer {
@@ -69,22 +69,20 @@ export interface RoundModalPlayer {
 	count: number;
 	volume: bigint;
 	win: bigint;
-	bonus: bigint;
 }
 
 export enum RoundStatusEnum {
-	Pending = 0,
-	Spinning = 1,
-	Finished = 2,
+	None = 0,
+	Open = 1,
+	SpinRequested = 2,
+	ResultReady = 3,
+	Settled = 4,
+	Cancelled = 5,
 }
+
 export interface PlaceBetParams {
 	round: number;
 	amount: number;
-	player: Address;
-	address: Address;
-}
-
-export interface BonusClaimParams {
 	player: Address;
 	address: Address;
 }

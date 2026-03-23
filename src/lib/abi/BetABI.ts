@@ -1,0 +1,93 @@
+export const BetABI = [
+	{
+		type: 'function',
+		name: 'amount',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'payout',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'player',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'recipient',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'result',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'roundId',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'status',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint8',
+				internalType: 'enum IBet.BetStatus',
+			},
+		],
+		stateMutability: 'view',
+	},
+] as const;

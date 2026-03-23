@@ -45,31 +45,9 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 				</div>
 			),
 		}),
-		columnHelper.accessor('total.bonus', {
-			header: t('columns.totalBonuses'),
-			meta: {
-				className: 'hidden md:table-cell',
-			},
-			cell: (props) => (
-				<div className={'text-secondary-foreground'}>
-					<BetValue value={valueToNumber(props.getValue())} withIcon />
-				</div>
-			),
-		}),
 		columnHelper.accessor('winnerAddress', {
 			header: t('columns.winner'),
 			cell: (props) => <WinnerInfo winner={props.getValue()} />,
-		}),
-		columnHelper.accessor('total.staking', {
-			meta: {
-				className: 'md:w-[160px] hidden md:table-cell',
-			},
-			header: t('columns.stakingEarnings'),
-			cell: (props) => (
-				<div className={''}>
-					<BetValue value={valueToNumber(props.getValue())} withIcon />
-				</div>
-			),
 		}),
 		columnHelper.display({
 			meta: { className: 'w-10' },
@@ -181,8 +159,6 @@ const PlayerRoundsTable: FC<{ columns: ColumnDef<Round, any>[] }> = ({ columns }
 const WinnerInfo: FC<{ winner: Address }> = ({ winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 	const { address } = useAccount();
-	console.log(address, winner);
-
 	const { data: username } = useUsername(winner, address);
 
 	if (!winner) {

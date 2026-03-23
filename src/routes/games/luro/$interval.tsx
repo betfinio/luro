@@ -2,8 +2,6 @@ import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
 import { createFileRoute, Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { BetsInfo } from '@/src/components/BetsInfo.tsx';
-import BonusClaimBlock from '@/src/components/BonusClaimBlock.tsx';
-import { BonusInfo } from '@/src/components/BonusInfo.tsx';
 import { CurrentRound } from '@/src/components/CurrentRound.tsx';
 import { RoundInfo } from '@/src/components/RoundInfo.tsx';
 import RoundModal from '@/src/components/RoundModal.tsx';
@@ -39,8 +37,6 @@ export function LuroPage() {
 					<div className={'grid grid-cols-4 md:grid-cols-3 lg:grid-cols-[repeat(21,minmax(0,1fr))] xl:grid-cols-12 gap-4 md:pt-4 relative'}>
 						<div className={'col-span-4 md:col-span-2 lg:col-[span_15_/_span_15] xl:col-span-8 flex flex-col justify-between'}>
 							<CurrentRound />
-							<BonusInfo />
-							<BonusClaimBlock />
 							<div className={'text-center my-2 justify-self-end'}>
 								<Link to={'/staking/conservative'} className={'text-sm text-muted-foreground'}>
 									<Trans

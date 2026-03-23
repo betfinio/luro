@@ -88,11 +88,11 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	}, [bets]);
 
 	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address]);
-	const expectedWinning = (valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume)) * 0.914;
+	const expectedWinning = valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume);
 	const coef = expectedWinning / Number(amount);
 
 	const myPercent = roundInfo.volume === 0 ? 0 : ((valueToNumber(myBetVolume) / roundInfo.volume) * 100).toFixed(2);
-	const potentialWin = roundInfo.volume * 0.914;
+	const potentialWin = roundInfo.volume;
 	const myCoef = myBetVolume === 0n ? 0 : potentialWin / valueToNumber(myBetVolume);
 
 	const [hovering, setHovering] = useState(false);
@@ -202,7 +202,6 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						<span className={'sm:hidden'}>{t('win')}:</span>
 						{expectedWinning.toLocaleString()}
 						<Bet className={'text-secondary-foreground'} />
-						<span className={'text-bonus'}>+{t('bonus')}</span>
 					</span>
 				</p>
 				<div className={'text-center text-secondary-foreground font-thin text-xs'}>

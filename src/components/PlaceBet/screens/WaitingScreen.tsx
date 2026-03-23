@@ -1,17 +1,24 @@
+import { toast } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAccount } from 'wagmi';
 import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { useRoundRequested, useStartRound } from '@/src/lib/query';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 
+	const { isConnected } = useAccount();
 	const { mutate: startRound, isPending } = useStartRound(round);
 	const { data: isRoundRequested } = useRoundRequested(round);
 
 	const handleSpin = () => {
+		if (!isConnected) {
+			toast.error(t('toast.connect'));
+			return;
+		}
 		startRound();
 	};
 	return (
@@ -35,14 +42,17 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
 				</div>
 				{!isRoundRequested && (
-					<button
-						type={'button'}
-						onClick={handleSpin}
-						disabled={isPending}
-						className={'bg-primary disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
-					>
-						{isPending ? t('spinning') : t('spinTheWheel')}
-					</button>
+					<div className={'flex flex-col items-center gap-2'}>
+						{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[240px]'}>{t('toast.connect')}</p> : null}
+						<button
+							type={'button'}
+							onClick={handleSpin}
+							disabled={isPending || !isConnected}
+							className={'bg-primary disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
+						>
+							{isPending ? t('spinning') : t('spinTheWheel')}
+						</button>
+					</div>
 				)}
 			</div>
 		</motion.div>

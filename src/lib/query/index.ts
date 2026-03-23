@@ -1,4 +1,4 @@
-import { LuckyRoundABI, ZeroAddress } from '@betfinio/abi';
+import { ZeroAddress } from '@betfinio/abi';
 import { toast } from '@betfinio/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readContract, type WriteContractReturnType } from '@wagmi/core';
@@ -8,26 +8,12 @@ import type { Address, WriteContractErrorType } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useConfig, useWatchContractEvent } from 'wagmi';
 import logger from '@/src/config/logger.ts';
-import { animateNewBet, getCurrentRound, useLuroAddress } from '@/src/lib';
+import { animateNewBet, getCurrentRound, useLuroAddress, useLuroStrategyAddress } from '@/src/lib';
+import { LuckyRoundStrategyABI } from '@/src/lib/abi/LuckyRoundStrategyABI.ts';
+import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
 import type { LuroBet, LuroInterval, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import {
-	calculateRound,
-	claimBonus,
-	distributeBonus,
-	fetchAvailableBonus,
-	fetchBetsCount,
-	fetchBonusDistribution,
-	fetchPlayerRoundInfo,
-	fetchRound,
-	fetchRoundBets,
-	fetchRounds,
-	fetchRoundsByPlayer,
-	fetchTotalVolume,
-	getRoundWinnerByOffset,
-	placeBet,
-	startRound,
-} from '../api';
+import { fetchPlayerRoundInfo, fetchRound, fetchRoundBets, fetchRounds, fetchRoundsByPlayer, getRoundWinnerByOffset, placeBet, spinRound } from '../api';
 import { fetchWinner } from '../gql';
 
 export const useObserveBet = (round: number) => {
@@ -44,14 +30,16 @@ export const useObserveBet = (round: number) => {
 	});
 
 	useWatchContractEvent({
-		abi: LuckyRoundABI,
+		abi: PvPGameABI,
 		address: luroAddress,
-		eventName: 'BetCreated',
+		eventName: 'BetPlaced',
 		args: {
-			round: BigInt(round),
+			// no round filter on BetPlaced — roundId is not indexed
 		},
 		onLogs: async (betLogs) => {
-			animateNewBet(betLogs[0]?.args?.player ?? ZeroAddress, 10, queryClient, luroAddress);
+			const log = betLogs[0];
+			if (Number(log?.args?.roundId) !== round) return;
+			animateNewBet(log?.args?.player ?? ZeroAddress, 10, queryClient, luroAddress);
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets'] });
 		},
@@ -104,7 +92,7 @@ export const useStartRound = (round: number) => {
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType>({
 		mutationKey: ['luro', luroAddress, 'round', 'start'],
-		mutationFn: () => startRound(luroAddress, round, config),
+		mutationFn: () => spinRound(luroAddress, round, config),
 		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('Start round'),
 		onSuccess: async (data) => {
@@ -150,110 +138,17 @@ export const useRoundBets = (round: number) => {
 
 export const useRoundBank = (round: number) => {
 	const config = useConfig();
-	const luroAddress = useLuroAddress();
+	const strategyAddress = useLuroStrategyAddress();
 
 	return useQuery<bigint>({
-		queryKey: ['luro', luroAddress, 'round', 'bank', round],
+		queryKey: ['luro', strategyAddress, 'round', 'bank', round],
 		queryFn: async () =>
 			(await readContract(config, {
-				abi: LuckyRoundABI,
-				address: luroAddress,
+				abi: LuckyRoundStrategyABI,
+				address: strategyAddress,
 				functionName: 'roundBank',
 				args: [BigInt(round)],
 			})) as bigint,
-	});
-};
-
-export const useRoundBonusShare = (round: number) => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useQuery<bigint>({
-		queryKey: ['luro', luroAddress, 'round', 'bonus', round],
-		queryFn: async () => {
-			return (await readContract(config, {
-				abi: LuckyRoundABI,
-				address: luroAddress,
-				functionName: 'roundBonusShares',
-				args: [BigInt(round)],
-			})) as bigint;
-		},
-	});
-};
-
-export const useDistributeBonus = () => {
-	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
-	const queryClient = useQueryClient();
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useMutation<WriteContractReturnType, WriteContractErrorType, { round: number }>({
-		mutationKey: ['luro', 'bonus', 'distribute'],
-		mutationFn: (params) => distributeBonus({ ...params, address: luroAddress }, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
-		onMutate: () => logger.log('distribute bonus'),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus'] });
-		},
-		onSettled: () => logger.log('placeBet settled'),
-	});
-};
-
-export const useBonusDistribution = (round: number) => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useQuery<boolean>({
-		queryKey: ['luro', luroAddress, 'bonus', 'distribution', round],
-		queryFn: () => fetchBonusDistribution(luroAddress, round, config),
-	});
-};
-
-export const useAvailableBonus = (address: Address) => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useQuery({
-		queryKey: ['luro', luroAddress, 'bonus', 'available'],
-		queryFn: () => fetchAvailableBonus(luroAddress, address, config),
-	});
-};
-
-export const useClaimBonus = () => {
-	const queryClient = useQueryClient();
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
-	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
-	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
-
-	const { address: player = ZeroAddress } = useAccount();
-
-	return useMutation<WriteContractReturnType, WriteContractErrorType>({
-		mutationKey: ['luro', luroAddress, 'bonus', 'claim'],
-		mutationFn: () => claimBonus({ player, address: luroAddress }, config),
-		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
-		onMutate: () => logger.log('bonusClaim'),
-		onSuccess: async (data) => {
-			logger.log(data);
-			const promise = async () => {
-				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
-				if (receipt.status === 'reverted') {
-					throw new Error('Transaction reverted');
-				}
-				queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bonus', 'available'] });
-			};
-
-			toast.promise(promise, {
-				loading: t('claimingBonus.title'),
-				success: t('claimingBonus.title'),
-				error: t('transactionFailed.title'),
-				action: getTransactionLink(data),
-			});
-		},
-		onSettled: () => logger.log('bonusClaim settled'),
 	});
 };
 
@@ -348,41 +243,6 @@ export const usePlayerRounds = (player: Address) => {
 	return useQuery<Round[]>({
 		queryKey: ['luro', luroAddress, 'playerRounds', player],
 		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config.getClient()),
-	});
-};
-
-export const useTotalVolume = () => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useQuery<bigint>({
-		queryKey: ['luro', luroAddress, 'totalVolume'],
-		queryFn: () => fetchTotalVolume(luroAddress, config),
-	});
-};
-export const useBetsCount = () => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useQuery<number>({
-		queryKey: ['luro', luroAddress, 'betsCount'],
-		queryFn: () => fetchBetsCount(luroAddress, config),
-	});
-};
-
-export const useCalculate = (round: number) => {
-	const config = useConfig();
-	const luroAddress = useLuroAddress();
-
-	return useMutation({
-		mutationKey: ['luro', luroAddress, 'calculate'],
-		mutationFn: () => calculateRound(luroAddress, round, config),
-		onMutate: () => logger.log('calculate'),
-		onSuccess: async (data) => {
-			logger.log(data);
-		},
-		onSettled: () => logger.log('calculate settled'),
-		onError: (e) => logger.error(e),
 	});
 };
 

@@ -2,7 +2,7 @@ import { valueToNumber, ZeroAddress } from '@betfinio/abi';
 import { Bet } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue } from '@betfinio/components/shared';
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
+import { Button, Tooltip, TooltipContent, TooltipTrigger, toast } from '@betfinio/components/ui';
 import { Pie, type PieTooltipProps } from '@nivo/pie';
 import { useQueryClient } from '@tanstack/react-query';
 import { addressToColor } from 'betfinio_context/lib/utils';
@@ -19,12 +19,10 @@ import Chainlink from '@/src/assets/chainlink.svg';
 import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
 import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
-import { NET_COEF } from '@/src/global.ts';
 import { getTimesByRound, hexToRgbA, jumpToCurrentRound, shootConfetti, useLuroAddress } from '@/src/lib';
 import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import {
-	useCalculate,
 	useLuroState,
 	useObserveBet,
 	usePlayerRoundInfo,
@@ -32,20 +30,26 @@ import {
 	useRoundBank,
 	useRoundBets,
 	useRoundWinner,
+	useStartRound,
 	useVisibleRound,
 } from '../lib/query';
 
 export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundCircle' });
+	const { t: tPlaceBetToast } = useTranslation('luro', { keyPrefix: 'placeBet.toast' });
 
 	const [winnerColor, setWinnerColor] = useState<string | null>(null);
-	const { address } = useAccount();
+	const { address, isConnected } = useAccount();
 	const { data: bets = [] } = useRoundBets(round);
 	const { data: currentRound } = useVisibleRound();
 	const { data: roundData } = useRound(round);
 	const winner = useRoundWinner(round);
-	const { mutate: spin } = useCalculate(round);
+	const { mutate: spin } = useStartRound(round);
 	const handleManualSpin = () => {
+		if (!isConnected) {
+			toast.error(tPlaceBetToast('connect'));
+			return;
+		}
 		spin();
 	};
 
@@ -60,7 +64,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 
 	const wheelAngle = useMemo(() => {
 		if (currentRound !== round) {
-			if (roundData?.status === 2) {
+			if (roundData?.status === 4) {
 				return Number((winner?.offset ?? 0n) * 360n) / valueToNumber(roundData?.total.volume);
 			}
 		}
@@ -206,14 +210,17 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				</div>
 				{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
 					<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
-						{roundData?.status === 0 && (
-							<div className={'flex flex-col gap-2'}>
+						{roundData?.status === 1 && (
+							<div className={'flex flex-col gap-2 items-center'}>
 								{t('waiting')}
-								<Button onClick={handleManualSpin}>SPIN now</Button>
+								{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[220px]'}>{tPlaceBetToast('connect')}</p> : null}
+								<Button onClick={handleManualSpin} disabled={!isConnected}>
+									SPIN now
+								</Button>
 							</div>
 						)}
 
-						{roundData?.status === 2 && (
+						{roundData?.status === 4 && (
 							<>
 								<div className={'shrink-0'}>
 									<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
@@ -404,10 +411,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	const renderInside = () => {
 		if (currentRound !== round) {
-			if (roundData?.status === 2) {
+			if (roundData?.status === 4) {
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = roundData?.total.volume || 1n;
-				const netVolume = (volume * NET_COEF) / 1000n;
+				const netVolume = volume;
 
 				const finalVolume = valueToNumber(netVolume);
 				const percent = (authorVolume / finalVolume) * 100;
@@ -420,7 +427,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 			case 'stopped': {
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = roundData?.total.volume || 1n;
-				const netVolume = (volume * NET_COEF) / 1000n;
+				const netVolume = volume;
 
 				const finalVolume = valueToNumber(netVolume);
 				const percent = (authorVolume / finalVolume) * 100;

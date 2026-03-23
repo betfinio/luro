@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import confetti from 'canvas-confetti';
 import type { Address } from 'viem';
-import { LURO, LURO_5MIN } from '@/src/global.ts';
+import { LURO, LURO_5MIN, LURO_5MIN_STRATEGY, LURO_STRATEGY } from '@/src/global.ts';
 import type { LuroAuthor, LuroBet, LuroInterval, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 
@@ -17,32 +17,26 @@ export const mapBetsToAuthors = (bets: LuroBet[]): LuroAuthor[] => {
 	}, []);
 };
 
-export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, volume: bigint, bonusShare: bigint, address: Address): RoundModalPlayer[] => {
-	const bonusPool = (volume / 100n) * 4n;
+export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, bank: bigint, address: Address): RoundModalPlayer[] => {
 	const mappedBets = [...bets]
 		.map((e) => ({
 			...e,
 			player: e.player.toLowerCase() as Address,
 		}))
-		.reduce((acc: RoundModalPlayer[], val, index) => {
+		.reduce((acc: RoundModalPlayer[], val) => {
 			const author = acc.findIndex((bet) => bet.player.toLowerCase() === val.player.toLowerCase());
-			const weight = val.amount * BigInt(bets.length - index);
-			const bonus = bonusShare === 0n ? 0n : (bonusPool * weight) / bonusShare;
 			if (author === -1) {
 				acc.push({
 					player: val.player.toLowerCase() as Address,
 					count: 1,
 					volume: val.amount,
-					win: val.player.toLowerCase() === winner.toLowerCase() ? (volume / 1000n) * 914n : 0n,
-					bonus: bonus,
+					win: val.player.toLowerCase() === winner.toLowerCase() ? bank : 0n,
 				});
 			} else {
 				acc[author].volume += val.amount;
 				acc[author].count += 1;
-				acc[author].bonus += bonus;
 			}
 			return acc;
-			//TODO: sorting algorhytm for largest volume
 		}, []);
 
 	return mappedBets.toSorted((a, b) => {
@@ -119,6 +113,18 @@ export const useLuroAddress = (): Address => {
 			return LURO_5MIN;
 		default:
 			return LURO;
+	}
+};
+
+export const useLuroStrategyAddress = (): Address => {
+	const { interval } = Route.useParams();
+	switch (interval) {
+		case '1d':
+			return LURO_STRATEGY;
+		case '5m':
+			return LURO_5MIN_STRATEGY;
+		default:
+			return LURO_STRATEGY;
 	}
 };
 
