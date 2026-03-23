@@ -170,14 +170,13 @@ export const useRoundWinner = (round: number) => {
 };
 
 export const useRound = (round: number) => {
-	const { address = ZeroAddress } = useAccount();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
 
 	return useQuery<Round>({
 		queryKey: ['luro', luroAddress, 'round', round],
 		queryFn: () => {
-			return fetchRound(luroAddress, BigInt(round), address, config.getClient());
+			return fetchRound(luroAddress, BigInt(round), config.getClient());
 		},
 	});
 };

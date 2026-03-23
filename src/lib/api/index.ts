@@ -118,7 +118,7 @@ export const fetchPlayerRoundInfo = async (address: Address, player: Address, ro
 	};
 };
 
-export const fetchRound = async (address: Address, round: bigint, player: Address, config: Client): Promise<Round> => {
+export const fetchRound = async (address: Address, round: bigint, config: Client): Promise<Round> => {
 	const roundInfo = (await readContract(config, {
 		abi: PvPGameABI,
 		address: address,
