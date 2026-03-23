@@ -15,7 +15,9 @@ export const RoundMyInfo = () => {
 	}, [bets]);
 
 	return (
-		<div className={'bg-background-light max-h-[120px] border-border border py-[10px] px-[10px] rounded-xl sticky top-5 text-sm grow flex flex-col gap-2'}>
+		<div
+			className={'bg-[var(--background-light)] max-h-[120px] border-border border py-[10px] px-[10px] rounded-xl sticky top-5 text-sm grow flex flex-col gap-2'}
+		>
 			<div className={'bg-background rounded-lg p-[10px] flex justify-between gap-1 items-center text-white font-semibold'}>
 				<div className={'flex flex-row items-center gap-1 text-secondary-foreground'}>
 					<LuckyRound className={'h-4 w-4 '} />

@@ -1,8 +1,8 @@
-import '@/src/globals.css';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { createRoot } from 'react-dom/client';
-
 import { routeTree } from './routeTree.gen';
+
+import '@/src/globals.css';
 
 const router = createRouter({ routeTree });
 

@@ -152,7 +152,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		<Tooltip>
 			<motion.div
 				className={cn(
-					'border-border border relative p-4 grow xl:p-8 rounded-xl bg-background-light flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
+					'border-border border relative p-4 grow xl:p-8 rounded-xl bg-[var(--background-light)] flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
 					className,
 				)}
 				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'hsl(var(--background-light))' }}

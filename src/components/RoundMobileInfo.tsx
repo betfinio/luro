@@ -17,7 +17,7 @@ const RoundMobileInfo: FC = () => {
 						<ChartBarIcon className={'text-secondary-foreground w-6'} />
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'luro max-w-0 w-auto'}>
+				<DialogContent className={'max-w-0 w-auto'}>
 					<MobileStatsModal />
 				</DialogContent>
 			</Dialog>

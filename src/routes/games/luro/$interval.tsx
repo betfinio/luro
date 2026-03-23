@@ -30,8 +30,8 @@ export function LuroPage() {
 
 	const { t } = useTranslation('luro');
 	return (
-		<div className={'luro w-full h-full '}>
-			<div className={'col-span-4 p-2 md:p-3 lg:p-4 lg:col-start-2 2xl:px-0'}>
+		<div className={'w-full h-full'}>
+			<div className={'col-span-4 p-2 md:p-3 lg:p-4 lg:col-start-2 min-[1440px]:px-0'}>
 				<TooltipProvider delayDuration={0}>
 					<RoundInfo />
 					<div className={'grid grid-cols-4 md:grid-cols-3 lg:grid-cols-[repeat(21,minmax(0,1fr))] xl:grid-cols-12 gap-4 md:pt-4 relative'}>
