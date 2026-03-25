@@ -4,6 +4,7 @@ import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { type NumberFormatValues, NumericInput, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
 import { addressToColor } from 'betfinio_context/lib/utils';
@@ -11,41 +12,36 @@ import { Loader } from 'lucide-react';
 import millify from 'millify';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { parseEther } from 'viem';
-import { useAccount } from 'wagmi';
-import { ASSETS_IPFS_BASE_URL } from '@/src/global';
+import { useAccount, useConfig } from 'wagmi';
+import { ASSETS_IPFS_BASE_URL, CORE } from '@/src/global';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
-import { getCurrentRoundInfo } from '@/src/lib/api';
+import { getCurrentRoundInfo, placeBet as submitPlaceBet } from '@/src/lib/api';
 import { usePlaceBet, useRoundBets } from '@/src/lib/query';
 
 export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
-	const { data: allowance = 0n } = useAllowance(address);
+	const config = useConfig();
+	const queryClient = useQueryClient();
+	const tokenSpender = CORE;
+	const { data: allowance = 0n } = useAllowance(address, tokenSpender);
 	const { data: balance = 0n } = useBalance(address);
 	const { data: isMember = false } = useIsMember(address);
-	const { mutate: placeBet, isPending, isSuccess, data } = usePlaceBet();
+	const { mutate: placeBet, isPending } = usePlaceBet();
 	const { data: bets = [] } = useRoundBets(round);
-	const { requestAllowance, setResult, requested } = useAllowanceModal();
-	useEffect(() => {
-		if (data && isSuccess) {
-			setResult?.(data);
-		}
-	}, [isSuccess, data]);
-	useEffect(() => {
-		if (requested) {
-			handleBet();
-		}
-	}, [requested]);
+	const { requestAllowance } = useAllowanceModal();
 	const handleBetChange = (values: NumberFormatValues) => {
 		const { value } = values;
 		setAmount(value);
 	};
 	const luroAddress = useLuroAddress();
+
+	const betParams = { round, amount: Number(amount), player: address, address: luroAddress };
 
 	const handleBet = () => {
 		if (address === ZeroAddress) {
@@ -72,11 +68,22 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			return;
 		}
 
-		if (allowance < parseEther(amount)) {
-			requestAllowance?.('bet', parseEther(amount));
+		const amountWei = parseEther(amount);
+
+		if (allowance < amountWei) {
+			requestAllowance?.({
+				type: 'bet',
+				amount: amountWei,
+				spender: tokenSpender,
+				execute: () => submitPlaceBet(betParams, config),
+				onFlowComplete: async () => {
+					await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
+					await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+				},
+			});
 			return;
 		}
-		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
+		placeBet(betParams);
 	};
 
 	const myBetVolume = useMemo(() => {

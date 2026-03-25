@@ -505,7 +505,6 @@ const BetCircleWinner: FC<{ player: Address; amount: number; percent: number; co
 				<div className={'flex items-center gap-1'}>
 					<span className={'text-secondary-foreground'}>{coef}x</span> {t('win')}
 				</div>
-				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</div>
 		</motion.div>
 	);
@@ -531,7 +530,6 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 					{t('couldWin')}
 					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-bonus text-xs'}>+ {t('bonus')}</div>
 			</>
 		);
 	}
@@ -543,19 +541,14 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
-				<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>+ {t('bonus')}</div>
-				<div className={'text-muted-foreground text-xs mt-2'}>{t('total')}</div>
-				<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 			</>
 		);
 	}
 
 	return (
 		<>
-			<div className={'text-xl font-semibold mb-4'}>{t('yourBonus')}</div>
-			<div className={'text-bonus text-sm flex flex-row items-center justify-center gap-1'}>
-				+<BetValue value={20} withIcon />
-			</div>
+			<div className={'text-xl font-semibold mb-4'}>{t('over')}</div>
+			<div className={'text-muted-foreground text-sm text-center px-2'}>{t('betterLuckNextTime')}</div>
 		</>
 	);
 };

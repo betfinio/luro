@@ -2,13 +2,11 @@
 	"feeStaking": "Все ставки облагаются <b>комиссией в размере 3,6%</b> , которая распределяется в <b>консервативный стейкинг.</b>",
 	"tabs": {
 		"bets": "Ставки",
-		"players": "Игроки",
-		"bonus": "Бонус"
+		"players": "Игроки"
 	},
 	"placeBet": {
 		"title": "Сделать ставку",
 		"amount": "Введите сумму вашей ставки:",
-		"bonus": "бонус",
 		"myBets": "Ваши ставки",
 		"allowance": "Увеличить лимит трат",
 		"unlock": "Разблокировать",
@@ -40,20 +38,7 @@
 		"couldWin": "Вы могли выиграть",
 		"backToGame": "Вернуться к игре",
 		"youWin": "Вы ПОБЕДИЛИ!",
-		"total": "В ощем",
-		"yourBonus": "Ваш бонус:"
-	},
-	"bonusClaimBlock": {
-		"available": "Доступно для получения:",
-		"claim": "Получить"
-	},
-	"bonusInfo": {
-		"title": "Ваш бонус за этот раунд:",
-		"info": "Чем раньше и больше вы сделаете ставку, тем больший бонус получите.",
-		"everyPlayer": "Бонус выплачивается каждому игроку!",
-		"firstBet": "Первая ставка",
-		"lastBet": "Последняя ставка",
-		"coefficient": "Коэффициент"
+		"total": "В ощем"
 	},
 	"roundInfo": {
 		"luro": "Lucky Round",
@@ -75,12 +60,8 @@
 		"win": "ПОБЕДА",
 		"couldWin": "Вы могли выиграть",
 		"youWin": "Вы ПОБЕДИЛИ!",
-		"bonus": "бонус",
 		"total": "В общем",
-		"yourBonus": "Ваш бонус;"
-	},
-	"myInfo": {
-		"totalBonus": "Общий бонус"
+		"betterLuckNextTime": "Повезёт в следующий раз."
 	},
 	"roundModal": {
 		"title": "Раунд",
@@ -93,7 +74,6 @@
 		"details": {
 			"bets": "ставки",
 			"totalBets": "Всего ставок",
-			"totalBonus": "Общий бонус",
 			"paidToStaking": "Выплачено в стейкинг"
 		},
 		"winnerBet": {
@@ -106,8 +86,6 @@
 				"player": "Игрок",
 				"bets": "Ставки",
 				"amount": "Сумма",
-				"result": "Результат",
-				"bonus": "Бонус",
 				"totalResult": "Общий результат"
 			}
 		}
@@ -127,7 +105,6 @@
 			"bets": "Ставки",
 			"myBets": "Мои ставки",
 			"totalBets": "Всего ставок",
-			"totalBonuses": "Всего бонусов",
 			"winner": "Победитель",
 			"stakingEarnings": "Доходы в стейкинг"
 		},
@@ -156,15 +133,23 @@
 		"roundRequested": {
 			"title": "Раунд запрошен",
 			"description": "Транзакция подтверждена"
-		},
-		"claimingBonus": {
-			"title": "Получение бонуса",
-			"description": "Ожидание транзакции"
-		},
-		"bonusClaimed": {
-			"title": "Бонус получен!",
-			"description": "Транзакция подтверждена"
 		}
+	},
+	"errors": {
+		"L01": "invalid staking contract",
+		"L02": "player address mismatch",
+		"L03": "amount mismatch",
+		"L04": "round mismatch",
+		"L05": "amount too low",
+		"L06": "new amount out of range",
+		"L07": "round is full",
+		"L08": "round already distributed",
+		"L09": "round not finished",
+		"L10": "round already requested",
+		"L11": "round is empty",
+		"L12": "round is not finished",
+		"L13": "only core can place bets",
+		"L14": "error when tranfering tokens"
 	},
 	"title": "Шаблон"
 }
