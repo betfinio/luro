@@ -12,24 +12,29 @@ import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { FeeNotice } from '@/src/components/FeeNotice.tsx';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
 import { getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
 import type { LuroInterval, Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { useRound, useRoundBank, useRoundBets, useVisibleRound, useWinner } from '../lib/query';
+import { useLuroFee, useRound, useRoundBetsGql, useVisibleRound, useWinner } from '../lib/query';
 
 export const ModalContent: FC<{
 	roundId: number;
 	round: Round | null;
-}> = ({ roundId, round }) => {
+}> = ({ roundId, round: _round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { interval } = Route.useParams();
 	const { start, end } = getTimesByRound(roundId, interval as LuroInterval);
 	const isFinished = DateTime.fromMillis(Date.now()).diff(DateTime.fromMillis(end)).milliseconds > 0;
 
-	const { data: volume = 0n } = useRoundBank(roundId);
+	const { data: bets = [] } = useRoundBetsGql(roundId);
+	const { data: feeData } = useLuroFee();
 	const { data: winner } = useWinner(roundId);
+
+	const gqlVolume = useMemo(() => bets.reduce((acc, b) => acc + b.amount, 0n), [bets]);
+	const lpFee = feeData ? (gqlVolume * feeData.feeBps) / 10000n : 0n;
 
 	return (
 		<ScrollArea className={'h-[98vh] SCROLLBAR max-h-[98vh] w-[98vw] md:h-auto md:max-w-[1200px] lg:w-[1000px]'}>
@@ -60,12 +65,13 @@ export const ModalContent: FC<{
 					</div>
 				</div>
 
-				<RoundDetails volume={volume} usersCount={Number(round?.total.bets)} />
+				<RoundDetails volume={gqlVolume} lpFee={lpFee} usersCount={bets.length} />
+				<FeeNotice className={'mt-3'} />
 				<div className={'mt-2 md:mt-3 lg:mt-4'}>
 					<RoundCircle round={roundId} className={'aspect-auto py-10 px-2 md:px-10 '} />
 				</div>
 				<WinnerBetInfo round={roundId} />
-				<BetsTable round={roundId} volume={volume} winner={(winner?.player || ZeroAddress).toLowerCase() as Address} />
+				<BetsTable round={roundId} volume={gqlVolume} winner={(winner?.player || ZeroAddress).toLowerCase() as Address} />
 			</div>
 		</ScrollArea>
 	);
@@ -73,10 +79,11 @@ export const ModalContent: FC<{
 
 interface RoundDetailsProps {
 	volume: bigint;
+	lpFee: bigint;
 	usersCount: number;
 }
 
-const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
+const RoundDetails: FC<RoundDetailsProps> = ({ volume, lpFee, usersCount }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.details' });
 
 	return (
@@ -106,9 +113,9 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 				<Bank className={'w-14 h-14 text-secondary-foreground md:w-20 md:h-20 '} />
 				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={'text-xl font-semibold'}>
-						<BetValue value={valueToNumber(volume)} precision={1} withIcon={true} />
+						<BetValue value={valueToNumber(lpFee)} precision={1} withIcon={true} />
 					</div>
-					<div className={'text-xs text-muted-foreground'}>{t('totalBets')}</div>
+					<div className={'text-xs text-muted-foreground'}>{t('paidToStaking')}</div>
 				</div>
 			</div>
 		</div>
@@ -123,7 +130,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 	const { data: winner, isLoading, isFetching } = useWinner(round);
 	const { data: currentRound } = useVisibleRound();
 
-	if (round === currentRound || winner === undefined) {
+	if (round === currentRound || !winner) {
 		return null;
 	}
 	return (
@@ -157,7 +164,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 const BetsTable: FC<{ round: number; className?: string; volume: bigint; winner: Address }> = ({ round, volume, winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.table' });
 	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
-	const { data: bets = [] } = useRoundBets(round);
+	const { data: bets = [] } = useRoundBetsGql(round);
 	const { address = ZeroAddress } = useAccount();
 	const { data: roundData } = useRound(round);
 

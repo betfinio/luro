@@ -1,5 +1,5 @@
 {
-	"feeStaking": "All bets are subject of <b>3,6% fee</b> which is distributed into <b>Conservative staking.</b>",
+	"feeStaking": "All bets are subject of <b>{{fee}}% fee</b> which is distributed into <b><link>Liquidity Pool</link></b>.",
 	"tabs": {
 		"bets": "Bets",
 		"players": "Players"
@@ -73,7 +73,7 @@
 		"details": {
 			"bets": "bets",
 			"totalBets": "Total bets",
-			"paidToStaking": "Paid to staking"
+			"paidToStaking": "Sent to LP"
 		},
 		"winnerBet": {
 			"winningBet": "Winning Bet:",
@@ -107,7 +107,8 @@
 			"winner": "Winner",
 			"stakingEarnings": "Stake Earnings"
 		},
-		"waiting": "Waiting"
+		"waiting": "Waiting",
+		"cancelled": "Cancelled"
 	},
 	"toast": {
 		"newVersion": {

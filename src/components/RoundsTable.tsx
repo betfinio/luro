@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import type { Round } from '@/src/lib/types.ts';
+import { type Round, RoundStatusEnum } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../lib/query';
 
@@ -47,7 +47,7 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 		}),
 		columnHelper.accessor('winnerAddress', {
 			header: t('columns.winner'),
-			cell: (props) => <WinnerInfo winner={props.getValue()} />,
+			cell: (props) => <WinnerInfo winner={props.getValue()} status={props.row.original.status} />,
 		}),
 		columnHelper.display({
 			meta: { className: 'w-10' },
@@ -156,11 +156,14 @@ const PlayerRoundsTable: FC<{ columns: ColumnDef<Round, any>[] }> = ({ columns }
 	);
 };
 
-const WinnerInfo: FC<{ winner: Address }> = ({ winner }) => {
+const WinnerInfo: FC<{ winner: Address; status?: RoundStatusEnum }> = ({ winner, status }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 	const { address } = useAccount();
 	const { data: username } = useUsername(winner, address);
 
+	if (status === RoundStatusEnum.Cancelled) {
+		return <div className={'text-muted-foreground'}>{t('cancelled')}</div>;
+	}
 	if (!winner) {
 		return <div>{t('waiting')}</div>;
 	}

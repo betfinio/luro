@@ -20,7 +20,7 @@ import { useAccount, useConfig } from 'wagmi';
 import { ASSETS_IPFS_BASE_URL, CORE } from '@/src/global';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
 import { getCurrentRoundInfo, placeBet as submitPlaceBet } from '@/src/lib/api';
-import { usePlaceBet, useRoundBets } from '@/src/lib/query';
+import { useLuroFee, usePlaceBet, useRoundBets } from '@/src/lib/query';
 
 export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
@@ -34,6 +34,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { data: isMember = false } = useIsMember(address);
 	const { mutate: placeBet, isPending } = usePlaceBet();
 	const { data: bets = [] } = useRoundBets(round);
+	const { data: feeData } = useLuroFee();
 	const { requestAllowance } = useAllowanceModal();
 	const handleBetChange = (values: NumberFormatValues) => {
 		const { value } = values;
@@ -95,12 +96,16 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	}, [bets]);
 
 	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address]);
-	const expectedWinning = valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume);
-	const coef = expectedWinning / Number(amount);
+	const feeFactor = feeData ? 10000n - feeData.feeBps : 10000n;
+	const bankNet = valueToNumber((bank * feeFactor) / 10000n);
+	const myBetVolumeNet = valueToNumber((myBetVolume * feeFactor) / 10000n);
+	const newBetNet = (Number(amount) * Number(feeFactor)) / 10000;
+	const expectedWinning = bankNet + newBetNet - myBetVolumeNet;
+	const coef = Number(amount) === 0 ? 0 : expectedWinning / Number(amount);
 
 	const myPercent = roundInfo.volume === 0 ? 0 : ((valueToNumber(myBetVolume) / roundInfo.volume) * 100).toFixed(2);
-	const potentialWin = roundInfo.volume;
-	const myCoef = myBetVolume === 0n ? 0 : potentialWin / valueToNumber(myBetVolume);
+	const potentialWin = bankNet;
+	const myCoef = myBetVolume === 0n ? 0 : potentialWin / myBetVolumeNet;
 
 	const [hovering, setHovering] = useState(false);
 	const { isMobile } = useMediaQuery();
@@ -139,7 +144,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'flex flex-col grow justify-between duration-300 lg:max-w-[300px]'}
+			className={'flex flex-col grow justify-between duration-300 lg:max-w-[400px]'}
 		>
 			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-5 my-2 sm:flex'}>
 				{t('title')}
@@ -153,7 +158,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					setHovering(false);
 				}}
 				style={{ filter: isMobile ? '' : compiledShadow }}
-				className={cn('rounded-xl bg-[var(--background-light)] border-border border p-4 relative w-full duration-300')}
+				className={cn('rounded-xl bg-(--background-light) border-border border p-4 relative w-full duration-300')}
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>

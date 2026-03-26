@@ -13,7 +13,7 @@ export const BetsInfo = () => {
 				<TabsTrigger value={'bets'}>{t('bets')}</TabsTrigger>
 			</TabsList>
 
-			<div className={'py-3 mt-3 min-h-[250px] overflow-y-auto rounded-xl bg-[var(--background-light)] grow flex flex-col gap-5 border-border border'}>
+			<div className={'py-3 mt-3 min-h-[200px] overflow-y-auto rounded-xl bg-(--background-light) grow flex flex-col gap-5 border-border border'}>
 				<div className={'grow flex flex-col h-full'}>
 					<TabsContent value={'players'} className={'overflow-hidden h-full'}>
 						<PlayersTab />

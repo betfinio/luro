@@ -29,9 +29,10 @@ import {
 	useRound,
 	useRoundBank,
 	useRoundBets,
-	useRoundWinner,
+	useRoundBetsGql,
 	useStartRound,
 	useVisibleRound,
+	useWinner,
 } from '../lib/query';
 
 export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, className = '' }) => {
@@ -42,8 +43,14 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const { address, isConnected } = useAccount();
 	const { data: bets = [] } = useRoundBets(round);
 	const { data: currentRound } = useVisibleRound();
+	const { data: betsGql = [] } = useRoundBetsGql(round);
+	const effectiveBets = useMemo(() => (currentRound !== round && bets.length === 0 ? betsGql : bets), [bets, betsGql, currentRound, round]);
 	const { data: roundData } = useRound(round);
-	const winner = useRoundWinner(round);
+	const { data: winnerInfoForCircle } = useWinner(round);
+	const _winner = useMemo(
+		() => (winnerInfoForCircle ? (effectiveBets.find((b) => b.address.toLowerCase() === winnerInfoForCircle.bet.toLowerCase()) ?? null) : null),
+		[winnerInfoForCircle, effectiveBets],
+	);
 	const { mutate: spin } = useStartRound(round);
 	const handleManualSpin = () => {
 		if (!isConnected) {
@@ -63,13 +70,8 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const wheelRef = useRef(null);
 
 	const wheelAngle = useMemo(() => {
-		if (currentRound !== round) {
-			if (roundData?.status === 4) {
-				return Number((winner?.offset ?? 0n) * 360n) / valueToNumber(roundData?.total.volume);
-			}
-		}
 		return 0;
-	}, [winner, roundData?.total.volume]);
+	}, []);
 
 	useEffect(() => {
 		if (round !== currentRound) return;
@@ -84,10 +86,10 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 			stopWheel((wheelState.winnerOffset * 360) / valueToNumber(roundData?.total.volume), wheelState.bet);
 		}
 		if (wheelState.state === 'stopped') {
-			if (winner?.player === address) {
+			if (winnerInfoForCircle?.player?.toLowerCase() === address?.toLowerCase()) {
 				shootConfetti();
 			} else {
-				setWinnerColor(addressToColor(winner?.player ?? ZeroAddress));
+				setWinnerColor(addressToColor(winnerInfoForCircle?.player ?? ZeroAddress));
 				setTimeout(() => {
 					setWinnerColor(null);
 				}, 1000);
@@ -128,14 +130,14 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	}
 
 	const data: CustomLuroBet[] = useMemo(() => {
-		return bets.map((bet) => ({
+		return effectiveBets.map((bet) => ({
 			id: bet.address,
 			label: bet.player,
 			value: valueToNumber(bet.amount),
 			color: hexToRgbA(addressToColor(bet.player)),
-			betsNumber: bets.filter((b) => bet.player === b.player).length,
+			betsNumber: effectiveBets.filter((b) => bet.player === b.player).length,
 		}));
-	}, [bets]);
+	}, [effectiveBets]);
 
 	const [chartHeight, setChartHeight] = useState(250);
 	const boxRef = useRef<HTMLDivElement | null>(null);
@@ -341,7 +343,14 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	const { data: roundData } = useRound(round);
 	const { data: bank = 0n, isLoading: isBankLoading } = useRoundBank(round);
 	const { data: currentRound } = useVisibleRound();
-	const winner = useRoundWinner(round);
+	const { data: winnerInfo } = useWinner(round);
+	const { data: betsData = [] } = useRoundBets(round);
+	const { data: betsGql = [] } = useRoundBetsGql(round);
+	const effectiveBetsData = useMemo(() => (currentRound !== round && betsData.length === 0 ? betsGql : betsData), [betsData, betsGql, currentRound, round]);
+	const winner = useMemo(
+		() => (winnerInfo ? (effectiveBetsData.find((b) => b.address.toLowerCase() === winnerInfo.bet.toLowerCase()) ?? null) : null),
+		[winnerInfo, effectiveBetsData],
+	);
 	const queryClient = useQueryClient();
 	const {
 		state: { data: luroState, isLoading: isLotteryStateLoading, isPending: isLotteryStatePending },
@@ -420,7 +429,16 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
+				return (
+					<BetCircleWinner
+						player={winnerInfo?.player ?? winner?.player ?? '0x123'}
+						amount={authorVolume}
+						percent={percent}
+						coef={coef}
+						win={finalVolume}
+						loading={!winnerInfo}
+					/>
+				);
 			}
 		}
 		switch (wheelState.data.state) {
@@ -433,7 +451,16 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 				const percent = (authorVolume / finalVolume) * 100;
 				const coef = (finalVolume / authorVolume).toFixed(2);
 
-				return <BetCircleWinner player={winner?.player ?? '0x123'} amount={authorVolume} percent={percent} coef={coef} win={finalVolume} loading={!winner} />;
+				return (
+					<BetCircleWinner
+						player={winnerInfo?.player ?? winner?.player ?? '0x123'}
+						amount={authorVolume}
+						percent={percent}
+						coef={coef}
+						win={finalVolume}
+						loading={!winnerInfo}
+					/>
+				);
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
@@ -515,13 +542,25 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 
 	const { data: roundData, isLoading, isFetching } = useRound(round);
 
-	const winner = useRoundWinner(round);
+	const { data: winnerInfo } = useWinner(round);
 
 	const { data: playerRoundInfo = { bets: 0, volume: 0n } } = usePlayerRoundInfo(BigInt(round));
 
 	const { address = ZeroAddress } = useAccount();
 	if (isLoading || isFetching) return <Loader size={40} className={'animate-spin text-foreground'} />;
 	if (!roundData) return null;
+
+	if (winnerInfo?.player?.toLowerCase() === address?.toLowerCase()) {
+		return (
+			<>
+				<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
+				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
+					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
+				</div>
+			</>
+		);
+	}
+
 	if (playerRoundInfo.bets === 0) {
 		return (
 			<>
@@ -529,17 +568,6 @@ const RoundResult: FC<{ round: number }> = ({ round }) => {
 				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
 					{t('couldWin')}
 					<BetValue className={'text-secondary-foreground text-sm'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
-				</div>
-			</>
-		);
-	}
-
-	if (winner?.player === address) {
-		return (
-			<>
-				<div className={'text-xl font-semibold mb-4'}>{t('youWin')}</div>
-				<div className={'w-full flex flex-row items-center justify-center gap-1'}>
-					<BetValue className={'text-secondary-foreground text-lg font-semibold'} value={valueToNumber((roundData.total.volume * 914n) / 1000n)} withIcon />
 				</div>
 			</>
 		);

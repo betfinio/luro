@@ -1,8 +1,17 @@
 import type { ExecutionResult } from 'graphql/execution';
 import type { Address } from 'viem';
-import { execute, LuroRoundsByPlayerDocument, LuroRoundsDocument, type LuroRoundsQuery, LuroWinnerDocument, type LuroWinnerQuery } from '@/.graphclient';
+import {
+	execute,
+	LuroRoundBetsDocument,
+	type LuroRoundBetsQuery,
+	LuroRoundsByPlayerDocument,
+	LuroRoundsDocument,
+	type LuroRoundsQuery,
+	LuroWinnerDocument,
+	type LuroWinnerQuery,
+} from '@/.graphclient';
 import logger from '@/src/config/logger.ts';
-import type { Round, RoundStatusEnum, WinnerInfo } from '@/src/lib/types.ts';
+import type { LuroBet, Round, RoundStatusEnum, WinnerInfo } from '@/src/lib/types.ts';
 
 const mapStatus = (status: string | number): RoundStatusEnum => {
 	if (typeof status === 'number') return status as RoundStatusEnum;
@@ -52,6 +61,18 @@ const populateRounds = (result: LuroRoundsQuery): Round[] => {
 		winnerAddress: round.winnerAddress as Address | undefined,
 		winnerOffset: round.winnerOffset ? BigInt(round.winnerOffset) : undefined,
 		winnerPayout: round.winnerPayout ? BigInt(round.winnerPayout) : undefined,
+	}));
+};
+
+export const fetchRoundBetsGql = async (luro: Address, round: number): Promise<LuroBet[]> => {
+	logger.start('[luro]', 'fetching round bets from subgraph', luro, round);
+	const data: ExecutionResult<LuroRoundBetsQuery> = await execute(LuroRoundBetsDocument, { address: luro, round: round });
+	logger.success('[luro]', 'fetched round bets from subgraph', data.data?.bets.length);
+	if (!data.data) return [];
+	return data.data.bets.map((bet) => ({
+		player: bet.player as Address,
+		amount: BigInt(bet.amount),
+		address: bet.betAddress as Address,
 	}));
 };
 

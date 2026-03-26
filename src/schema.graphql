@@ -34,6 +34,14 @@ query LuroRounds($address: Bytes) {
     }
 }
 
+query LuroRoundBets($address: Bytes, $round: BigInt) {
+    bets(where: { address: $address, round_: { round: $round } }, first: 1000, orderBy: blockTimestamp, orderDirection: asc) {
+        player
+        amount
+        betAddress
+    }
+}
+
 query LuroRoundsByPlayer($address: Bytes, $player: Bytes) {
     rounds(where: {address: $address, bets_: {player: $player}}, orderBy: round, orderDirection: desc) {
         round

@@ -8,13 +8,15 @@ import type { Address, WriteContractErrorType } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useConfig, useWatchContractEvent } from 'wagmi';
 import logger from '@/src/config/logger.ts';
+import { CORE } from '@/src/global.ts';
 import { animateNewBet, getCurrentRound, useLuroAddress, useLuroStrategyAddress } from '@/src/lib';
+import { CoreBetABI } from '@/src/lib/abi/CoreBetABI.ts';
 import { LuckyRoundStrategyABI } from '@/src/lib/abi/LuckyRoundStrategyABI.ts';
 import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
 import type { LuroBet, LuroInterval, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import { fetchPlayerRoundInfo, fetchRound, fetchRoundBets, fetchRounds, fetchRoundsByPlayer, getRoundWinnerByOffset, placeBet, spinRound } from '../api';
-import { fetchWinner } from '../gql';
+import { fetchRoundBetsGql, fetchWinner } from '../gql';
 
 export const useObserveBet = (round: number) => {
 	const queryClient = useQueryClient();
@@ -136,6 +138,15 @@ export const useRoundBets = (round: number) => {
 	});
 };
 
+export const useRoundBetsGql = (round: number) => {
+	const luroAddress = useLuroAddress();
+
+	return useQuery<LuroBet[]>({
+		queryKey: ['luro', luroAddress, 'bets', 'round', 'gql', round],
+		queryFn: () => fetchRoundBetsGql(luroAddress, round),
+	});
+};
+
 export const useRoundBank = (round: number) => {
 	const config = useConfig();
 	const strategyAddress = useLuroStrategyAddress();
@@ -242,6 +253,25 @@ export const usePlayerRounds = (player: Address) => {
 	return useQuery<Round[]>({
 		queryKey: ['luro', luroAddress, 'playerRounds', player],
 		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config.getClient()),
+	});
+};
+
+export const useLuroFee = () => {
+	const config = useConfig();
+	const luroAddress = useLuroAddress();
+
+	return useQuery<{ feeBps: bigint; liquidityPool: Address }>({
+		queryKey: ['luro', luroAddress, 'fee'],
+		queryFn: async () => {
+			const result = await readContract(config, {
+				abi: CoreBetABI,
+				address: CORE,
+				functionName: 'getGameConfig',
+				args: [luroAddress],
+			});
+			return { feeBps: result.feeBps, liquidityPool: result.liquidityPool };
+		},
+		staleTime: Number.POSITIVE_INFINITY,
 	});
 };
 
