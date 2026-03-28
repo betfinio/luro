@@ -1,5 +1,5 @@
 import { defaultMulticall, valueToNumber, ZeroAddress } from '@betfinio/abi';
-import { writeContract } from '@wagmi/core';
+import { simulateContract, writeContract } from '@wagmi/core';
 import { type Address, type Client, encodeAbiParameters, parseAbiParameters } from 'viem';
 import { multicall, readContract } from 'viem/actions';
 import type { Config } from 'wagmi';
@@ -16,12 +16,17 @@ export async function placeBet({ round, amount, player, address }: PlaceBetParam
 	try {
 		logger.log('placing a bet', amount, round);
 		const data = encodeAbiParameters(parseAbiParameters('uint256 roundId'), [BigInt(round)]);
-		return await writeContract(config, {
+		const args = [player, player, address, BigInt(amount) * 10n ** 18n, data, PARTNER] as const;
+
+		const { request } = await simulateContract(config, {
 			abi: CoreBetABI,
 			address: CORE,
 			functionName: 'bet',
-			args: [player, player, address, BigInt(amount) * 10n ** 18n, data, PARTNER],
+			args,
+			account: player,
 		});
+
+		return await writeContract(config, request);
 	} catch (e) {
 		logger.error(e);
 		throw e;
@@ -30,12 +35,19 @@ export async function placeBet({ round, amount, player, address }: PlaceBetParam
 
 export async function spinRound(luro: Address, round: number, config: Config) {
 	logger.log('Spinning round', round);
-	return await writeContract(config, {
-		abi: PvPGameABI,
-		address: luro,
-		functionName: 'spin',
-		args: [BigInt(round)],
-	});
+	try {
+		const { request } = await simulateContract(config, {
+			abi: PvPGameABI,
+			address: luro,
+			functionName: 'spin',
+			args: [BigInt(round)],
+			account: config.getClient().account,
+		});
+		return await writeContract(config, request);
+	} catch (e) {
+		logger.error(e);
+		throw e;
+	}
 }
 
 export const fetchRoundBets = async (address: Address, roundId: number, config: Config) => {
