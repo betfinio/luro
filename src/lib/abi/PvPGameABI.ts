@@ -79,6 +79,19 @@ export const PvPGameABI = [
 	},
 	{
 		type: 'function',
+		name: 'resolveRound',
+		inputs: [
+			{
+				name: 'roundId',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [],
+		stateMutability: 'nonpayable',
+	},
+	{
+		type: 'function',
 		name: 'spin',
 		inputs: [
 			{
@@ -224,6 +237,12 @@ export const PvPGameABI = [
 			},
 			{
 				name: 'payout',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'roundId',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',

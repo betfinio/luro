@@ -1,12 +1,13 @@
 import { ZeroAddress } from '@betfinio/abi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useWatchContractEvent } from 'wagmi';
+import { useConfig, useWatchContractEvent } from 'wagmi';
 import { PlaceBet } from '@/src/components/PlaceBet/PlaceBet';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import logger from '@/src/config/logger.ts';
 import { useLuroAddress } from '@/src/lib';
 import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
+import { resolveRound } from '@/src/lib/api/index.ts';
 import { useLuroState, useVisibleRound } from '../lib/query';
 
 export const CurrentRound = () => {
@@ -17,7 +18,7 @@ export const CurrentRound = () => {
 	const { updateState } = useLuroState(round);
 
 	const luroAddress = useLuroAddress();
-
+	const config = useConfig();
 	const queryClient = useQueryClient();
 
 	useWatchContractEvent({
@@ -30,7 +31,23 @@ export const CurrentRound = () => {
 			// contextId is roundId for PvPGame
 			if (Number(rolledLogs[0].args.contextId) === observedRound) {
 				logger.log('START SPINNING');
-				updateState({ state: 'spinning' }, observedRound);
+				updateState({ state: 'spinning', spinRequestedAt: Date.now() }, observedRound);
+			}
+		},
+	});
+
+	// VRF returned the random number — round is now ResultReady.
+	// resolveRound() must be called to settle bets and emit BetResolved.
+	useWatchContractEvent({
+		abi: PvPGameABI,
+		address: luroAddress,
+		eventName: 'RandomnessFulfilled',
+		poll: true,
+		onLogs: (logs) => {
+			const log = logs[0];
+			if (Number(log?.args?.contextId) === observedRound) {
+				logger.log('RANDOMNESS FULFILLED, calling resolveRound', observedRound);
+				resolveRound(luroAddress, observedRound, config).catch((e) => logger.error('resolveRound failed', e));
 			}
 		},
 	});
@@ -41,10 +58,9 @@ export const CurrentRound = () => {
 		eventName: 'BetResolved',
 		onLogs: async (landedLogs) => {
 			logger.log('RESOLVED LOGS', landedLogs, observedRound);
-			// Find the winner (payout > 0)
-			const winnerLog = landedLogs.find((log) => (log.args.payout ?? 0n) > 0n);
+			// Filter by roundId and find the winner (payout > 0)
+			const winnerLog = landedLogs.find((log) => Number(log.args.roundId) === observedRound && (log.args.payout ?? 0n) > 0n);
 			if (winnerLog) {
-				// Get roundId from the bet — we can infer from result (winnerOffset)
 				const winnerOffset = Number(winnerLog.args.result ?? 0);
 				logger.log('LANDED, STOP SPINNING');
 				updateState({ state: 'landed', round: observedRound, winnerOffset, bet: (winnerLog.args.bet as string) || ZeroAddress }, observedRound);

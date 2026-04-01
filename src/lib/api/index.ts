@@ -50,6 +50,40 @@ export async function spinRound(luro: Address, round: number, config: Config) {
 	}
 }
 
+export async function resolveRound(luro: Address, round: number, config: Config) {
+	logger.log('Resolving round', round);
+	try {
+		const { request } = await simulateContract(config, {
+			abi: PvPGameABI,
+			address: luro,
+			functionName: 'resolveRound',
+			args: [BigInt(round)],
+			account: config.getClient().account,
+		});
+		return await writeContract(config, request);
+	} catch (e) {
+		logger.error(e);
+		throw e;
+	}
+}
+
+export async function refundRound(luro: Address, round: number, config: Config) {
+	logger.log('Refunding round', round);
+	try {
+		const { request } = await simulateContract(config, {
+			abi: PvPGameABI,
+			address: luro,
+			functionName: 'refundRound',
+			args: [BigInt(round)],
+			account: config.getClient().account,
+		});
+		return await writeContract(config, request);
+	} catch (e) {
+		logger.error(e);
+		throw e;
+	}
+}
+
 export const fetchRoundBets = async (address: Address, roundId: number, config: Config) => {
 	logger.log('fetching round bets', roundId);
 	// Get round info which includes bets array

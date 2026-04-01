@@ -37,7 +37,10 @@
 		"couldWin": "You could win",
 		"backToGame": "Back to the game",
 		"youWin": "You WIN!",
-		"total": "total"
+		"total": "total",
+		"refundRound": "Refund round",
+		"refunding": "Refunding...",
+		"refundAvailableIn": "Refund available in {hours}h"
 	},
 	"roundInfo": {
 		"luro": "Lucky Round",
@@ -133,6 +136,10 @@
 		"roundRequested": {
 			"title": "Round requested",
 			"description": "Transaction is confirmed"
+		},
+		"refundRound": {
+			"title": "Refunding round",
+			"success": "Round refunded"
 		}
 	},
 	"errors": {

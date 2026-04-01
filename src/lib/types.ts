@@ -20,6 +20,7 @@ export interface WheelWaitingForBlock {
 
 export interface WheelSpinning {
 	state: 'spinning';
+	spinRequestedAt?: number;
 }
 
 export interface WheelLanded {

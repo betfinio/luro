@@ -15,7 +15,17 @@ import { LuckyRoundStrategyABI } from '@/src/lib/abi/LuckyRoundStrategyABI.ts';
 import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
 import type { LuroBet, LuroInterval, PlaceBetParams, PlayerRoundInfo, Round, WheelState, WinnerInfo } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { fetchPlayerRoundInfo, fetchRound, fetchRoundBets, fetchRounds, fetchRoundsByPlayer, getRoundWinnerByOffset, placeBet, spinRound } from '../api';
+import {
+	fetchPlayerRoundInfo,
+	fetchRound,
+	fetchRoundBets,
+	fetchRounds,
+	fetchRoundsByPlayer,
+	getRoundWinnerByOffset,
+	placeBet,
+	refundRound,
+	spinRound,
+} from '../api';
 import { fetchRoundBetsGql, fetchWinner } from '../gql';
 
 export const useObserveBet = (round: number) => {
@@ -116,6 +126,37 @@ export const useStartRound = (round: number) => {
 			queryClient.setQueryData(['luro', luroAddress, 'requested', round], true);
 		},
 		onSettled: () => logger.log('Round start settled'),
+	});
+};
+
+export const useRefundRound = (round: number) => {
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
+	const queryClient = useQueryClient();
+	const config = useConfig();
+	const luroAddress = useLuroAddress();
+
+	return useMutation<WriteContractReturnType, WriteContractErrorType>({
+		mutationKey: ['luro', luroAddress, 'round', 'refund', round],
+		mutationFn: () => refundRound(luroAddress, round, config),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
+		onSuccess: async (data) => {
+			const promise = async () => {
+				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+				if (receipt.status === 'reverted') {
+					throw new Error('Transaction reverted');
+				}
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round', round] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round', round] });
+			};
+			toast.promise(promise, {
+				loading: t('refundRound.title'),
+				success: t('refundRound.success'),
+				error: t('transactionFailed.title'),
+				action: getTransactionLink(data),
+			});
+		},
 	});
 };
 

@@ -38,7 +38,10 @@
 		"couldWin": "Вы могли выиграть",
 		"backToGame": "Вернуться к игре",
 		"youWin": "Вы ПОБЕДИЛИ!",
-		"total": "В ощем"
+		"total": "В ощем",
+		"refundRound": "Вернуть ставки",
+		"refunding": "Возврат...",
+		"refundAvailableIn": "Возврат через {hours}ч"
 	},
 	"roundInfo": {
 		"luro": "Lucky Round",
@@ -134,6 +137,10 @@
 		"roundRequested": {
 			"title": "Раунд запрошен",
 			"description": "Транзакция подтверждена"
+		},
+		"refundRound": {
+			"title": "Возврат ставок",
+			"success": "Ставки возвращены"
 		}
 	},
 	"errors": {

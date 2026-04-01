@@ -383,7 +383,8 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	const luroAddress = useLuroAddress();
 
 	const handleRoundEnd = () => {
-		if (bank === 0n) {
+		if (isBankLoading) return;
+		if (bank === 0n && effectiveBetsData.length === 0) {
 			jumpToCurrentRound(queryClient, luroAddress);
 		} else {
 			changeLotteryState();

@@ -1,10 +1,12 @@
 import { toast } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 import { ASSETS_IPFS_BASE_URL } from '@/src/global';
+import { jumpToCurrentRound, useLuroAddress } from '@/src/lib';
 import { useRoundRequested, useStartRound } from '@/src/lib/query';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
@@ -13,6 +15,8 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { isConnected } = useAccount();
 	const { mutate: startRound, isPending } = useStartRound(round);
 	const { data: isRoundRequested } = useRoundRequested(round);
+	const queryClient = useQueryClient();
+	const luroAddress = useLuroAddress();
 
 	const handleSpin = () => {
 		if (!isConnected) {
@@ -54,6 +58,13 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 						</button>
 					</div>
 				)}
+				<button
+					type={'button'}
+					onClick={() => jumpToCurrentRound(queryClient, luroAddress)}
+					className={'text-xs text-muted-foreground underline mt-2 hover:text-white transition-colors'}
+				>
+					{t('backToGame')}
+				</button>
 			</div>
 		</motion.div>
 	);
