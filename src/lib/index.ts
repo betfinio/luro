@@ -63,24 +63,28 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 	queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], { address, strength });
 };
 
-export const getLuroInterval = (interval: LuroInterval) => {
-	if (interval === '5m') {
-		return 60 * 5;
+/** Fallback when `INTERVAL()` has not loaded yet; keep in sync with deployed short-mode game. */
+export const LURO_SHORT_ROUND_SECONDS_FALLBACK = 210;
+
+export const getLuroInterval = (interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		return shortRoundSeconds;
 	}
 	return 60 * 60 * 24;
 };
 
-export const getCurrentRound = (interval: LuroInterval) => {
-	if (interval === '5m') {
-		return Math.floor(Date.now() / 1000 / (60 * 5));
+export const getCurrentRound = (interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		return Math.floor(Date.now() / 1000 / shortRoundSeconds);
 	}
 	return Math.floor((Date.now() + 1000 * 60 * 60 * 6) / 1000 / (60 * 60 * 24));
 };
 
-export const getTimesByRound = (round: number, interval: LuroInterval) => {
-	if (interval === '5m') {
-		const start = round * 60 * 5 * 1000;
-		return { start, end: start + 60 * 5 * 1000 };
+export const getTimesByRound = (round: number, interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		const ms = shortRoundSeconds * 1000;
+		const start = round * ms;
+		return { start, end: start + ms };
 	}
 	const start = round * 60 * 60 * 24 * 1000 - 1000 * 60 * 60 * 6;
 	return { start, end: start + 60 * 60 * 24 * 1000 };
@@ -109,7 +113,7 @@ export const useLuroAddress = (): Address => {
 	switch (interval) {
 		case '1d':
 			return LURO;
-		case '5m':
+		case '210s':
 			return LURO_5MIN;
 		default:
 			return LURO;
@@ -121,7 +125,7 @@ export const useLuroStrategyAddress = (): Address => {
 	switch (interval) {
 		case '1d':
 			return LURO_STRATEGY;
-		case '5m':
+		case '210s':
 			return LURO_5MIN_STRATEGY;
 		default:
 			return LURO_STRATEGY;

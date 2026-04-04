@@ -1,5 +1,6 @@
 import { SonnerToaster, TooltipProvider } from '@betfinio/components/ui';
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { useLayoutEffect } from 'react';
 import { BetsInfo } from '@/src/components/BetsInfo.tsx';
 import { CurrentRound } from '@/src/components/CurrentRound.tsx';
 import { FeeNotice } from '@/src/components/FeeNotice.tsx';
@@ -23,9 +24,20 @@ export function LuroPage() {
 	const { interval } = useParams({ from: '/games/luro/$interval' });
 	const navigate = useNavigate();
 
-	if (!types.includes(interval as LuroInterval)) {
-		navigate({ to: '/games/luro/$interval', params: { interval: '5m' } });
+	useLayoutEffect(() => {
+		if (interval === '5m') {
+			void navigate({ to: '/games/luro/$interval', params: { interval: '210s' }, search, replace: true });
+			return;
+		}
+		if (!types.includes(interval as LuroInterval)) {
+			void navigate({ to: '/games/luro/$interval', params: { interval: '210s' }, search, replace: true });
+		}
+	}, [interval, navigate, search]);
+
+	if (interval === '5m' || !types.includes(interval as LuroInterval)) {
+		return null;
 	}
+
 	return (
 		<div className={'w-full h-full'}>
 			<div className={'col-span-4 p-2 md:py-4 lg:col-start-2 2xl:px-0'}>

@@ -9,7 +9,7 @@ import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useConfig, useWatchContractEvent } from 'wagmi';
 import logger from '@/src/config/logger.ts';
 import { CORE } from '@/src/global.ts';
-import { animateNewBet, getCurrentRound, useLuroAddress, useLuroStrategyAddress } from '@/src/lib';
+import { animateNewBet, getCurrentRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, useLuroAddress, useLuroStrategyAddress } from '@/src/lib';
 import { CoreBetABI } from '@/src/lib/abi/CoreBetABI.ts';
 import { LuckyRoundStrategyABI } from '@/src/lib/abi/LuckyRoundStrategyABI.ts';
 import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
@@ -21,9 +21,11 @@ import {
 	fetchRoundBets,
 	fetchRounds,
 	fetchRoundsByPlayer,
+	fetchWinnerFromChain,
 	getRoundWinnerByOffset,
 	placeBet,
 	refundRound,
+	resolveRound,
 	spinRound,
 } from '../api';
 import { fetchRoundBetsGql, fetchWinner } from '../gql';
@@ -31,6 +33,7 @@ import { fetchRoundBetsGql, fetchWinner } from '../gql';
 export const useObserveBet = (round: number) => {
 	const queryClient = useQueryClient();
 	const luroAddress = useLuroAddress();
+	const strategyAddress = useLuroStrategyAddress();
 
 	const resetObservedBet = () => {
 		queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], ZeroAddress);
@@ -54,6 +57,7 @@ export const useObserveBet = (round: number) => {
 			animateNewBet(log?.args?.player ?? ZeroAddress, 10, queryClient, luroAddress);
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets'] });
+			await queryClient.invalidateQueries({ queryKey: ['luro', strategyAddress, 'round', 'bank', round] });
 		},
 	});
 
@@ -67,13 +71,14 @@ export const usePlaceBet = () => {
 	const queryClient = useQueryClient();
 	const config = useConfig();
 	const luroAddress = useLuroAddress();
+	const strategyAddress = useLuroStrategyAddress();
 
 	return useMutation<WriteContractReturnType, WriteContractErrorType, PlaceBetParams>({
 		mutationKey: ['luro', luroAddress, 'bets', 'place'],
 		mutationFn: (params) => placeBet(params, config),
 		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
 		onMutate: () => logger.log('placeBet'),
-		onSuccess: async (data) => {
+		onSuccess: async (data, variables) => {
 			const promise = async () => {
 				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
 				if (receipt.status === 'reverted') {
@@ -81,6 +86,7 @@ export const usePlaceBet = () => {
 				}
 				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
 				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', strategyAddress, 'round', 'bank', variables.round] });
 			};
 
 			toast.promise(promise, {
@@ -126,6 +132,43 @@ export const useStartRound = (round: number) => {
 			queryClient.setQueryData(['luro', luroAddress, 'requested', round], true);
 		},
 		onSettled: () => logger.log('Round start settled'),
+	});
+};
+
+export const useResolveRound = (round: number) => {
+	const queryClient = useQueryClient();
+	const { t: tErrors } = useTranslation('shared', { keyPrefix: 'errors' });
+	const { t: tLocalErrors } = useTranslation('luro', { keyPrefix: 'errors' });
+	const { t } = useTranslation('luro', { keyPrefix: 'toast' });
+	const config = useConfig();
+	const luroAddress = useLuroAddress();
+	const strategyAddress = useLuroStrategyAddress();
+
+	return useMutation<WriteContractReturnType, WriteContractErrorType>({
+		mutationKey: ['luro', luroAddress, 'round', 'resolve', round],
+		mutationFn: () => resolveRound(luroAddress, round, config),
+		onError: (e) => toast.error(handleError(e, tErrors, tLocalErrors)),
+		onMutate: () => logger.log('Resolve round', round),
+		onSuccess: async (data) => {
+			const promise = async () => {
+				const receipt = await waitForTransactionReceipt(config.getClient(), { hash: data });
+				if (receipt.status === 'reverted') {
+					throw new Error('Transaction reverted');
+				}
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'rounds'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'winners'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', strategyAddress, 'round', 'bank', round] });
+			};
+
+			toast.promise(promise, {
+				loading: t('settleRound.title'),
+				success: t('settleRound.title'),
+				error: t('transactionFailed.title'),
+				action: getTransactionLink(data),
+			});
+		},
 	});
 };
 
@@ -204,13 +247,28 @@ export const useRoundBank = (round: number) => {
 	});
 };
 
-export const useWinner = (round: number) => {
+export const useWinner = (round: number, options?: { enabled?: boolean }) => {
 	const luroAddress = useLuroAddress();
+	const config = useConfig();
+	const enabled = options?.enabled !== false && Number.isFinite(round);
 
-	return useQuery<WinnerInfo | null>({
+	const gql = useQuery<WinnerInfo | null>({
 		queryKey: ['luro', luroAddress, 'winners', round],
 		queryFn: () => fetchWinner(luroAddress, round),
+		enabled,
 	});
+
+	const needsChain = enabled && !gql.isLoading && gql.data === null;
+
+	const chain = useQuery<WinnerInfo | null>({
+		queryKey: ['luro', luroAddress, 'winners', 'chain', round],
+		queryFn: () => fetchWinnerFromChain(luroAddress, round, config),
+		enabled: needsChain,
+	});
+
+	if (gql.data !== null && gql.data !== undefined) return gql;
+	if (needsChain) return chain;
+	return gql;
 };
 
 export const useRoundWinner = (round: number) => {
@@ -259,19 +317,39 @@ export interface ICurrentRoundInfo {
 	volume: number;
 }
 
+export const useLuroGameIntervalSeconds = () => {
+	const luroAddress = useLuroAddress();
+	const config = useConfig();
+
+	return useQuery({
+		queryKey: ['luro', luroAddress, 'intervalSeconds'],
+		queryFn: async () => {
+			const value = await readContract(config, {
+				abi: PvPGameABI,
+				address: luroAddress,
+				functionName: 'INTERVAL',
+			});
+			return Number(value);
+		},
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+};
+
 export const useVisibleRound = () => {
 	const queryClient = useQueryClient();
 	const { interval } = Route.useParams();
 	const luroAddress = useLuroAddress();
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
 
 	const fetchRound = async (): Promise<number> => {
 		await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
-		return getCurrentRound(interval as LuroInterval);
+		return getCurrentRound(interval as LuroInterval, shortRoundSeconds);
 	};
 	return useQuery({
-		queryKey: ['luro', luroAddress, 'visibleRound'],
+		queryKey: ['luro', luroAddress, 'visibleRound', interval, interval === '210s' ? shortRoundSeconds : 'daily'],
 		queryFn: fetchRound,
-		initialData: getCurrentRound(interval as LuroInterval),
+		initialData: getCurrentRound(interval as LuroInterval, shortRoundSeconds),
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
 		refetchOnReconnect: false,
@@ -284,7 +362,7 @@ export const useRounds = (player: Address) => {
 
 	return useQuery<Round[]>({
 		queryKey: ['luro', luroAddress, 'rounds', player],
-		queryFn: () => fetchRounds(luroAddress, player, config.getClient()),
+		queryFn: () => fetchRounds(luroAddress, player, config),
 	});
 };
 export const usePlayerRounds = (player: Address) => {
@@ -293,7 +371,7 @@ export const usePlayerRounds = (player: Address) => {
 
 	return useQuery<Round[]>({
 		queryKey: ['luro', luroAddress, 'playerRounds', player],
-		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config.getClient()),
+		queryFn: () => fetchRoundsByPlayer(luroAddress, player, config),
 	});
 };
 

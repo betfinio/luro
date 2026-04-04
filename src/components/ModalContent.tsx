@@ -15,10 +15,10 @@ import { useAccount } from 'wagmi';
 import { FeeNotice } from '@/src/components/FeeNotice.tsx';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import { ETHSCAN } from '@/src/global.ts';
-import { getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
+import { getTimesByRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, mapBetsToRoundTable } from '@/src/lib';
 import type { LuroInterval, Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { useLuroFee, useRound, useRoundBetsGql, useVisibleRound, useWinner } from '../lib/query';
+import { useLuroFee, useLuroGameIntervalSeconds, useRoundBets, useRoundBetsGql, useVisibleRound, useWinner } from '../lib/query';
 
 export const ModalContent: FC<{
 	roundId: number;
@@ -26,10 +26,14 @@ export const ModalContent: FC<{
 }> = ({ roundId, round: _round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { interval } = Route.useParams();
-	const { start, end } = getTimesByRound(roundId, interval as LuroInterval);
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
+	const { start, end } = getTimesByRound(roundId, interval as LuroInterval, shortRoundSeconds);
 	const isFinished = DateTime.fromMillis(Date.now()).diff(DateTime.fromMillis(end)).milliseconds > 0;
 
-	const { data: bets = [] } = useRoundBetsGql(roundId);
+	const { data: betsChain = [] } = useRoundBets(roundId);
+	const { data: betsGql = [] } = useRoundBetsGql(roundId);
+	const bets = betsChain.length > 0 ? betsChain : betsGql;
 	const { data: feeData } = useLuroFee();
 	const { data: winner } = useWinner(roundId);
 
@@ -164,9 +168,10 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 const BetsTable: FC<{ round: number; className?: string; volume: bigint; winner: Address }> = ({ round, volume, winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.table' });
 	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
-	const { data: bets = [] } = useRoundBetsGql(round);
+	const { data: betsChain = [] } = useRoundBets(round);
+	const { data: betsGql = [] } = useRoundBetsGql(round);
+	const bets = betsChain.length > 0 ? betsChain : betsGql;
 	const { address = ZeroAddress } = useAccount();
-	const { data: roundData } = useRound(round);
 
 	const players = useMemo(() => {
 		return mapBetsToRoundTable(bets, winner, volume, address.toLowerCase() as Address);
@@ -240,7 +245,7 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; winner:
 
 	return (
 		<div className={'mt-4'}>
-			<DataTable t={tShared} columns={columns} data={players} state={{ columnVisibility: { totalWin: (roundData?.winnerOffset || 0n) > 0n } }} />
+			<DataTable t={tShared} columns={columns} data={players} state={{ columnVisibility: { totalWin: winner !== ZeroAddress.toLowerCase() } }} />
 		</div>
 	);
 };

@@ -40,13 +40,15 @@
 		"total": "total",
 		"refundRound": "Refund round",
 		"refunding": "Refunding...",
-		"refundAvailableIn": "Refund available in {hours}h"
+		"refundAvailableIn": "Refund available in {hours}h",
+		"settleRound": "Settle round",
+		"settling": "Settling..."
 	},
 	"roundInfo": {
 		"luro": "Lucky Round",
 		"howToPlay": "How to play?",
 		"interval": {
-			"5m": "5 min",
+			"210s": "210 sec",
 			"1d": "1 day"
 		},
 		"stats": {
@@ -63,7 +65,10 @@
 		"couldWin": "You could win",
 		"youWin": "You WIN!",
 		"total": "Total",
-		"betterLuckNextTime": "Better luck next time."
+		"betterLuckNextTime": "Better luck next time.",
+		"historicalVrfPending": "Waiting for VRF — randomness is being delivered.",
+		"historicalSettleHint": "VRF is ready — run settlement on-chain to distribute the pot.",
+		"settleRound": "Settle round"
 	},
 	"roundModal": {
 		"title": "Round",
@@ -111,6 +116,9 @@
 			"stakingEarnings": "Stake Earnings"
 		},
 		"waiting": "Waiting",
+		"pending": "Pending settlement",
+		"awaitingVrf": "Awaiting randomness",
+		"winnerIndexing": "Winner finalizing",
 		"cancelled": "Cancelled"
 	},
 	"toast": {
@@ -140,6 +148,10 @@
 		"refundRound": {
 			"title": "Refunding round",
 			"success": "Round refunded"
+		},
+		"settleRound": {
+			"title": "Settling round",
+			"description": "Transaction is pending"
 		}
 	},
 	"errors": {

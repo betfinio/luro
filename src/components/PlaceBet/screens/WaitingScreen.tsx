@@ -7,16 +7,21 @@ import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { jumpToCurrentRound, useLuroAddress } from '@/src/lib';
-import { useRoundRequested, useStartRound } from '@/src/lib/query';
+import { useResolveRound, useRound, useRoundRequested, useStartRound } from '@/src/lib/query';
+import { RoundStatusEnum } from '@/src/lib/types';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 
 	const { isConnected } = useAccount();
 	const { mutate: startRound, isPending } = useStartRound(round);
+	const { mutate: settle, isPending: isSettling } = useResolveRound(round);
 	const { data: isRoundRequested } = useRoundRequested(round);
+	const { data: roundData } = useRound(round);
 	const queryClient = useQueryClient();
 	const luroAddress = useLuroAddress();
+
+	const isResultReady = roundData?.status === RoundStatusEnum.ResultReady;
 
 	const handleSpin = () => {
 		if (!isConnected) {
@@ -45,18 +50,32 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 					<span className={'leading-[12px]'}>{t('waiting')}</span>
 					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
 				</div>
-				{!isRoundRequested && (
+				{isResultReady ? (
 					<div className={'flex flex-col items-center gap-2'}>
 						{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[240px]'}>{t('toast.connect')}</p> : null}
 						<button
 							type={'button'}
-							onClick={handleSpin}
-							disabled={isPending || !isConnected}
+							onClick={() => settle()}
+							disabled={isSettling || !isConnected}
 							className={'bg-primary disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
 						>
-							{isPending ? t('spinning') : t('spinTheWheel')}
+							{isSettling ? t('settling') : t('settleRound')}
 						</button>
 					</div>
+				) : (
+					!isRoundRequested && (
+						<div className={'flex flex-col items-center gap-2'}>
+							{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[240px]'}>{t('toast.connect')}</p> : null}
+							<button
+								type={'button'}
+								onClick={handleSpin}
+								disabled={isPending || !isConnected}
+								className={'bg-primary disabled:bg-gray-500 rounded-lg px-6 py-2 text-black font-medium'}
+							>
+								{isPending ? t('spinning') : t('spinTheWheel')}
+							</button>
+						</div>
+					)
 				)}
 				<button
 					type={'button'}

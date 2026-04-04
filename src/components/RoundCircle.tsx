@@ -19,13 +19,16 @@ import Chainlink from '@/src/assets/chainlink.svg';
 import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
 import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
-import { getTimesByRound, hexToRgbA, jumpToCurrentRound, shootConfetti, useLuroAddress } from '@/src/lib';
+import { getTimesByRound, hexToRgbA, jumpToCurrentRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, shootConfetti, useLuroAddress } from '@/src/lib';
 import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
+import { RoundStatusEnum } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import {
+	useLuroGameIntervalSeconds,
 	useLuroState,
 	useObserveBet,
 	usePlayerRoundInfo,
+	useResolveRound,
 	useRound,
 	useRoundBank,
 	useRoundBets,
@@ -52,6 +55,8 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		[winnerInfoForCircle, effectiveBets],
 	);
 	const { mutate: spin } = useStartRound(round);
+	const { mutate: resolveRoundTx, isPending: isResolving } = useResolveRound(round);
+
 	const handleManualSpin = () => {
 		if (!isConnected) {
 			toast.error(tPlaceBetToast('connect'));
@@ -70,8 +75,9 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const wheelRef = useRef(null);
 
 	const wheelAngle = useMemo(() => {
-		return 0;
-	}, []);
+		if (!winnerInfoForCircle || !roundData?.total.volume || roundData.total.volume === 0n) return 0;
+		return (winnerInfoForCircle.offset / Number(roundData.total.volume)) * 360;
+	}, [winnerInfoForCircle, roundData?.total.volume]);
 
 	useEffect(() => {
 		if (round !== currentRound) return;
@@ -212,7 +218,7 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				</div>
 				{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
 					<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
-						{roundData?.status === 1 && (
+						{roundData?.status === RoundStatusEnum.Open && (
 							<div className={'flex flex-col gap-2 items-center'}>
 								{t('waiting')}
 								{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[220px]'}>{tPlaceBetToast('connect')}</p> : null}
@@ -222,7 +228,23 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 							</div>
 						)}
 
-						{roundData?.status === 4 && (
+						{roundData?.status === RoundStatusEnum.SpinRequested && (
+							<div className={'flex flex-col gap-2 items-center text-center max-w-[280px] px-2'}>
+								<p className={'text-sm text-muted-foreground'}>{t('historicalVrfPending')}</p>
+							</div>
+						)}
+
+						{roundData?.status === RoundStatusEnum.ResultReady && (
+							<div className={'flex flex-col gap-3 items-center text-center max-w-[320px] px-2'}>
+								<p className={'text-sm text-muted-foreground'}>{t('historicalSettleHint')}</p>
+								{!isConnected ? <p className={'text-xs text-muted-foreground'}>{tPlaceBetToast('connect')}</p> : null}
+								<Button onClick={() => resolveRoundTx()} disabled={!isConnected || isResolving}>
+									{isResolving ? <Loader className={'w-4 h-4 animate-spin'} /> : t('settleRound')}
+								</Button>
+							</div>
+						)}
+
+						{roundData?.status === RoundStatusEnum.Settled && (
 							<>
 								<div className={'shrink-0'}>
 									<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
@@ -371,8 +393,10 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	};
 	const [progress, setProgress] = useState(0);
 	const { interval } = Route.useParams();
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
 
-	const { start, end } = getTimesByRound(round, interval as LuroInterval);
+	const { start, end } = getTimesByRound(round, interval as LuroInterval, shortRoundSeconds);
 
 	const changeLotteryState = () => {
 		if (luroState.state === 'standby' && !isLotteryStateLoading && !isLotteryStatePending) {
@@ -383,12 +407,12 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 	const luroAddress = useLuroAddress();
 
 	const handleRoundEnd = () => {
-		if (isBankLoading) return;
-		if (bank === 0n && effectiveBetsData.length === 0) {
+		const definitelyEmpty = !isBankLoading && bank === 0n && effectiveBetsData.length === 0;
+		if (definitelyEmpty) {
 			jumpToCurrentRound(queryClient, luroAddress);
-		} else {
-			changeLotteryState();
+			return;
 		}
+		changeLotteryState();
 	};
 
 	useEffect(() => {
@@ -405,7 +429,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 			}, 500);
 			return () => clearInterval(i);
 		}
-	}, [round, bank, luroState.state]);
+	}, [round, bank, luroState.state, start, end]);
 
 	const [from, setFrom] = useState(0);
 
@@ -421,7 +445,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	const renderInside = () => {
 		if (currentRound !== round) {
-			if (roundData?.status === 4) {
+			if (roundData?.status === RoundStatusEnum.Settled) {
 				const authorVolume = valueToNumber(winner?.amount ?? 0n);
 				const volume = roundData?.total.volume || 1n;
 				const netVolume = volume;
@@ -465,7 +489,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 			}
 			default: {
 				const remaining = DateTime.fromMillis(end).diffNow();
-				const secondsLeft = Number(remaining.toFormat('ss'));
+				const totalSecondsLeft = Math.max(0, Math.floor(remaining.as('seconds')));
 				return (
 					<motion.div
 						initial={{ opacity: 0 }}
@@ -474,7 +498,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 						transition={{ duration: 0.5 }}
 						className={'absolute flex flex-col items-center justify-center w-full h-full -top-4 gap-4'}
 					>
-						<div className={cn('text-md', secondsLeft < 30 && secondsLeft > 0 && 'text-red-500 animate-pulse')}>
+						<div className={cn('text-md', totalSecondsLeft < 30 && totalSecondsLeft > 0 && 'text-red-500 animate-pulse')}>
 							{end > Date.now() ? (
 								remaining.toFormat('hh:mm:ss')
 							) : (
@@ -483,7 +507,7 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 								</div>
 							)}
 						</div>
-						<div className={cn('text-xl  lg:text-3xl', secondsLeft < 30 && secondsLeft > 0 && 'animate-pulse')}>
+						<div className={cn('text-xl  lg:text-3xl', totalSecondsLeft < 30 && totalSecondsLeft > 0 && 'animate-pulse')}>
 							<Counter doMillify={true} from={from} to={to} />
 						</div>
 					</motion.div>

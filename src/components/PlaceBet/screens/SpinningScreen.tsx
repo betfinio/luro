@@ -4,8 +4,8 @@ import { motion } from 'motion/react';
 import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ASSETS_IPFS_BASE_URL } from '@/src/global';
-import { getTimesByRound, jumpToCurrentRound, useLuroAddress } from '@/src/lib';
-import { useLuroState, useRefundRound } from '@/src/lib/query';
+import { getTimesByRound, jumpToCurrentRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, useLuroAddress } from '@/src/lib';
+import { useLuroGameIntervalSeconds, useLuroState, useRefundRound } from '@/src/lib/query';
 import type { LuroInterval } from '@/src/lib/types';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 
@@ -16,6 +16,8 @@ export const SpinningScreen: FC<{ round: number }> = ({ round }) => {
 	const queryClient = useQueryClient();
 	const luroAddress = useLuroAddress();
 	const { interval } = Route.useParams();
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
 	const { mutate: refund, isPending: isRefunding } = useRefundRound(round);
 	const { state: luroState } = useLuroState(round);
 
@@ -27,9 +29,9 @@ export const SpinningScreen: FC<{ round: number }> = ({ round }) => {
 		if (spinningState?.spinRequestedAt) {
 			return spinningState.spinRequestedAt + REFUND_TIMEOUT_MS;
 		}
-		const { end } = getTimesByRound(round, interval as LuroInterval);
+		const { end } = getTimesByRound(round, interval as LuroInterval, shortRoundSeconds);
 		return end + REFUND_TIMEOUT_MS;
-	}, [luroState.data, round, interval]);
+	}, [luroState.data, round, interval, shortRoundSeconds]);
 
 	const now = Date.now();
 	const refundAvailable = now >= refundAvailableAt;

@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'motion/react';
-import { getTimesByRound } from '@/src/lib';
+import { getTimesByRound, LURO_SHORT_ROUND_SECONDS_FALLBACK } from '@/src/lib';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { useLuroState, useRound, useRoundBets, useRoundBetsGql, useVisibleRound } from '../../lib/query';
+import { useLuroGameIntervalSeconds, useLuroState, useRound, useRoundBets, useRoundBetsGql, useVisibleRound } from '../../lib/query';
 import type { LuroInterval } from '../../lib/types';
 import { RoundStatusEnum } from '../../lib/types';
 import { RoundResultScreen } from './screens/RoundResultScreen';
@@ -12,6 +12,8 @@ import { WaitingScreen } from './screens/WaitingScreen';
 export const PlaceBet = () => {
 	const { data: round } = useVisibleRound();
 	const { interval } = Route.useParams();
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
 
 	const { state: luroState } = useLuroState(round);
 	const { data: roundData } = useRound(round);
@@ -22,7 +24,7 @@ export const PlaceBet = () => {
 		const wheelStateValue = luroState.data.state;
 
 		if (wheelStateValue === 'standby') {
-			const { end } = getTimesByRound(round, interval as LuroInterval);
+			const { end } = getTimesByRound(round, interval as LuroInterval, shortRoundSeconds);
 			const roundEnded = Date.now() > end;
 			const hasBets = bets.length > 0 || betsGql.length > 0;
 

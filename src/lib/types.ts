@@ -96,4 +96,4 @@ export interface CustomLuroBet {
 	betsNumber?: number;
 }
 
-export type LuroInterval = '1d' | '5m';
+export type LuroInterval = '1d' | '210s';

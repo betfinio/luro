@@ -1,13 +1,12 @@
 import { ZeroAddress } from '@betfinio/abi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useConfig, useWatchContractEvent } from 'wagmi';
+import { useWatchContractEvent } from 'wagmi';
 import { PlaceBet } from '@/src/components/PlaceBet/PlaceBet';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
 import logger from '@/src/config/logger.ts';
 import { useLuroAddress } from '@/src/lib';
 import { PvPGameABI } from '@/src/lib/abi/PvPGameABI.ts';
-import { resolveRound } from '@/src/lib/api/index.ts';
 import { useLuroState, useVisibleRound } from '../lib/query';
 
 export const CurrentRound = () => {
@@ -18,7 +17,6 @@ export const CurrentRound = () => {
 	const { updateState } = useLuroState(round);
 
 	const luroAddress = useLuroAddress();
-	const config = useConfig();
 	const queryClient = useQueryClient();
 
 	useWatchContractEvent({
@@ -37,17 +35,18 @@ export const CurrentRound = () => {
 	});
 
 	// VRF returned the random number — round is now ResultReady.
-	// resolveRound() must be called to settle bets and emit BetResolved.
+	// The user must click "Settle round" to call resolveRound() on-chain.
 	useWatchContractEvent({
 		abi: PvPGameABI,
 		address: luroAddress,
 		eventName: 'RandomnessFulfilled',
 		poll: true,
-		onLogs: (logs) => {
+		onLogs: async (logs) => {
 			const log = logs[0];
 			if (Number(log?.args?.contextId) === observedRound) {
-				logger.log('RANDOMNESS FULFILLED, calling resolveRound', observedRound);
-				resolveRound(luroAddress, observedRound, config).catch((e) => logger.error('resolveRound failed', e));
+				logger.log('RANDOMNESS FULFILLED, prompting user to settle', observedRound);
+				updateState({ state: 'waiting' }, observedRound);
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
 			}
 		},
 	});

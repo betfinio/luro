@@ -41,13 +41,15 @@
 		"total": "В ощем",
 		"refundRound": "Вернуть ставки",
 		"refunding": "Возврат...",
-		"refundAvailableIn": "Возврат через {hours}ч"
+		"refundAvailableIn": "Возврат через {hours}ч",
+		"settleRound": "Рассчитать раунд",
+		"settling": "Расчёт..."
 	},
 	"roundInfo": {
 		"luro": "Lucky Round",
 		"howToPlay": "Как играть?",
 		"interval": {
-			"5m": "5 минут",
+			"210s": "210 сек",
 			"1d": "1 день"
 		},
 		"stats": {
@@ -64,7 +66,10 @@
 		"couldWin": "Вы могли выиграть",
 		"youWin": "Вы ПОБЕДИЛИ!",
 		"total": "В общем",
-		"betterLuckNextTime": "Повезёт в следующий раз."
+		"betterLuckNextTime": "Повезёт в следующий раз.",
+		"historicalVrfPending": "Ожидание VRF — доставляется случайность.",
+		"historicalSettleHint": "VRF готов — выполните расчёт в сети, чтобы распределить банк.",
+		"settleRound": "Рассчитать раунд"
 	},
 	"roundModal": {
 		"title": "Раунд",
@@ -112,6 +117,9 @@
 			"stakingEarnings": "Доходы в стейкинг"
 		},
 		"waiting": "Ожидание",
+		"pending": "Ожидание расчёта",
+		"awaitingVrf": "Ожидание случайности",
+		"winnerIndexing": "Финализация победителя",
 		"cancelled": "Отменён"
 	},
 	"toast": {
@@ -141,6 +149,10 @@
 		"refundRound": {
 			"title": "Возврат ставок",
 			"success": "Ставки возвращены"
+		},
+		"settleRound": {
+			"title": "Расчёт раунда",
+			"description": "Ожидание транзакции"
 		}
 	},
 	"errors": {
