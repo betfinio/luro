@@ -1,77 +1,8 @@
-@layer components, theme, base, utilities;
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
 
-@import "@betfinio/components/globals.css" layer(components);
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
+@import "@betfinio/components/globals.css";
 @import "tw-animate-css";
+@import "tailwindcss";
 
-@layer utilities {
-	.luro {
-		@tailwind utilities;
-		@import "@betfinio/components/globals.css" layer(components);
-	}
-}
-
-@theme {
-	--breakpoint-2xl: 1440px;
-	--color-background-light: var(--background-light);
-}
-
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-	*,
-	::after,
-	::before,
-	::backdrop,
-	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
-	}
-}
-
-.dot-flashing {
-	animation: dot-flashing 1s infinite linear alternate;
-	animation-delay: 0.5s;
-}
-
-.dot-flashing::before,
-.dot-flashing::after {
-	content: "";
-	display: inline-block;
-	position: absolute;
-	top: 0;
-}
-.dot-flashing::before {
-	left: -5px;
-	width: 3px;
-	height: 3px;
-	border-radius: 5px;
-	background-color: #ffffff;
-	animation: dot-flashing 1s infinite alternate;
-	animation-delay: 0s;
-}
-.dot-flashing::after {
-	left: 5px;
-	width: 3px;
-	height: 3px;
-	border-radius: 5px;
-	background-color: #ffffff;
-	animation: dot-flashing 1s infinite alternate;
-	animation-delay: 1s;
-}
-
-@keyframes dot-flashing {
-	0% {
-		background-color: #ffffff;
-	}
-	50%,
-	100% {
-		background-color: rgba(255, 255, 255, 0.2);
-	}
-}
+@source "../@mf-types/source";

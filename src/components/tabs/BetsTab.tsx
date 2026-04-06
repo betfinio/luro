@@ -7,7 +7,7 @@ import { useRoundBets, useVisibleRound } from '@/src/lib/query';
 export const BetsTab = () => {
 	const { data: round } = useVisibleRound();
 	const { data: bets = [] } = useRoundBets(round);
-	const [listHeight, setListHeight] = useState(460);
+	const [listHeight, setListHeight] = useState(220);
 	const totalVolume = useMemo(() => {
 		return bets.reduce((acc, val) => acc + val.amount, 0n);
 	}, [bets]);
@@ -31,7 +31,7 @@ export const BetsTab = () => {
 		if (ref.current) {
 			setListHeight(ref.current.offsetHeight);
 		} else {
-			setListHeight(460);
+			setListHeight(220);
 		}
 	}, [ref.current]);
 

@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import confetti from 'canvas-confetti';
 import type { Address } from 'viem';
-import { LURO, LURO_5MIN } from '@/src/global.ts';
+import { LURO, LURO_5MIN, LURO_5MIN_STRATEGY, LURO_STRATEGY } from '@/src/global.ts';
 import type { LuroAuthor, LuroBet, LuroInterval, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 
@@ -17,32 +17,26 @@ export const mapBetsToAuthors = (bets: LuroBet[]): LuroAuthor[] => {
 	}, []);
 };
 
-export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, volume: bigint, bonusShare: bigint, address: Address): RoundModalPlayer[] => {
-	const bonusPool = (volume / 100n) * 4n;
+export const mapBetsToRoundTable = (bets: LuroBet[], winner: Address, bank: bigint, address: Address): RoundModalPlayer[] => {
 	const mappedBets = [...bets]
 		.map((e) => ({
 			...e,
 			player: e.player.toLowerCase() as Address,
 		}))
-		.reduce((acc: RoundModalPlayer[], val, index) => {
+		.reduce((acc: RoundModalPlayer[], val) => {
 			const author = acc.findIndex((bet) => bet.player.toLowerCase() === val.player.toLowerCase());
-			const weight = val.amount * BigInt(bets.length - index);
-			const bonus = bonusShare === 0n ? 0n : (bonusPool * weight) / bonusShare;
 			if (author === -1) {
 				acc.push({
 					player: val.player.toLowerCase() as Address,
 					count: 1,
 					volume: val.amount,
-					win: val.player.toLowerCase() === winner.toLowerCase() ? (volume / 1000n) * 914n : 0n,
-					bonus: bonus,
+					win: val.player.toLowerCase() === winner.toLowerCase() ? bank : 0n,
 				});
 			} else {
 				acc[author].volume += val.amount;
 				acc[author].count += 1;
-				acc[author].bonus += bonus;
 			}
 			return acc;
-			//TODO: sorting algorhytm for largest volume
 		}, []);
 
 	return mappedBets.toSorted((a, b) => {
@@ -69,32 +63,50 @@ export const animateNewBet = (address: Address, strength: number, queryClient: Q
 	queryClient.setQueryData(['luro', luroAddress, 'bets', 'newBet'], { address, strength });
 };
 
-export const getLuroInterval = (interval: LuroInterval) => {
-	if (interval === '5m') {
-		return 60 * 5;
+/** Fallback when `INTERVAL()` has not loaded yet; keep in sync with deployed short-mode game. */
+export const LURO_SHORT_ROUND_SECONDS_FALLBACK = 210;
+
+export const getLuroInterval = (interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		return shortRoundSeconds;
 	}
 	return 60 * 60 * 24;
 };
 
-export const getCurrentRound = (interval: LuroInterval) => {
-	if (interval === '5m') {
-		return Math.floor(Date.now() / 1000 / (60 * 5));
+export const getCurrentRound = (interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		return Math.floor(Date.now() / 1000 / shortRoundSeconds);
 	}
 	return Math.floor((Date.now() + 1000 * 60 * 60 * 6) / 1000 / (60 * 60 * 24));
 };
 
-export const getTimesByRound = (round: number, interval: LuroInterval) => {
-	if (interval === '5m') {
-		const start = round * 60 * 5 * 1000;
-		return { start, end: start + 60 * 5 * 1000 };
+export const getTimesByRound = (round: number, interval: LuroInterval, shortRoundSeconds = LURO_SHORT_ROUND_SECONDS_FALLBACK) => {
+	if (interval === '210s') {
+		const ms = shortRoundSeconds * 1000;
+		const start = round * ms;
+		return { start, end: start + ms };
 	}
 	const start = round * 60 * 60 * 24 * 1000 - 1000 * 60 * 60 * 6;
 	return { start, end: start + 60 * 60 * 24 * 1000 };
 };
 
-export const jumpToCurrentRound = (queryClient: QueryClient, address: Address) => {
-	queryClient.setQueryData(['luro', address, 'state'], { state: 'standby' });
-	queryClient.invalidateQueries({ queryKey: ['luro'] });
+export interface JumpToCurrentRoundOptions {
+	/** Clears stuck `waiting` / spin UI for this round id (per-round query key). */
+	endedRound?: number;
+	interval?: LuroInterval;
+	shortRoundSeconds?: number;
+}
+
+export const jumpToCurrentRound = (queryClient: QueryClient, address: Address, options?: JumpToCurrentRoundOptions) => {
+	if (options?.endedRound !== undefined) {
+		queryClient.setQueryData(['luro', address, 'state', options.endedRound], { state: 'standby' });
+	}
+	if (options?.interval !== undefined) {
+		const shortRoundSeconds = options.shortRoundSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
+		const suffix = options.interval === '210s' ? shortRoundSeconds : 'daily';
+		queryClient.setQueryData(['luro', address, 'visibleRound', options.interval, suffix], getCurrentRound(options.interval, shortRoundSeconds));
+	}
+	void queryClient.invalidateQueries({ queryKey: ['luro', address] });
 };
 
 export function hexToRgbA(hex: string) {
@@ -115,10 +127,22 @@ export const useLuroAddress = (): Address => {
 	switch (interval) {
 		case '1d':
 			return LURO;
-		case '5m':
+		case '210s':
 			return LURO_5MIN;
 		default:
 			return LURO;
+	}
+};
+
+export const useLuroStrategyAddress = (): Address => {
+	const { interval } = Route.useParams();
+	switch (interval) {
+		case '1d':
+			return LURO_STRATEGY;
+		case '210s':
+			return LURO_5MIN_STRATEGY;
+		default:
+			return LURO_STRATEGY;
 	}
 };
 

@@ -11,7 +11,7 @@ const SwitchModal: FC<{ selected: LuroInterval }> = ({ selected }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundInfo.interval' });
 
 	return (
-		<motion.div layoutId={'switcher'} className={'rounded-lg border-border border bg-background p-2 w-[300px] mx-auto text-foreground'}>
+		<motion.div layoutId={'switcher'} className={'rounded-lg bg-background p-2 w-[300px] mx-auto text-foreground'}>
 			{types.map((pair, index) => (
 				<DialogClose asChild key={index}>
 					<Link

@@ -1,52 +1,45 @@
 import { truncateEthAddress, valueToNumber, ZeroAddress } from '@betfinio/abi';
-import { Bank, GoldenTrophy, MoneyHand, People } from '@betfinio/components/icons';
+import { Bank, GoldenTrophy, People } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { BetValue, DataTable } from '@betfinio/components/shared';
-import { Button, DialogClose, ScrollArea } from '@betfinio/components/ui';
+import { DialogClose, ScrollArea } from '@betfinio/components/ui';
 import { Link } from '@tanstack/react-router';
 import { type ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { addressToColor } from 'betfinio_context/lib/utils';
 import { Loader, ShieldCheckIcon, X } from 'lucide-react';
 import { DateTime } from 'luxon';
-import { type FC, useCallback, useMemo } from 'react';
+import { type FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { FeeNotice } from '@/src/components/FeeNotice.tsx';
 import { RoundCircle } from '@/src/components/RoundCircle.tsx';
-import logger from '@/src/config/logger.ts';
 import { ETHSCAN } from '@/src/global.ts';
-import { getTimesByRound, mapBetsToRoundTable } from '@/src/lib';
+import { getTimesByRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, mapBetsToRoundTable } from '@/src/lib';
 import type { LuroInterval, Round, RoundModalPlayer } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import {
-	useBonusDistribution,
-	useCalculate,
-	useDistributeBonus,
-	useRound,
-	useRoundBank,
-	useRoundBets,
-	useRoundBonusShare,
-	useVisibleRound,
-	useWinner,
-} from '../lib/query';
+import { useLuroFee, useLuroGameIntervalSeconds, useRoundBets, useRoundBetsGql, useVisibleRound, useWinner } from '../lib/query';
 
 export const ModalContent: FC<{
 	roundId: number;
 	round: Round | null;
-}> = ({ roundId, round }) => {
+}> = ({ roundId, round: _round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal' });
 	const { interval } = Route.useParams();
-	const { start, end } = getTimesByRound(roundId, interval as LuroInterval);
+	const { data: intervalSeconds } = useLuroGameIntervalSeconds();
+	const shortRoundSeconds = intervalSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
+	const { start, end } = getTimesByRound(roundId, interval as LuroInterval, shortRoundSeconds);
 	const isFinished = DateTime.fromMillis(Date.now()).diff(DateTime.fromMillis(end)).milliseconds > 0;
 
-	const { data: volume = 0n } = useRoundBank(roundId);
-	const { data: bonusShare = 0n } = useRoundBonusShare(roundId);
+	const { data: betsChain = [] } = useRoundBets(roundId);
+	const { data: betsGql = [] } = useRoundBetsGql(roundId);
+	const bets = betsChain.length > 0 ? betsChain : betsGql;
+	const { data: feeData } = useLuroFee();
 	const { data: winner } = useWinner(roundId);
-	const { mutate } = useCalculate(round?.round || 0);
 
-	const handleCalculate = useCallback(() => {
-		mutate();
-	}, []);
+	const gqlVolume = useMemo(() => bets.reduce((acc, b) => acc + b.amount, 0n), [bets]);
+	const lpFee = feeData ? (gqlVolume * feeData.feeBps) / 10000n : 0n;
+
 	return (
 		<ScrollArea className={'h-[98vh] SCROLLBAR max-h-[98vh] w-[98vw] md:h-auto md:max-w-[1200px] lg:w-[1000px]'}>
 			<div
@@ -60,7 +53,7 @@ export const ModalContent: FC<{
 				</DialogClose>
 
 				<div className={'flex flex-row gap-2 justify-start items-center'}>
-					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap cursor-pointer'} onClick={handleCalculate}>
+					<div className={'flex flex-col gap-1 w-1/3 whitespace-nowrap'}>
 						{isFinished ? (
 							<div className={'text-lg leading-6'}>
 								{t('titleFinished')} #{roundId}
@@ -76,13 +69,13 @@ export const ModalContent: FC<{
 					</div>
 				</div>
 
-				<RoundDetails volume={volume} usersCount={Number(round?.total.bets)} />
+				<RoundDetails volume={gqlVolume} lpFee={lpFee} usersCount={bets.length} />
+				<FeeNotice className={'mt-3'} />
 				<div className={'mt-2 md:mt-3 lg:mt-4'}>
 					<RoundCircle round={roundId} className={'aspect-auto py-10 px-2 md:px-10 '} />
 				</div>
 				<WinnerBetInfo round={roundId} />
-				<BetsTable round={roundId} volume={volume} bonusShare={bonusShare} winner={(winner?.player || ZeroAddress).toLowerCase() as Address} />
-				<BonusDistribution round={roundId} />
+				<BetsTable round={roundId} volume={gqlVolume} winner={(winner?.player || ZeroAddress).toLowerCase() as Address} />
 			</div>
 		</ScrollArea>
 	);
@@ -90,42 +83,15 @@ export const ModalContent: FC<{
 
 interface RoundDetailsProps {
 	volume: bigint;
+	lpFee: bigint;
 	usersCount: number;
 }
 
-const BonusDistribution: FC<{ round: number }> = ({ round }) => {
-	const { data: distributed } = useBonusDistribution(round);
-	const { mutate: distribute } = useDistributeBonus();
-	const { interval } = Route.useParams();
-	const { end } = getTimesByRound(round, interval as LuroInterval);
-	const handleDistribute = () => {
-		logger.log('distribute');
-		distribute({ round });
-	};
-
-	if (distributed) {
-		return <div className={'flex flex-row items-center my-4 justify-center'}>Bonuses were distributed!</div>;
-	}
-
-	if (end > Date.now()) {
-		return null;
-	}
-	return (
-		<div className={'flex flex-row gap-2 items-center justify-end py-2'}>
-			<Button type={'button'} onClick={handleDistribute}>
-				Distribute bonuses
-			</Button>
-		</div>
-	);
-};
-
-const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
+const RoundDetails: FC<RoundDetailsProps> = ({ volume, lpFee, usersCount }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.details' });
 
-	const staking = (volume / 1000n) * 36n;
-	const bonus = (volume / 100n) * 5n;
 	return (
-		<div className={'mt-4 grid grid-cols-3 gap-2 md:mt-10 md:gap-3 lg:gap-4'}>
+		<div className={'mt-4 grid grid-cols-2 gap-2 md:mt-10 md:gap-3 lg:gap-4'}>
 			<div
 				className={
 					'border rounded-xl border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
@@ -145,26 +111,13 @@ const RoundDetails: FC<RoundDetailsProps> = ({ volume, usersCount }) => {
 			</div>
 			<div
 				className={
-					'border rounded-xl border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-1'
-				}
-			>
-				<MoneyHand className={'p-1 w-13 h-13 text-secondary-foreground md:w-20 md:h-20 '} />
-				<div className={'flex flex-col items-center md:items-start'}>
-					<div className={' text-xl font-semibold'}>
-						<BetValue value={valueToNumber(bonus)} precision={1} withIcon={true} />
-					</div>
-					<div className={'text-xs text-muted-foreground'}>{t('totalBonus')}</div>
-				</div>
-			</div>
-			<div
-				className={
-					'border rounded-xl  border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
+					'border rounded-xl border-border bg-background-lighter min-h-[100px] flex flex-col md:flex-row justify-center items-center gap-1 md:gap-2 p-2 pt-0'
 				}
 			>
 				<Bank className={'w-14 h-14 text-secondary-foreground md:w-20 md:h-20 '} />
 				<div className={'flex flex-col items-center md:items-start'}>
 					<div className={'text-xl font-semibold'}>
-						<BetValue value={valueToNumber(staking)} precision={1} withIcon={true} />
+						<BetValue value={valueToNumber(lpFee)} precision={1} withIcon={true} />
 					</div>
 					<div className={'text-xs text-muted-foreground'}>{t('paidToStaking')}</div>
 				</div>
@@ -181,7 +134,7 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 	const { data: winner, isLoading, isFetching } = useWinner(round);
 	const { data: currentRound } = useVisibleRound();
 
-	if (round === currentRound || winner === undefined) {
+	if (round === currentRound || !winner) {
 		return null;
 	}
 	return (
@@ -212,16 +165,17 @@ const WinnerBetInfo: FC<{ round: number }> = ({ round }) => {
 	);
 };
 
-const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusShare: bigint; winner: Address }> = ({ round, volume, bonusShare, winner }) => {
+const BetsTable: FC<{ round: number; className?: string; volume: bigint; winner: Address }> = ({ round, volume, winner }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'roundModal.table' });
 	const { t: tShared } = useTranslation('shared', { keyPrefix: 'tables' });
-	const { data: bets = [] } = useRoundBets(round);
+	const { data: betsChain = [] } = useRoundBets(round);
+	const { data: betsGql = [] } = useRoundBetsGql(round);
+	const bets = betsChain.length > 0 ? betsChain : betsGql;
 	const { address = ZeroAddress } = useAccount();
-	const { data: roundData } = useRound(round);
 
 	const players = useMemo(() => {
-		return mapBetsToRoundTable(bets, winner, volume, bonusShare, address.toLowerCase() as Address);
-	}, [bets, winner, address]);
+		return mapBetsToRoundTable(bets, winner, volume, address.toLowerCase() as Address);
+	}, [bets, winner, address, volume]);
 
 	const columns: ColumnDef<RoundModalPlayer, any>[] = [
 		columnHelper.display({
@@ -271,39 +225,27 @@ const BetsTable: FC<{ round: number; className?: string; volume: bigint; bonusSh
 			},
 		}),
 		columnHelper.accessor('volume', {
-			id: 'total_bonus',
+			id: 'total_volume',
 			header: t('columns.amount'),
 			cell: (props) => {
 				const pool = props.getValue();
 				return <BetValue value={valueToNumber(pool)} withIcon={true} />;
 			},
 		}),
-
-		columnHelper.accessor('bonus', {
-			header: t('columns.bonus'),
-			meta: {
-				className: 'hidden md:table-cell',
-			},
-			cell: (props) => {
-				const pool = props.getValue();
-				return <BetValue value={valueToNumber(pool)} withIcon={true} />;
-			},
-		}),
-		columnHelper.display({
+		columnHelper.accessor('win', {
 			header: t('columns.totalResult'),
 			id: 'totalWin',
 			cell: (props) => {
-				const isWinner = props.row.getValue('player') === winner;
-				const win = props.row.original.win;
-				const bonus = props.row.getValue('bonus') as bigint;
-				return <BetValue value={bonus + (isWinner ? win : 0n)} withIcon={true} className={cn(isWinner && 'text-success')} />;
+				const win = props.getValue();
+				const isWinner = win > 0n;
+				return <BetValue value={valueToNumber(win)} withIcon={true} className={cn(isWinner && 'text-success')} />;
 			},
 		}),
 	];
 
 	return (
 		<div className={'mt-4'}>
-			<DataTable t={tShared} columns={columns} data={players} state={{ columnVisibility: { totalWin: (roundData?.winnerOffset || 0n) > 0n } }} />
+			<DataTable t={tShared} columns={columns} data={players} state={{ columnVisibility: { totalWin: winner !== ZeroAddress.toLowerCase() } }} />
 		</div>
 	);
 };
