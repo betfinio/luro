@@ -10,7 +10,7 @@ import { Loader, PlusIcon, TriangleIcon } from 'lucide-react';
 import { DateTime } from 'luxon';
 import millify from 'millify';
 import { AnimatePresence, animate, type BezierDefinition, motion, useAnimation } from 'motion/react';
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
@@ -20,7 +20,7 @@ import Crown from '@/src/assets/luro/crown.svg';
 import Duck from '@/src/assets/luro/duck.png';
 import { TabItem, WinnerCard } from '@/src/components/tabs/PlayersTab.tsx';
 import { getTimesByRound, hexToRgbA, jumpToCurrentRound, LURO_SHORT_ROUND_SECONDS_FALLBACK, shootConfetti, useLuroAddress } from '@/src/lib';
-import type { CustomLuroBet, LuroInterval } from '@/src/lib/types.ts';
+import type { CustomLuroBet, LuroInterval, WheelState } from '@/src/lib/types.ts';
 import { RoundStatusEnum } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
 import {
@@ -79,19 +79,25 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 		return (winnerInfoForCircle.offset / Number(roundData.total.volume)) * 360;
 	}, [winnerInfoForCircle, roundData?.total.volume]);
 
+	const wheelTransitionRef = useRef<{ round: number; state: WheelState['state'] }>({ round: -1, state: 'standby' });
+
 	useEffect(() => {
 		if (round !== currentRound) return;
 
-		if (wheelState.state === 'standby') {
+		const state = wheelState.state;
+		const prev = wheelTransitionRef.current;
+		const prevState = prev.round === round ? prev.state : undefined;
+
+		if (state === 'standby' && prevState !== 'standby') {
 			controls.set({ rotate: 0 });
 		}
-		if (wheelState.state === 'spinning') {
+		if (state === 'spinning' && prevState !== 'spinning') {
 			spinWheel();
 		}
-		if (wheelState.state === 'landed') {
+		if (state === 'landed' && prevState !== 'landed' && wheelState.state === 'landed') {
 			stopWheel((wheelState.winnerOffset * 360) / valueToNumber(roundData?.total.volume), wheelState.bet);
 		}
-		if (wheelState.state === 'stopped') {
+		if (state === 'stopped' && prevState !== 'stopped') {
 			if (winnerInfoForCircle?.player?.toLowerCase() === address?.toLowerCase()) {
 				shootConfetti();
 			} else {
@@ -101,7 +107,9 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 				}, 1000);
 			}
 		}
-	}, [wheelState]);
+
+		wheelTransitionRef.current = { round, state };
+	}, [address, currentRound, round, roundData?.total.volume, wheelState, winnerInfoForCircle?.player]);
 
 	function spinWheel() {
 		if (wheelState.state !== 'spinning') return;
@@ -148,122 +156,124 @@ export const RoundCircle: FC<{ round: number; className?: string }> = ({ round, 
 	const [chartHeight, setChartHeight] = useState(250);
 	const boxRef = useRef<HTMLDivElement | null>(null);
 
-	useEffect(() => {
-		if (boxRef.current) {
-			setChartHeight(boxRef.current?.offsetHeight);
-		} else {
+	// One-shot measure when layout inputs change. Avoid ResizeObserver here: chart size drives
+	// Pie dimensions which changes the box, which re-fires the observer → update depth exceeded.
+	useLayoutEffect(() => {
+		const el = boxRef.current;
+		if (!el) {
 			setChartHeight(460);
+			return;
 		}
-	}, [boxRef.current]);
+		const h = el.offsetHeight;
+		if (h > 0) setChartHeight((prev) => (prev === h ? prev : h));
+	}, [round, currentRound, data.length]);
 
 	return (
-		<Tooltip>
-			<motion.div
-				className={cn(
-					'border-border border relative p-4 grow xl:p-8 rounded-xl bg-[var(--background-light)] flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
-					className,
-				)}
-				style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'hsl(var(--background-light))' }}
-			>
-				{currentRound === round && <EffectsLayer round={round} />}
-				<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && 'h-[300px]! md:h-[325px]!')} ref={boxRef}>
-					<div className={'relative'}>
-						<ProgressBar round={round} authors={data} />
+		<motion.div
+			className={cn(
+				'border-border border relative p-4 grow xl:p-8 rounded-xl bg-[var(--background-light)] flex flex-col md:flex-row items-center justify-center gap-10 duration-500 ease-in-out',
+				className,
+			)}
+			style={{ backgroundColor: winnerColor ? `${winnerColor}80` : 'hsl(var(--background-light))' }}
+		>
+			{currentRound === round && <EffectsLayer round={round} />}
+			<div className={cn('h-[250px] xl:h-[325px]', currentRound !== round && 'h-[300px]! md:h-[325px]!')} ref={boxRef}>
+				<div className={'relative'}>
+					<ProgressBar round={round} authors={data} />
 
-						{data.length > 0 ? (
-							round === currentRound ? (
-								<motion.div ref={wheelRef} animate={controls}>
-									<Pie
-										data={data}
-										colors={{ datum: 'data.color' }}
-										innerRadius={0.7}
-										enableArcLabels={false}
-										enableArcLinkLabels={false}
-										width={chartHeight}
-										height={chartHeight}
-										isInteractive={wheelState.state === 'standby' || wheelState.state === 'waiting'}
-										tooltip={CustomTooltip(roundData?.total.volume || 0n)}
-									/>
-								</motion.div>
-							) : (
-								<div>
-									<Pie
-										data={data}
-										colors={{ datum: 'data.color' }}
-										innerRadius={0.7}
-										startAngle={-wheelAngle}
-										endAngle={360 - wheelAngle}
-										enableArcLabels={false}
-										enableArcLinkLabels={false}
-										width={chartHeight}
-										height={chartHeight}
-										isInteractive={wheelState.state === 'standby' || wheelState.state === 'waiting'}
-										tooltip={CustomTooltip(roundData?.total.volume || 0n)}
-									/>
-								</div>
-							)
+					{data.length > 0 ? (
+						round === currentRound ? (
+							<motion.div ref={wheelRef} animate={controls}>
+								<Pie
+									data={data}
+									colors={{ datum: 'data.color' }}
+									innerRadius={0.7}
+									enableArcLabels={false}
+									enableArcLinkLabels={false}
+									width={chartHeight}
+									height={chartHeight}
+									isInteractive={wheelState.state === 'standby' || wheelState.state === 'waiting'}
+									tooltip={CustomTooltip(roundData?.total.volume || 0n)}
+								/>
+							</motion.div>
 						) : (
-							<Pie
-								data={[{ id: 'none', value: 100, color: '#777' }]}
-								colors={{ datum: 'data.color' }}
-								innerRadius={0.7}
-								enableArcLabels={false}
-								enableArcLinkLabels={false}
-								width={chartHeight}
-								height={chartHeight}
-								tooltip={() => null}
-							/>
-						)}
-					</div>
+							<div>
+								<Pie
+									data={data}
+									colors={{ datum: 'data.color' }}
+									innerRadius={0.7}
+									startAngle={-wheelAngle}
+									endAngle={360 - wheelAngle}
+									enableArcLabels={false}
+									enableArcLinkLabels={false}
+									width={chartHeight}
+									height={chartHeight}
+									isInteractive={wheelState.state === 'standby' || wheelState.state === 'waiting'}
+									tooltip={CustomTooltip(roundData?.total.volume || 0n)}
+								/>
+							</div>
+						)
+					) : (
+						<Pie
+							data={[{ id: 'none', value: 100, color: '#777' }]}
+							colors={{ datum: 'data.color' }}
+							innerRadius={0.7}
+							enableArcLabels={false}
+							enableArcLinkLabels={false}
+							width={chartHeight}
+							height={chartHeight}
+							tooltip={() => null}
+						/>
+					)}
 				</div>
-				{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
-					<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
-						{roundData?.status === RoundStatusEnum.Open && (
-							<div className={'flex flex-col gap-2 items-center'}>
-								{t('waiting')}
-								{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[220px]'}>{tPlaceBetToast('connect')}</p> : null}
-								<Button onClick={handleManualSpin} disabled={!isConnected}>
-									SPIN now
-								</Button>
-							</div>
-						)}
+			</div>
+			{currentRound !== round && (roundData?.total.volume || 0n) > 0n && (
+				<div className={cn('w-full flex gap-4 flex-row items-center justify-evenly')}>
+					{roundData?.status === RoundStatusEnum.Open && (
+						<div className={'flex flex-col gap-2 items-center'}>
+							{t('waiting')}
+							{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[220px]'}>{tPlaceBetToast('connect')}</p> : null}
+							<Button onClick={handleManualSpin} disabled={!isConnected}>
+								SPIN now
+							</Button>
+						</div>
+					)}
 
-						{roundData?.status === RoundStatusEnum.SpinRequested && (
-							<div className={'flex flex-col gap-2 items-center text-center max-w-[280px] px-2'}>
-								<p className={'text-sm text-muted-foreground'}>{t('historicalVrfPending')}</p>
-							</div>
-						)}
+					{roundData?.status === RoundStatusEnum.SpinRequested && (
+						<div className={'flex flex-col gap-2 items-center text-center max-w-[280px] px-2'}>
+							<p className={'text-sm text-muted-foreground'}>{t('historicalVrfPending')}</p>
+						</div>
+					)}
 
-						{roundData?.status === RoundStatusEnum.ResultReady && (
-							<div className={'flex flex-col gap-3 items-center text-center max-w-[320px] px-2'}>
-								<p className={'text-sm text-muted-foreground'}>{t('historicalSettleHint')}</p>
-								{!isConnected ? <p className={'text-xs text-muted-foreground'}>{tPlaceBetToast('connect')}</p> : null}
-								<Button onClick={() => resolveRoundTx()} disabled={!isConnected || isResolving}>
-									{isResolving ? <Loader className={'w-4 h-4 animate-spin'} /> : t('settleRound')}
-								</Button>
-							</div>
-						)}
+					{roundData?.status === RoundStatusEnum.ResultReady && (
+						<div className={'flex flex-col gap-3 items-center text-center max-w-[320px] px-2'}>
+							<p className={'text-sm text-muted-foreground'}>{t('historicalSettleHint')}</p>
+							{!isConnected ? <p className={'text-xs text-muted-foreground'}>{tPlaceBetToast('connect')}</p> : null}
+							<Button onClick={() => resolveRoundTx()} disabled={!isConnected || isResolving}>
+								{isResolving ? <Loader className={'w-4 h-4 animate-spin'} /> : t('settleRound')}
+							</Button>
+						</div>
+					)}
 
-						{roundData?.status === RoundStatusEnum.Settled && (
-							<>
-								<div className={'shrink-0'}>
-									<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
+					{roundData?.status === RoundStatusEnum.Settled && (
+						<>
+							<div className={'shrink-0'}>
+								<img alt={'duck'} src={Duck as string} className={'max-h-[200px] md:h-[300px]'} />
+							</div>
+							<div className={'flex flex-col min-w-[190px] gap-4'}>
+								<div
+									className={cn(
+										'border border-secondary-foreground bg-background flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
+									)}
+								>
+									<RoundResult round={round} />
 								</div>
-								<div className={'flex flex-col min-w-[190px] gap-4'}>
-									<div
-										className={cn(
-											'border border-secondary-foreground bg-background flex flex-col py-4 items-center rounded-lg min-h-[130px] justify-center drop-shadow-[0_0_35px_rgba(87,101,242,0.75)] duration-300',
-										)}
-									>
-										<RoundResult round={round} />
-									</div>
-								</div>
-							</>
-						)}
-					</div>
-				)}
-			</motion.div>
-		</Tooltip>
+							</div>
+						</>
+					)}
+				</div>
+			)}
+		</motion.div>
 	);
 };
 
@@ -398,38 +408,56 @@ const ProgressBar: FC<{ round: number; authors: CustomLuroBet[] }> = ({ round })
 
 	const { start, end } = getTimesByRound(round, interval as LuroInterval, shortRoundSeconds);
 
-	const changeLotteryState = () => {
+	const luroAddress = useLuroAddress();
+
+	const handleRoundEnd = useCallback(() => {
+		const noBets = effectiveBetsData.length === 0;
+		// If bank is still loading when the timer hits zero, treat the round as empty when there are no bet rows yet — otherwise we incorrectly enter `waiting` / "spin" for a dead round.
+		const bankEmptyOrUnknown = isBankLoading || bank === 0n;
+		if (noBets && bankEmptyOrUnknown) {
+			jumpToCurrentRound(queryClient, luroAddress, {
+				endedRound: round,
+				interval: interval as LuroInterval,
+				shortRoundSeconds,
+			});
+			return;
+		}
 		if (luroState.state === 'standby' && !isLotteryStateLoading && !isLotteryStatePending) {
 			updateState({ state: 'waiting' }, round);
 		}
-	};
-
-	const luroAddress = useLuroAddress();
-
-	const handleRoundEnd = () => {
-		const definitelyEmpty = !isBankLoading && bank === 0n && effectiveBetsData.length === 0;
-		if (definitelyEmpty) {
-			jumpToCurrentRound(queryClient, luroAddress);
-			return;
-		}
-		changeLotteryState();
-	};
+	}, [
+		bank,
+		effectiveBetsData.length,
+		interval,
+		isBankLoading,
+		isLotteryStateLoading,
+		isLotteryStatePending,
+		luroState.state,
+		queryClient,
+		luroAddress,
+		round,
+		shortRoundSeconds,
+		updateState,
+	]);
 
 	useEffect(() => {
 		const now = Date.now();
 		setProgress(100 - ((end - now) / (end - start)) * 100);
 
-		if (now <= end) {
-			const i = setInterval(() => {
-				const now = Date.now();
-				if (end < now) {
-					handleRoundEnd();
-				}
-				setProgress(100 - ((end - now) / (end - start)) * 100);
-			}, 500);
-			return () => clearInterval(i);
+		if (now > end) {
+			handleRoundEnd();
+			return;
 		}
-	}, [round, bank, luroState.state, start, end]);
+
+		const i = setInterval(() => {
+			const tick = Date.now();
+			if (end < tick) {
+				handleRoundEnd();
+			}
+			setProgress(100 - ((end - tick) / (end - start)) * 100);
+		}, 500);
+		return () => clearInterval(i);
+	}, [end, handleRoundEnd, start, round, bank, luroState.state]);
 
 	const [from, setFrom] = useState(0);
 
@@ -650,15 +678,14 @@ export const Counter: FC<{ from: number; to: number; doMillify?: boolean }> = ({
 	}, [from, to]);
 
 	return (
-		<>
-			<TooltipTrigger>
+		<Tooltip>
+			<TooltipTrigger asChild>
 				<div className={'flex gap-1 lg:gap-2 items-center relative z-10'}>
 					<Bet className={'text-secondary-foreground w-5 h-5 lg:w-7 lg:h-7'} />
 					<div className={''} ref={nodeRef} />
 				</div>
 			</TooltipTrigger>
-
 			<TooltipContent className={'font-semibold'}>{to.toLocaleString()} BET</TooltipContent>
-		</>
+		</Tooltip>
 	);
 };

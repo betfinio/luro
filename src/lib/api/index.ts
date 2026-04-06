@@ -280,6 +280,25 @@ export const getRoundWinnerByOffset = (bets: LuroBet[], offset: bigint) => {
 	}
 };
 
+/** Same as `LuckyRoundStrategy.resolveRound`: `(randomWords[0] % lastOffset) + 1` */
+export function luroVrfWinnerOffset(randomWord: bigint, lastOffset: bigint): bigint {
+	if (lastOffset <= 0n) return 0n;
+	return (randomWord % lastOffset) + 1n;
+}
+
+/** Strategy assigns contiguous offset ranges per bet in wei; returns the winning bet or undefined */
+export function findLuroBetAtStrategyOffset(bets: LuroBet[], winnerOffset: bigint): LuroBet | undefined {
+	if (winnerOffset <= 0n || bets.length === 0) return undefined;
+	let cumulative = 0n;
+	for (const bet of bets) {
+		const start = cumulative + 1n;
+		const end = cumulative + bet.amount;
+		if (winnerOffset >= start && winnerOffset <= end) return bet;
+		cumulative = end;
+	}
+	return undefined;
+}
+
 export const fetchPlayerRoundInfo = async (address: Address, player: Address, round: bigint, config: Config): Promise<PlayerRoundInfo> => {
 	// No more roundPlayerVolume/roundPlayerBetsCount on contract — compute from bets
 	const bets = await fetchRoundBets(address, Number(round), config);

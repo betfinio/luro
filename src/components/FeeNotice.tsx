@@ -1,7 +1,7 @@
 import { cn } from '@betfinio/components/lib';
+import { Link } from '@tanstack/react-router';
 import type { FC } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { ETHSCAN } from '@/src/global.ts';
 import { useLuroFee } from '@/src/lib/query';
 
 export const FeeNotice: FC<{ className?: string }> = ({ className }) => {
@@ -11,7 +11,6 @@ export const FeeNotice: FC<{ className?: string }> = ({ className }) => {
 	if (!data) return null;
 
 	const feePercent = Number(data.feeBps) / 100;
-	const poolUrl = `${ETHSCAN}/address/${data.liquidityPool}`;
 
 	return (
 		<div className={cn('text-center text-sm text-gray-400 py-2', className)}>
@@ -21,8 +20,7 @@ export const FeeNotice: FC<{ className?: string }> = ({ className }) => {
 				values={{ fee: feePercent }}
 				components={{
 					b: <strong className="text-white" />,
-					// biome-ignore lint/a11y/useAnchorContent: content is injected by Trans component
-					link: <a href={poolUrl} target="_blank" rel="noreferrer" className="underline hover:opacity-80" />,
+					pool: <Link to="/staking/liquidity-pool" className="underline hover:opacity-80" />,
 				}}
 			/>
 		</div>

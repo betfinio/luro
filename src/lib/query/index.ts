@@ -3,6 +3,7 @@ import { toast } from '@betfinio/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readContract, type WriteContractReturnType } from '@wagmi/core';
 import { getTransactionLink, handleError } from 'betfinio_context/lib/helpers';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address, WriteContractErrorType } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
@@ -299,14 +300,17 @@ export const useLuroState = (round: number) => {
 		queryKey: ['luro', luroAddress, 'state', round],
 		initialData: { state: 'standby' },
 	});
-	const updateState = async (st: WheelState, round: number) => {
-		logger.log('SET WHEEL STATE DATA', st, round);
-		queryClient.setQueryData(['luro', luroAddress, 'state', round], st);
-		if (st.state === 'stopped') {
-			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'rounds'] });
-			await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'winners'] });
-		}
-	};
+	const updateState = useCallback(
+		async (st: WheelState, roundArg: number) => {
+			logger.log('SET WHEEL STATE DATA', st, roundArg);
+			queryClient.setQueryData(['luro', luroAddress, 'state', roundArg], st);
+			if (st.state === 'stopped') {
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'rounds'] });
+				await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'winners'] });
+			}
+		},
+		[queryClient, luroAddress],
+	);
 
 	return { state, updateState };
 };

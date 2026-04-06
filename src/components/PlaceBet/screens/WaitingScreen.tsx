@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 import { ASSETS_IPFS_BASE_URL } from '@/src/global';
 import { jumpToCurrentRound, useLuroAddress } from '@/src/lib';
-import { useResolveRound, useRound, useRoundRequested, useStartRound } from '@/src/lib/query';
+import { useLuroState, useResolveRound, useRound, useRoundRequested, useStartRound } from '@/src/lib/query';
 import { RoundStatusEnum } from '@/src/lib/types';
 
 export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
@@ -18,10 +18,13 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 	const { mutate: settle, isPending: isSettling } = useResolveRound(round);
 	const { data: isRoundRequested } = useRoundRequested(round);
 	const { data: roundData } = useRound(round);
+	const { state: luroWheel } = useLuroState(round);
 	const queryClient = useQueryClient();
 	const luroAddress = useLuroAddress();
 
 	const isResultReady = roundData?.status === RoundStatusEnum.ResultReady;
+	const isSettled = roundData?.status === RoundStatusEnum.Settled;
+	const showSettle = isResultReady || luroWheel.data.state === 'landed' || (luroWheel.data.state === 'stopped' && !isSettled);
 
 	const handleSpin = () => {
 		if (!isConnected) {
@@ -47,10 +50,10 @@ export const WaitingScreen: FC<{ round: number }> = ({ round }) => {
 			/>
 			<div className={'flex flex-col justify-center items-center relative p-5 bg-background bg-opacity-75 mt-10'}>
 				<div className={'flex items-end pb-4 gap-2'}>
-					<span className={'leading-[12px]'}>{t('waiting')}</span>
-					<div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" />
+					<span className={'leading-[12px] text-center max-w-[280px]'}>{showSettle ? t('settlementRequired') : t('waiting')}</span>
+					{!showSettle ? <div className="relative w-[3px] h-[3px] rounded-[5px] dot-flashing" /> : null}
 				</div>
-				{isResultReady ? (
+				{showSettle ? (
 					<div className={'flex flex-col items-center gap-2'}>
 						{!isConnected ? <p className={'text-xs text-center text-muted-foreground max-w-[240px]'}>{t('toast.connect')}</p> : null}
 						<button

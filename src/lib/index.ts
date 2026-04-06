@@ -90,9 +90,23 @@ export const getTimesByRound = (round: number, interval: LuroInterval, shortRoun
 	return { start, end: start + 60 * 60 * 24 * 1000 };
 };
 
-export const jumpToCurrentRound = (queryClient: QueryClient, address: Address) => {
-	queryClient.setQueryData(['luro', address, 'state'], { state: 'standby' });
-	queryClient.invalidateQueries({ queryKey: ['luro'] });
+export interface JumpToCurrentRoundOptions {
+	/** Clears stuck `waiting` / spin UI for this round id (per-round query key). */
+	endedRound?: number;
+	interval?: LuroInterval;
+	shortRoundSeconds?: number;
+}
+
+export const jumpToCurrentRound = (queryClient: QueryClient, address: Address, options?: JumpToCurrentRoundOptions) => {
+	if (options?.endedRound !== undefined) {
+		queryClient.setQueryData(['luro', address, 'state', options.endedRound], { state: 'standby' });
+	}
+	if (options?.interval !== undefined) {
+		const shortRoundSeconds = options.shortRoundSeconds ?? LURO_SHORT_ROUND_SECONDS_FALLBACK;
+		const suffix = options.interval === '210s' ? shortRoundSeconds : 'daily';
+		queryClient.setQueryData(['luro', address, 'visibleRound', options.interval, suffix], getCurrentRound(options.interval, shortRoundSeconds));
+	}
+	void queryClient.invalidateQueries({ queryKey: ['luro', address] });
 };
 
 export function hexToRgbA(hex: string) {

@@ -1,5 +1,5 @@
 {
-	"feeStaking": "All bets are subject of <b>{{fee}}% fee</b> which is distributed into <b><link>Liquidity Pool</link></b>.",
+	"feeStaking": "All bets are subject of <b>{{fee}}% fee</b> which is distributed into <pool><b>Liquidity Pool</b></pool>.",
 	"tabs": {
 		"bets": "Bets",
 		"players": "Players"
@@ -30,6 +30,7 @@
 		"activeBets": "Your active bets",
 		"potentialWin": "Potential win",
 		"waiting": "Waiting for polygon block",
+		"settlementRequired": "Randomness is in — this round must still be settled on-chain to pay the winner.",
 		"spinning": "Spinning",
 		"spinTheWheel": "Spin the wheel",
 		"winnerIsBeingDecided": "The winner is being decided",
