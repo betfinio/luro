@@ -11,9 +11,9 @@ import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import type { Round } from '@/src/lib/types.ts';
+import { type Round, RoundStatusEnum } from '@/src/lib/types.ts';
 import { Route } from '@/src/routes/games/luro/$interval.tsx';
-import { usePlayerRoundInfo, usePlayerRounds, useRounds } from '../lib/query';
+import { usePlayerRoundInfo, usePlayerRounds, useRounds, useWinner } from '../lib/query';
 
 const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
@@ -45,31 +45,9 @@ const RoundsTable: FC<{ className?: string }> = ({ className = '' }) => {
 				</div>
 			),
 		}),
-		columnHelper.accessor('total.bonus', {
-			header: t('columns.totalBonuses'),
-			meta: {
-				className: 'hidden md:table-cell',
-			},
-			cell: (props) => (
-				<div className={'text-secondary-foreground'}>
-					<BetValue value={valueToNumber(props.getValue())} withIcon />
-				</div>
-			),
-		}),
 		columnHelper.accessor('winnerAddress', {
 			header: t('columns.winner'),
-			cell: (props) => <WinnerInfo winner={props.getValue()} />,
-		}),
-		columnHelper.accessor('total.staking', {
-			meta: {
-				className: 'md:w-[160px] hidden md:table-cell',
-			},
-			header: t('columns.stakingEarnings'),
-			cell: (props) => (
-				<div className={''}>
-					<BetValue value={valueToNumber(props.getValue())} withIcon />
-				</div>
-			),
+			cell: (props) => <WinnerInfo round={props.row.original.round} winner={props.getValue()} status={props.row.original.status} />,
 		}),
 		columnHelper.display({
 			meta: { className: 'w-10' },
@@ -178,15 +156,40 @@ const PlayerRoundsTable: FC<{ columns: ColumnDef<Round, any>[] }> = ({ columns }
 	);
 };
 
-const WinnerInfo: FC<{ winner: Address }> = ({ winner }) => {
+function isNonZeroWinnerAddress(w?: Address): w is Address {
+	return Boolean(w && w.toLowerCase() !== ZeroAddress.toLowerCase());
+}
+
+const WinnerInfo: FC<{ round: number; winner?: Address; status?: RoundStatusEnum }> = ({ round, winner, status }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'table' });
 	const { address } = useAccount();
-	console.log(address, winner);
 
-	const { data: username } = useUsername(winner, address);
+	const rowWinner = isNonZeroWinnerAddress(winner) ? winner : undefined;
+	const needsWinnerFromEntity = status === RoundStatusEnum.Settled && !rowWinner;
+	const { data: winnerEntity, isLoading: isWinnerEntityLoading } = useWinner(round, {
+		enabled: needsWinnerFromEntity,
+	});
 
-	if (!winner) {
+	const displayWinner = rowWinner ?? winnerEntity?.player;
+	const { data: username } = useUsername(displayWinner ?? ZeroAddress, address);
+
+	if (status === RoundStatusEnum.Cancelled) {
+		return <div className={'text-muted-foreground'}>{t('cancelled')}</div>;
+	}
+	if (!displayWinner || !isNonZeroWinnerAddress(displayWinner)) {
+		if (status === RoundStatusEnum.ResultReady) {
+			return <div className={'text-muted-foreground'}>{t('pending')}</div>;
+		}
+		if (status === RoundStatusEnum.SpinRequested) {
+			return <div className={'text-muted-foreground'}>{t('awaitingVrf')}</div>;
+		}
+		if (status === RoundStatusEnum.Settled) {
+			if (needsWinnerFromEntity && isWinnerEntityLoading) {
+				return <div className={'text-muted-foreground animate-pulse'}>{t('winnerIndexing')}</div>;
+			}
+			return <div className={'text-muted-foreground'}>{t('winnerIndexing')}</div>;
+		}
 		return <div>{t('waiting')}</div>;
 	}
-	return <div className={cn(address?.toLowerCase() === winner.toLowerCase() && 'text-green-500')}>{username}</div>;
+	return <div className={cn(address?.toLowerCase() === displayWinner.toLowerCase() && 'text-green-500')}>{username}</div>;
 };

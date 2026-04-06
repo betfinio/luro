@@ -1,11 +1,10 @@
-import { valueToNumber } from '@betfinio/abi';
 import { Dialog, DialogContent, DialogTrigger } from '@betfinio/components/ui';
 import { ChartBarIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = ({ bets, volume, staking }) => {
+const RoundMobileInfo: FC = () => {
 	return (
 		<div className={'md:hidden'}>
 			<Dialog>
@@ -18,8 +17,8 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 						<ChartBarIcon className={'text-secondary-foreground w-6'} />
 					</motion.div>
 				</DialogTrigger>
-				<DialogContent className={'luro max-w-0 w-auto'}>
-					<SwitchModal bets={bets} volume={volume} staking={staking} />
+				<DialogContent className={'max-w-0 w-auto'}>
+					<MobileStatsModal />
 				</DialogContent>
 			</Dialog>
 		</div>
@@ -28,23 +27,13 @@ const RoundMobileInfo: FC<{ bets: number; volume: bigint; staking: bigint }> = (
 
 export default RoundMobileInfo;
 
-const SwitchModal: FC<{ bets: number; volume: bigint; staking: bigint }> = ({ bets, volume, staking }) => {
+const MobileStatsModal: FC = () => {
 	const { t } = useTranslation('luro', { keyPrefix: 'statsModal' });
 
 	return (
 		<motion.div className={'rounded-lg border-border border bg-background p-5 w-[350px] flex flex-col gap-5 text-white'}>
 			<div className={'flex justify-between'}>
-				<span className={'text-sm'}>{t('bets')}</span>
-				<span className={'font-semibold'}>{bets}</span>
-			</div>
-
-			<div className={'flex justify-between'}>
 				<span className={'text-sm'}>{t('volume')}</span>
-				<span className={'font-semibold'}>{Math.floor(valueToNumber(volume)).toLocaleString()} BET</span>
-			</div>
-			<div className={'flex justify-between'}>
-				<span className={'text-sm'}>{t('staking')}</span>
-				<span className={'font-semibold'}>{Math.floor(valueToNumber(staking)).toLocaleString()} BET</span>
 			</div>
 		</motion.div>
 	);

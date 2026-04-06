@@ -4,6 +4,7 @@ import { Bet, LuckyRound } from '@betfinio/components/icons';
 import { cn } from '@betfinio/components/lib';
 import { type NumberFormatValues, NumericInput, Slider, Tooltip, TooltipContent, TooltipTrigger } from '@betfinio/components/ui';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAllowanceModal } from 'betfinio_context/lib/context';
 import { useAllowance, useBalance, useIsMember } from 'betfinio_context/lib/query';
 import { addressToColor } from 'betfinio_context/lib/utils';
@@ -11,41 +12,37 @@ import { Loader } from 'lucide-react';
 import millify from 'millify';
 import { motion } from 'motion/react';
 import type { FC } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { parseEther } from 'viem';
-import { useAccount } from 'wagmi';
-import { ASSETS_IPFS_BASE_URL } from '@/src/global';
+import { useAccount, useConfig } from 'wagmi';
+import { ASSETS_IPFS_BASE_URL, CORE } from '@/src/global';
 import { hexToRgbA, useLuroAddress } from '@/src/lib';
-import { getCurrentRoundInfo } from '@/src/lib/api';
-import { usePlaceBet, useRoundBets } from '@/src/lib/query';
+import { getCurrentRoundInfo, placeBet as submitPlaceBet } from '@/src/lib/api';
+import { useLuroFee, usePlaceBet, useRoundBets } from '@/src/lib/query';
 
 export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	const { t } = useTranslation('luro', { keyPrefix: 'placeBet' });
 	const [amount, setAmount] = useState<string>('10000');
 	const { address = ZeroAddress } = useAccount();
-	const { data: allowance = 0n } = useAllowance(address);
+	const config = useConfig();
+	const queryClient = useQueryClient();
+	const tokenSpender = CORE;
+	const { data: allowance = 0n } = useAllowance(address, tokenSpender);
 	const { data: balance = 0n } = useBalance(address);
 	const { data: isMember = false } = useIsMember(address);
-	const { mutate: placeBet, isPending, isSuccess, data } = usePlaceBet();
+	const { mutate: placeBet, isPending } = usePlaceBet();
 	const { data: bets = [] } = useRoundBets(round);
-	const { requestAllowance, setResult, requested } = useAllowanceModal();
-	useEffect(() => {
-		if (data && isSuccess) {
-			setResult?.(data);
-		}
-	}, [isSuccess, data]);
-	useEffect(() => {
-		if (requested) {
-			handleBet();
-		}
-	}, [requested]);
+	const { data: feeData } = useLuroFee();
+	const { requestAllowance } = useAllowanceModal();
 	const handleBetChange = (values: NumberFormatValues) => {
 		const { value } = values;
 		setAmount(value);
 	};
 	const luroAddress = useLuroAddress();
+
+	const betParams = { round, amount: Number(amount), player: address, address: luroAddress };
 
 	const handleBet = () => {
 		if (address === ZeroAddress) {
@@ -72,11 +69,22 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			return;
 		}
 
-		if (allowance < parseEther(amount)) {
-			requestAllowance?.('bet', parseEther(amount));
+		const amountWei = parseEther(amount);
+
+		if (allowance < amountWei) {
+			requestAllowance?.({
+				type: 'bet',
+				amount: amountWei,
+				spender: tokenSpender,
+				execute: () => submitPlaceBet(betParams, config),
+				onFlowComplete: async () => {
+					await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'bets', 'round'] });
+					await queryClient.invalidateQueries({ queryKey: ['luro', luroAddress, 'round'] });
+				},
+			});
 			return;
 		}
-		placeBet({ round: round, amount: Number(amount), player: address, address: luroAddress });
+		placeBet(betParams);
 	};
 
 	const myBetVolume = useMemo(() => {
@@ -88,12 +96,16 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 	}, [bets]);
 
 	const bank = useMemo(() => bets.reduce((acc, val) => acc + val.amount, 0n), [bets, address]);
-	const expectedWinning = (valueToNumber(bank) + Number(amount) - valueToNumber(myBetVolume)) * 0.914;
-	const coef = expectedWinning / Number(amount);
+	const feeFactor = feeData ? 10000n - feeData.feeBps : 10000n;
+	const bankNet = valueToNumber((bank * feeFactor) / 10000n);
+	const myBetVolumeNet = valueToNumber((myBetVolume * feeFactor) / 10000n);
+	const newBetNet = (Number(amount) * Number(feeFactor)) / 10000;
+	const expectedWinning = bankNet + newBetNet - myBetVolumeNet;
+	const coef = Number(amount) === 0 ? 0 : expectedWinning / Number(amount);
 
 	const myPercent = roundInfo.volume === 0 ? 0 : ((valueToNumber(myBetVolume) / roundInfo.volume) * 100).toFixed(2);
-	const potentialWin = roundInfo.volume * 0.914;
-	const myCoef = myBetVolume === 0n ? 0 : potentialWin / valueToNumber(myBetVolume);
+	const potentialWin = bankNet;
+	const myCoef = myBetVolume === 0n ? 0 : potentialWin / myBetVolumeNet;
 
 	const [hovering, setHovering] = useState(false);
 	const { isMobile } = useMediaQuery();
@@ -132,7 +144,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className={'flex flex-col grow justify-between duration-300 lg:max-w-[300px]'}
+			className={'flex flex-col grow justify-between duration-300 lg:max-w-[400px]'}
 		>
 			<div className={'hidden uppercase text-xl items-center justify-center w-full font-semibold gap-2 z-5 my-2 sm:flex'}>
 				{t('title')}
@@ -146,7 +158,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 					setHovering(false);
 				}}
 				style={{ filter: isMobile ? '' : compiledShadow }}
-				className={cn('rounded-xl bg-background-light border-border border p-4 relative w-full duration-300')}
+				className={cn('rounded-xl bg-(--background-light) border-border border p-4 relative w-full duration-300')}
 			>
 				<h4 className={'font-medium text-center text-gray-500 text-xs '}>{t('amount')}</h4>
 				<div className={'flex items-center gap-2 mt-2'}>
@@ -202,7 +214,6 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 						<span className={'sm:hidden'}>{t('win')}:</span>
 						{expectedWinning.toLocaleString()}
 						<Bet className={'text-secondary-foreground'} />
-						<span className={'text-bonus'}>+{t('bonus')}</span>
 					</span>
 				</p>
 				<div className={'text-center text-secondary-foreground font-thin text-xs'}>
@@ -232,7 +243,7 @@ export const StandByScreen: FC<{ round: number }> = ({ round }) => {
 				</motion.button>
 			</div>
 
-			<div className={cn('block rounded-xl bg-background-light p-3 relative w-full lg:w-full mt-3 border-border border')}>
+			<div className={cn('block rounded-xl bg-[var(--background-light)] p-3 relative w-full lg:w-full mt-3 border-border border')}>
 				<div className={'grid grid-cols-2 gap-2 text-xs'}>
 					<div className={'bg-background py-2 text-center flex flex-col gap-1 rounded-[8px]'}>
 						<div className={'text-gray-500'}>{t('activeBets')}</div>
